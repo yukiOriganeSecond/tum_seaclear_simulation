@@ -12,7 +12,7 @@ axis ij equal
 xlabel("Position (m)")
 ylabel("Depth (m)")
 legend("vessel path","robot path","wire","robot position","crane top")
-xlim([-3,3])
+xlim([-4,4])
 ylim([-1,7])
 end
 

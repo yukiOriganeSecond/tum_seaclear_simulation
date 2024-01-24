@@ -1,5 +1,5 @@
 
-function [q_next, mode] = step(qt, ut, param, mode)
+function [q_next, mode] = step(qt, ut, param, mode, opt_cnt)
     theta = qt(1);
     theta_dot= qt(2);
     l = qt(3);
@@ -8,14 +8,14 @@ function [q_next, mode] = step(qt, ut, param, mode)
     X_dot = qt(6);
     r = qt(7);
     r_dot = qt(8);
-    u_theta = ut(1);
-    u_r = ut(2);
-    U_l = ut(3);
-    U_X = ut(4);
+    u_theta = ut(1)*param.enable_u(1,opt_cnt);
+    u_r = ut(2)*param.enable_u(2,opt_cnt);
+    U_l = ut(3)*param.enable_u(3,opt_cnt);
+    U_X = ut(4)*param.enable_u(4,opt_cnt);
     
     X_ddot = (U_X-X_dot*param.Mu_X)/param.M;
     %theta_ddot = (u+param.m*X_ddot*cos(theta)-param.bar_m*param.g*sin(theta)-param.mu*(l*theta_dot-X_dot*cos(theta))-2*l_dot*theta_dot)/l/param.m;
-    theta_ddot = (u_theta+param.m*X_ddot*cos(theta)-param.bar_m*param.g*sin(theta)-param.mu*(r*theta_dot-X_dot*cos(theta))^2)/r/param.m;
+    theta_ddot = (u_theta+param.m*X_ddot*cos(theta)-param.bar_m*param.g*sin(theta)-param.mu*(r*theta_dot-X_dot*cos(theta)))/r/param.m;
     
     %if r>=l
     T = 0;  % tention force

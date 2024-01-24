@@ -1,4 +1,4 @@
-function eval_result = evaluateInput(u,q0,xd,Q,R,W,param)
+function eval_result = evaluateInput(u,q0,xd,Q,R,W,param,opt_cnt)
 %EVALUATEINPUT この関数の概要をここに記述
 %   詳細説明をここに記述
     persistent u_cnt
@@ -8,7 +8,7 @@ function eval_result = evaluateInput(u,q0,xd,Q,R,W,param)
         U_r_list = zeros(3000,param.Nt);
     end
     u_cnt = u_cnt+1;
-    q = system.steps(q0,u,param);           % simulate state variables
+    q = system.steps(q0,u,param,opt_cnt);           % simulate state variables
     x = system.changeCoordinate(q,param);   % output variables
     L = zeros(1,param.Nt);                  % cost function at t
     for t = 1:param.Nt

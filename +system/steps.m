@@ -1,4 +1,4 @@
-function q = steps(q0,u,param)
+function q = steps(q0,u,param,opt_cnt)
     q = zeros(length(q0),param.Nt);
     q(:,1) = q0;
     clear system.step
@@ -8,6 +8,6 @@ function q = steps(q0,u,param)
         mode = 2;
     end
     for t = 1:param.Nt-1
-        [q(:,t+1),mode] = system.step(q(:,t),u(:,t),param,mode);
+        [q(:,t+1),mode] = system.step(q(:,t),u(:,t),param,mode,opt_cnt);
     end
 end
