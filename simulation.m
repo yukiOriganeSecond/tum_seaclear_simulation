@@ -78,6 +78,7 @@ disp(fval)
 %u = u0;opt_cnt = 1;
 q = system.steps(q0,u,param,opt_cnt);
 x = system.changeCoordinate(q,param);
+input_energy = energyEvaluation(u,q0,xd,Q,R,W,param,opt_cnt);
 
 %% save
 folder_name = "data/"+string(datetime('now','Format','yyyyMMdd/HH_mm_ss/'));
