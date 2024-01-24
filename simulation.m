@@ -22,7 +22,7 @@ param.Mu_X = 1000;         % viscocity of vessel
 param.Mu_l = 300;       % viscocity of wire
 
 % other constants
-param.m = 60;                           % mass of robots (kg)
+param.m = 120;                           % mass of robots (kg)
 floating_mass = 30;                     % Floating mass of robots and litter (kg)
 param.M = 1075;                         % mass of vessel (kg)
 param.I_l = 30;                         % Inertia to change wire length (kg)
@@ -48,15 +48,15 @@ W = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 %U_X = 1000;      % input for vessel position      (m/s^2)
 %u0 = zeros(4,param.Nt);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
-%u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
-u0 = repmat([0;-param.bar_m*param.g/2;-param.bar_m*param.g/2;0],[1,param.Nt]);
+u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
+%u0 = repmat([0;-param.bar_m*param.g/2;-param.bar_m*param.g/2;0],[1,param.Nt]);
 %u0 = repmat([0;0;0;0],[1,param.Nt]);
 %u0 = u_b;
 param.enable_u = [
-    1 1;
-    0 1;
-    1 1;
-    1 1];  % do not use u_r
+    0;
+    0;
+    1;
+    1];  % do not use u_r
 
 %% optimization
 clc
