@@ -22,7 +22,7 @@ param.Mu_X = 1000;         % viscocity of vessel
 param.Mu_l = 300;       % viscocity of wire
 
 % other constants
-param.m = 60;                           % mass of robots (kg)
+param.m = 120;                           % mass of robots (kg)
 floating_mass = 30;                     % Floating mass of robots and litter (kg)
 param.M = 1075;                         % mass of vessel (kg)
 param.I_l = 30;                         % Inertia to change wire length (kg)
@@ -78,6 +78,7 @@ disp(fval)
 %u = u0;opt_cnt = 1;
 q = system.steps(q0,u,param,opt_cnt);
 x = system.changeCoordinate(q,param);
+input_energy = energyEvaluation(u,q0,xd,Q,R,W,param,opt_cnt);
 
 %% save
 folder_name = "data/"+string(datetime('now','Format','yyyyMMdd/HH_mm_ss/'));
