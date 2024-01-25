@@ -9,7 +9,7 @@ function plotInputs(u,param,t_vec,dimset,folder_name)
             k = k+1;
             subplot(size(dimset,1),size(dimset,2),k)
             plot(t_vec(1:end-1), u(dimset(m,n),1:end-1));
-            xlim([t_vec(1),t_vec(end)])
+            xlim([0,t_vec(end)])
             hold on
             %yline(xd(1),'--','LineWidth',1,'Color')
             xlabel("Time (s)",'Interpreter','latex');
