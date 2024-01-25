@@ -12,7 +12,7 @@ function eval_result = energyEvaluation(u,q0,xd,Q,R,W,param,opt_cnt)
     x = system.changeCoordinate(q,param);   % output variables
     L = zeros(1,param.Nt);                  % cost function at t
     for t = 1:param.Nt
-        L(1,t) = u(:,t).'*u(:,t);
+        L(1,t) = sqrt(u(:,t).'*u(:,t));
     end
     eval_result = sum(L(1,:))*param.dt;
     %U_r_list(u_cnt,:) = u(2,:);

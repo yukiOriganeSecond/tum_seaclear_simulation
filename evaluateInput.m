@@ -11,6 +11,8 @@ function eval_result = evaluateInput(u,q0,xd,Q,R,W,param,opt_cnt)
     q = system.steps(q0,u,param,opt_cnt);           % simulate state variables
     x = system.changeCoordinate(q,param);   % output variables
     L = zeros(1,param.Nt);                  % cost function at t
+    x(1:2,:) = q(1:2,:);
+    x(3:4,:) = q(7:8,:);
     for t = 1:param.Nt
         L(1,t) = u(:,t).'*R*u(:,t) + (x(:,t)-xd(:,1)).'*Q*(x(:,t)-xd(:,1));
     end
