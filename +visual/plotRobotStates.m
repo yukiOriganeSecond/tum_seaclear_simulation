@@ -1,4 +1,13 @@
-function plotRobotStates(q,param,t_vec,dimset,folder_name)
+function plotRobotStates(q,param,t_vec,dimset,folder_name,sum_set)
+
+arguments
+    q
+    param
+    t_vec
+    dimset
+    folder_name
+    sum_set = [1]
+end
 %PLOTROBOTSTATES この関数の概要をここに記述
 %   詳細説明をここに記述
     %titleset = ["$\theta(t)$","$\dot{\theta}(t)$","$l(t)$","$\dot{l}(t)$","$X(t)$","$\dot{X}(t)$"];
@@ -12,14 +21,23 @@ function plotRobotStates(q,param,t_vec,dimset,folder_name)
         for n = 1:size(dimset,2)
             k = k+1;
             subplot(size(dimset,1),size(dimset,2),k)
-            plot(t_vec, q(dimset(m,n),:));
-            hold on
-            %yline(xd(1),'--','LineWidth',1,'Color')
-            if (ismember(dimset(m,n),[7,8]))    % also show l,l_dot when show r, r_dot
-                plot(t_vec, q(dimset(m,n)-4,:));
-                legend(legset(dimset(m,n)),legset_2(dimset(m,n)),'Interpreter','latex')
+            if length(sum_set) == 1
+                plot(t_vec, q(dimset(m,n),:,sum_set(1)));
+                hold on
+                if (ismember(dimset(m,n),[7,8]))    % also show l,l_dot when show r, r_dot
+                    plot(t_vec, q(dimset(m,n)-4,:,sum_set(1)));
+                    legend(legset(dimset(m,n)),legset_2(dimset(m,n)),'Interpreter','latex')
+                else
+                    legend(legset(dimset(m,n)),'Interpreter','latex')
+                end
             else
-                legend(legset(dimset(m,n)),'Interpreter','latex')
+                for s = sum_set
+                    plot(t_vec, q(dimset(m,n),:,s),'Color','b','LineWidth',0.8);
+                    hold on
+                    if (ismember(dimset(m,n),[7,8]))    % also show l,l_dot when show r, r_dot
+                        plot(t_vec, q(dimset(m,n)-4,:,s),'Color','r','LineWidth',0.8);
+                    end
+                end
             end
             hold off
             xlabel("Time (s)",'Interpreter','latex');

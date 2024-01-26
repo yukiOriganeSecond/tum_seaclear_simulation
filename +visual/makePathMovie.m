@@ -1,4 +1,4 @@
-function makePathMovie(q,x,param,t_vec,folder_name,speed)
+function makePathMovie(q,x,param,t_vec,folder_name,speed,snum_list)
 %MAKEPATHMOVIE この関数の概要をここに記述
 %   詳細説明をここに記述
     f = figure;
@@ -10,7 +10,7 @@ function makePathMovie(q,x,param,t_vec,folder_name,speed)
     for k = 1:Nk
         t = t_list(k);
         % plot here
-        visual.snapPath(t,q,x,param);
+        visual.snapPath(t,q,x,param,snum_list);
         legend('off')
         % 
         drawnow;
