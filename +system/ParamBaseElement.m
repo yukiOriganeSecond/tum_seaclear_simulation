@@ -9,10 +9,14 @@ classdef ParamBaseElement
     end
     
     methods
-        function val = uncertainCalc(obj)
-            if obj.type == "Gaussian"
+        function val = uncertainCalc(obj, force_deterministic)
+            arguments
+                obj
+                force_deterministic = false;
+            end
+            if obj.type == "Gaussian"&&force_deterministic
                 val = obj.error.*obj.average.*randn(size(obj.average))+obj.average;
-            elseif obj.type == "White"
+            elseif obj.type == "White"&&force_deterministic
                 val = obj.error.*obj.average.*(2*rand(size(obj.average))-0.5)+obj.average;
             else
                 val = obj.average;

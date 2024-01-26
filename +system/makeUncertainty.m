@@ -7,9 +7,9 @@ end
     param = struct;
     for fname = string(fieldnames(param_base)).'
         if (param_base.force_deterministic.average)
-            param_base.(fname).type = 'Deterministic';  % force deterministic
+            param.(fname) = param_base.(fname).uncertainCalc(true); % sample parameters
         end
-        param.(fname) = param_base.(fname).uncertainCalc(); % sample parameters
+        param.(fname) = param_base.(fname).uncertainCalc(false); % sample parameters
     end
     dW = sqrt(param.dt)*randn(1,param.Nt);
     W = cumsum(dW); % generate Wiener Process 

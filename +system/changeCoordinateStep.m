@@ -13,8 +13,8 @@ function x = changeCoordinateStep(q,param,t)
     X_dot = q(6,t);
     r = q(7,t);
     r_dot = q(8,t);
-    x(2,t) = -r_dot*sin(theta)-r*theta_dot*cos(theta)+X_dot;
-    x(4,t) = r_dot*cos(theta)-r*theta_dot*sin(theta);
-    x(1,t) = -r*sin(theta)+X;
-    x(3,t) = r*cos(theta);
+    x(2,1) = -r_dot*sin(theta)-r*theta_dot*cos(theta)+X_dot;
+    x(4,1) = r_dot*cos(theta)-r*theta_dot*sin(theta);
+    x(1,1) = -r*sin(theta)+X;
+    x(3,1) = r*cos(theta);
 end

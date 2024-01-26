@@ -62,8 +62,8 @@ u0 = repmat([0;-param_base.bar_m.average*param_base.g.average/2;-param_base.bar_
 %u0 = repmat([0;0;0;0],[1,param.Nt]);
 %u0 = u_b;
 enable_u = [
-    1;
-    1;
+    0;
+    0;
     1;
     1];  % do not use u_r at first optimization
 param_base = system.addParam(param_base,"enable_u",enable_u);
@@ -84,7 +84,8 @@ opt_cnt = 1;
 seed_list = [1];
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],lb,ub,[],options);
-u = u0;
+u0 = u;
+toc
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 seed_list = 1:10;
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],lb,ub,@(u),options);
