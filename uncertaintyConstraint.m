@@ -8,8 +8,6 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
     %    U_r_list = zeros(3000,param.Nt);
     %end
     %u_cnt = u_cnt+1;
-    i = 0;
-    eval_result = 0;
     dist = zeros(length(seed_list),param_base.Nt.average);
     i = 0;
     for seed = seed_list
@@ -17,16 +15,13 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
         [param,W] = system.makeUncertainty(seed, param_base);
         q = system.steps(param.q0,u,param,opt_cnt,W);           % simulate state variables
         x = system.changeCoordinate(q,param);   % output variables
-        L = zeros(1,param.Nt);                  % cost function at t
         %x(1:2,:) = q(1:2,:);   % change output values
         %x(3:4,:) = q(7:8,:);
         dist(i,:) = vecnorm(x-param.obj_pos,2,1)-param.obj_size;
-        for t = 1:param.Nt
-            L(1,t) = u(:,t).'*R*u(:,t) + (x(:,t)-xd(:,1)).'*Q*(x(:,t)-xd(:,1));
-        end
-        eval_result = eval_result + sum(L(1,:))*param.dt+(x(:,end)-xd(:,1)).'*P*(x(:,end)-xd(:,1));
     end
-    eval_result = eval_result/length(seed_list);
+    t = 0;
+    alpha = 0.05;
+    C = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0));
     ceq = [];
 end
 
