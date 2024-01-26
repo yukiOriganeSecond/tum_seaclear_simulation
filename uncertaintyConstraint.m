@@ -19,9 +19,10 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
         %x(3:4,:) = q(7:8,:);
         dist(i,:) = vecnorm(x-param.obj_pos,2,1)-param.obj_size;
     end
-    t = 0;
+    t = -5:0.2:5;
     alpha = 0.05;
-    C = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0));
+    c_pre = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1);
+    c = min(C_pre); % inf t
     ceq = [];
 end
 
