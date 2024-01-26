@@ -86,11 +86,11 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 u0 = u;
 toc
-%param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-%seed_list = 1:10;
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-%toc
-%disp(fval)
+param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+seed_list = 1:10;
+[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
+toc
+disp(fval)
 
 %% simulation
 %evaluateInput(u,q0,xd,Q,R,W,param)
