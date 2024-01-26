@@ -8,8 +8,8 @@ function eval_result = energyEvaluation(u,q0,xd,Q,R,W,param,opt_cnt)
         U_r_list = zeros(3000,param.Nt);
     end
     u_cnt = u_cnt+1;
-    q = system.steps(q0,u,param,opt_cnt);           % simulate state variables
-    x = system.changeCoordinate(q,param);   % output variables
+    %q = system.steps(q0,u,param,opt_cnt);           % simulate state variables
+    %x = system.changeCoordinate(q,param);   % output variables
     L = zeros(1,param.Nt);                  % cost function at t
     for t = 1:param.Nt
         L(1,t) = sqrt(u(:,t).'*u(:,t));
