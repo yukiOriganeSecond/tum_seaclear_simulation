@@ -11,7 +11,7 @@ param_base = system.addParam(param_base,"dt",dt,"Deterministic");
 param_base = system.addParam(param_base,"Nt",Nt,"Deterministic");
 
 %param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");   % if true, there is no uncertainty
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+%param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 
 % initial values
 % state variables : q = [theta, theta_dot, l, l_dot, X, X_dot, r, r_dot]
@@ -58,8 +58,8 @@ u0 = repmat([0;-param_base.bar_m.average*param_base.g.average/2;-param_base.bar_
 %u0 = repmat([0;0;0;0],[1,param.Nt]);
 %u0 = u_b;
 enable_u = [
-    0;
-    0;
+    1;
+    1;
     1;
     1];  % do not use u_r at first optimization
 param_base = system.addParam(param_base,"enable_u",enable_u);
@@ -69,14 +69,17 @@ clc
 options = optimoptions(@fmincon,'MaxFunctionEvaluations',30000,'MaxFunctionEvaluations',3*10^5);
 seed_list = [1];
 tic
-for opt_cnt = size(param.enable_u,2)
-    if param.use_constraint == "thruster"
-        [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param,opt_cnt),u0,[],[],[],[],lb,ub,[],options);
-    else
-        [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param,opt_cnt),u0,[],[],[],[],[],[],[],options);
-    end
-    u0 = u; % repeat optimization using former solution as initial solution
-end
+%for opt_cnt = size(param.enable_u,2)
+%    if param.use_constraint == "thruster"
+%        [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],lb,ub,[],options);
+%    else
+%        [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],[],[],[],options);
+%    end
+%    u0 = u; % repeat optimization using former solution as initial solution
+%end
+opt_cnt = 1;
+param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
+[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],lb,ub,[],options);
 toc
 disp(fval)
 
@@ -85,7 +88,7 @@ disp(fval)
 if exist('u') == 0
     u = u0; opt_cnt = 1;
 end
-seed_list = [1 5];
+seed_list = [1];
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 x = zeros(length(xd),Nt,length(seed_list));
 input_energy = zeros(length(seed_list),1);
@@ -106,7 +109,7 @@ save(folder_name+"simulation.mat")
 %% Visualize
 t_vec = dt:dt:dt*Nt;
 snum_list = 1:length(seed_list);
-snum_list = [1 2];
+snum_list = [1];
 visual.visualInit();
 visual.plotInputs(u,param,t_vec,[2,3],folder_name);
 visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);

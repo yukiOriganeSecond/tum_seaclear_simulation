@@ -22,6 +22,7 @@ function eval_result = evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list)
         end
         eval_result = eval_result + sum(L(1,:))*param.dt+(x(:,end)-xd(:,1)).'*P*(x(:,end)-xd(:,1));
     end
+    eval_result = eval_result/length(seed_list);
     %U_r_list(u_cnt,:) = u(2,:);
 end
 
