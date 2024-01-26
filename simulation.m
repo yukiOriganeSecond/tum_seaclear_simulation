@@ -62,8 +62,8 @@ u0 = repmat([0;-param_base.bar_m.average*param_base.g.average;-param_base.bar_m.
 %u0 = repmat([0;0;0;0],[1,param.Nt]);
 %u0 = u_b;
 enable_u = [
-    0;
-    0;
+    1;
+    1;
     1;
     1];  % do not use u_r at first optimization
 param_base = system.addParam(param_base,"enable_u",enable_u);
