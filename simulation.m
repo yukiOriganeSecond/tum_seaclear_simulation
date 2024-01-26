@@ -35,6 +35,10 @@ param_base = system.addParam(param_base,"bar_m",250,"Deterministic",0.20);   % m
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
+param_base = system.addParam(param_base,"obs_pos",[0;-6],"White",[0.2;0.2]);
+param_base = system.addParam(param_base,"obs_size",0.8,"White",0.2);
+
+% set limitations
 use_constraint = "thruster";
 %param.use_constraint = "none";
 lb = repmat([-400; -400; -6000; -6000],1,Nt);
@@ -67,7 +71,6 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 %% optimization
 clc
 options = optimoptions(@fmincon,'MaxFunctionEvaluations',30000,'MaxFunctionEvaluations',3*10^5);
-seed_list = [1];
 tic
 %for opt_cnt = size(param.enable_u,2)
 %    if param.use_constraint == "thruster"
@@ -78,8 +81,14 @@ tic
 %    u0 = u; % repeat optimization using former solution as initial solution
 %end
 opt_cnt = 1;
+seed_list = [1];
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u(:,opt_cnt).*lb,enable_u(:,opt_cnt).*ub,[],options);
+[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],lb,ub,[],options);
+u0 = u;
+toc
+param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+seed_list = 1:10;
+[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],lb,ub,[],options);
 toc
 disp(fval)
 
