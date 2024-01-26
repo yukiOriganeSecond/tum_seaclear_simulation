@@ -28,10 +28,10 @@ param_base = system.addParam(param_base,"Mu_X",1000,"Deterministic",0.50);   % v
 param_base = system.addParam(param_base,"Mu_l",300,"Deterministic",0.50);   % viscocity of wire
 
 % other constants
-param_base = system.addParam(param_base,"m",320,"Gaussian",0.20);       % mass of robots (kg)
+param_base = system.addParam(param_base,"m",50,"Gaussian",0.20);       % mass of robots (kg)
 param_base = system.addParam(param_base,"M",1075,"Deterministic",0.01);      % mass of vessel (kg)
 param_base = system.addParam(param_base,"I_l",30,"Deterministic",0.10);      % Inertia to change wire length (kg)
-param_base = system.addParam(param_base,"bar_m",250,"Deterministic",0.20);   % mass of robot under water (substituting floating force)
+param_base = system.addParam(param_base,"bar_m",30,"Deterministic",0.20);   % mass of robot under water (substituting floating force)
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
@@ -58,7 +58,7 @@ P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 %u0 = zeros(4,param.Nt);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
 %u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
-u0 = repmat([0;-param_base.bar_m.average*param_base.g.average/2;-param_base.bar_m.average*param_base.g.average/2;0],[1,param_base.Nt.average]);
+u0 = repmat([0;-param_base.bar_m.average*param_base.g.average;-param_base.bar_m.average*param_base.g.average/2;0],[1,param_base.Nt.average]);
 %u0 = repmat([0;0;0;0],[1,param.Nt]);
 %u0 = u_b;
 enable_u = [
@@ -70,7 +70,7 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 
 %% optimization
 clc
-options = optimoptions(@fmincon,'MaxFunctionEvaluations',30000,'MaxFunctionEvaluations',3*10^5);
+options = optimoptions(@fmincon,'MaxFunctionEvaluations',30000);
 tic
 %for opt_cnt = size(param.enable_u,2)
 %    if param.use_constraint == "thruster"
@@ -83,14 +83,14 @@ tic
 opt_cnt = 1;
 seed_list = [1];
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],lb,ub,[],options);
+[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 u0 = u;
 toc
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-seed_list = 1:10;
-[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],lb,ub,@(u),options);
-toc
-disp(fval)
+%param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+%seed_list = 1:10;
+%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
+%toc
+%disp(fval)
 
 %% simulation
 %evaluateInput(u,q0,xd,Q,R,W,param)
@@ -98,6 +98,7 @@ if exist('u') == 0
     u = u0; opt_cnt = 1;
 end
 seed_list = [1];
+param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 x = zeros(length(xd),Nt,length(seed_list));
 input_energy = zeros(length(seed_list),1);
@@ -123,7 +124,7 @@ visual.visualInit();
 visual.plotInputs(u,param,t_vec,[2,3],folder_name);
 visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
 visual.plotRobotOutputs(x,xd,param,t_vec,[3 4],folder_name,snum_list);
-%visual.plotInputs(u,param,t_vec,[1,2;3,4],folder_name,1:length(seed_list));
+%visual.plotInputs(u,param,t_vec,[1,2;3,4],folder_name);
 %visual.plotRobotStates(q,param,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
 %visual.plotRobotStates(q,param,t_vec,[5;6],folder_name);
 %visual.plotRobotOutputs(x,xd,param,t_vec,[1,3;2,4],folder_name);
