@@ -14,9 +14,9 @@ classdef ParamBaseElement
                 obj
                 force_deterministic = false;
             end
-            if obj.type == "Gaussian"&&force_deterministic
+            if obj.type == "Gaussian"&&~force_deterministic
                 val = obj.error.*obj.average.*randn(size(obj.average))+obj.average;
-            elseif obj.type == "White"&&force_deterministic
+            elseif obj.type == "White"&&~force_deterministic
                 val = obj.error.*obj.average.*(2*rand(size(obj.average))-0.5)+obj.average;
             else
                 val = obj.average;

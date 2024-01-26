@@ -96,8 +96,11 @@ disp(fval)
 %evaluateInput(u,q0,xd,Q,R,W,param)
 if exist('u') == 0
     u = u0; opt_cnt = 1;
+    seed_list = [1];
 end
-seed_list = [1];
+seed_list = 11:20;
+u_val = u;
+u_val = u0;
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 x = zeros(length(xd),Nt,length(seed_list));
@@ -106,9 +109,9 @@ i = 0;
 for seed = seed_list
     i = i+1;
     [param,W] = system.makeUncertainty(seed,param_base);
-    q(:,:,i) = system.steps(param.q0,u,param,opt_cnt,W);
+    q(:,:,i) = system.steps(param.q0,u_val,param,opt_cnt,W);
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
-    input_energy(i) = energyEvaluation(u,param.q0,xd,Q,R,P,param,opt_cnt);
+    input_energy(i) = energyEvaluation(u_val,param.q0,xd,Q,R,P,param,opt_cnt);
 end
 
 %% save
@@ -119,11 +122,11 @@ save(folder_name+"simulation.mat")
 %% Visualize
 t_vec = dt:dt:dt*Nt;
 snum_list = 1:length(seed_list);
-snum_list = [1];
+%snum_list = [1];
 visual.visualInit();
 visual.plotInputs(u,param,t_vec,[2,3],folder_name);
 visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
-visual.plotRobotOutputs(x,xd,param,t_vec,[3 4],folder_name,snum_list);
+visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotInputs(u,param,t_vec,[1,2;3,4],folder_name);
 %visual.plotRobotStates(q,param,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
 %visual.plotRobotStates(q,param,t_vec,[5;6],folder_name);
