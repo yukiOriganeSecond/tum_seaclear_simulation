@@ -35,6 +35,10 @@ param_base = system.addParam(param_base,"bar_m",250,"Deterministic",0.20);   % m
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
+param_base = system.addParam(param_base,"obs_pos",[0;-6],"White",[0.2;0.2]);
+param_base = system.addParam(param_base,"obs_size",0.8,"White",0.2);
+
+% set limitations
 use_constraint = "thruster";
 %param.use_constraint = "none";
 lb = repmat([-400; -400; -6000; -6000],1,Nt);
