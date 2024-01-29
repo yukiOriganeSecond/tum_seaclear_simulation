@@ -5,7 +5,7 @@ function eval_result = evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list)
     %persistent U_r_list
     %if isempty(u_cnt)
     %    u_cnt = 0;
-    %    U_r_list = zeros(3000,param.Nt);
+    %    U_r_list = zeros(3000,param_base.Nt.average);
     %end
     %u_cnt = u_cnt+1;
     i = 0;

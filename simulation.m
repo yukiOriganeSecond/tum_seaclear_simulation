@@ -58,7 +58,7 @@ P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 %u0 = zeros(4,param.Nt);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
 %u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
-u0 = repmat([0;-param_base.bar_m.average*param_base.g.average;-param_base.bar_m.average*param_base.g.average/2;0],[1,param_base.Nt.average]);
+u0 = repmat([0;-param_base.bar_m.average*param_base.g.average/2;-param_base.bar_m.average*param_base.g.average/2;0],[1,param_base.Nt.average]);
 %u0 = repmat([0;0;0;0],[1,param.Nt]);
 %u0 = u_b;
 enable_u = [
@@ -70,7 +70,7 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 
 %% optimization
 clc
-options = optimoptions(@fmincon,'MaxFunctionEvaluations',30000);
+options = optimoptions(@fmincon,'MaxFunctionEvaluations',100000);
 tic
 %for opt_cnt = size(param.enable_u,2)
 %    if param.use_constraint == "thruster"
@@ -81,15 +81,15 @@ tic
 %    u0 = u; % repeat optimization using former solution as initial solution
 %end
 opt_cnt = 1;
-seed_list = [1];
-param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-u0 = u;
+%seed_list = [1];
+%param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
+%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
+%u0 = u;
 toc
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 seed_list = 1%:10;
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
+[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
+%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
 disp(fval)
 
@@ -99,13 +99,15 @@ if exist('u') == 0
     u = u0; opt_cnt = 1;
     seed_list = [1];
 end
-seed_list = 11:20;
+%seed_list = 11:20;
+seed_list = 1;
 u_val = u;
 u_val = u0;
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 x = zeros(length(xd),Nt,length(seed_list));
 input_energy = zeros(length(seed_list),1);
+constraint_results = zeros(length(seed_list),1);
 i = 0;
 for seed = seed_list
     i = i+1;
@@ -113,6 +115,7 @@ for seed = seed_list
     q(:,:,i) = system.steps(param.q0,u_val,param,opt_cnt,W);
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
     input_energy(i) = energyEvaluation(u_val,param.q0,xd,Q,R,P,param,opt_cnt);
+    [constraint_results(i),Ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list);
 end
 
 %% save
