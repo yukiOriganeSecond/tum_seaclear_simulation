@@ -58,7 +58,7 @@ P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 %u0 = zeros(4,param.Nt);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
 %u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
-u0 = repmat([0;-param_base.bar_m.average*param_base.g.average/2;-param_base.bar_m.average*param_base.g.average/2;0],[1,param_base.Nt.average]);
+u0 = repmat([0;-param_base.bar_m.average*param_base.g.average;-param_base.bar_m.average*param_base.g.average/2;0],[1,param_base.Nt.average]);
 %u0 = repmat([0;0;0;0],[1,param.Nt]);
 %u0 = u_b;
 enable_u = [
@@ -85,12 +85,12 @@ seed_list = [1];
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 %param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-%u0 = u;
+u0 = u;
 %toc
-%param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 %seed_list = 1%:10;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
+[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
 disp(fval)
 
