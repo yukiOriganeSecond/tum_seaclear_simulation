@@ -70,7 +70,7 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 
 %% optimization
 clc
-options = optimoptions(@fmincon,'MaxFunctionEvaluations',100000);
+options = optimoptions(@fmincon,'MaxFunctionEvaluations',30000);
 tic
 %for opt_cnt = size(param.enable_u,2)
 %    if param.use_constraint == "thruster"
@@ -81,14 +81,15 @@ tic
 %    u0 = u; % repeat optimization using former solution as initial solution
 %end
 opt_cnt = 1;
-%seed_list = [1];
-%param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-%u0 = u;
-toc
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-seed_list = 1%:10;
+seed_list = [1];
+param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
+%param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
+%u0 = u;
+%toc
+%param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+%seed_list = 1%:10;
+%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
 disp(fval)
