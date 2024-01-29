@@ -9,6 +9,8 @@ end
 line([x(1,t,1),q(5,t,1)],[x(3,t,1),0],'Color','k','LineWidth',0.7);
 plot(x(1,t,1), x(3,t,1),'o','MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',10);
 plot(q(5,t,1),0,'+','Color','k','MarkerSize',10);
+objpos = [(param.obs_pos-param.obs_size).', (2*param.obs_size)*[1 1]];
+rectangle('Position',objpos,'Curvature',[1 1]);
 hold off
 axis ij equal
 xlabel("Position (m)")

@@ -35,8 +35,8 @@ param_base = system.addParam(param_base,"bar_m",30,"Deterministic",0.20);   % ma
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[0;4],"White",[0.2;0.2]);
-param_base = system.addParam(param_base,"obs_size",1,"White",0.2);
+param_base = system.addParam(param_base,"obs_pos",[0;3],"Deterministic",[0.2;0.2]);
+param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.2);
 
 % set limitations
 use_constraint = "thruster";
@@ -103,7 +103,7 @@ end
 %seed_list = 11:20;
 seed_list = 1;
 u_val = u;
-u_val = u0;
+%u_val = u0;
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 x = zeros(length(xd),Nt,length(seed_list));
@@ -116,7 +116,7 @@ for seed = seed_list
     q(:,:,i) = system.steps(param.q0,u_val,param,opt_cnt,W);
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
     input_energy(i) = energyEvaluation(u_val,param.q0,xd,Q,R,P,param,opt_cnt);
-    [constraint_results(i),Ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list);
+    [constraint_results(i),Ceq] = uncertaintyConstraint(u_val,xd,Q,R,P,param_base,opt_cnt,seed);
 end
 
 %% save
@@ -140,7 +140,7 @@ visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotRelativePath(q,x,param,t_vec,folder_name);
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
 visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
-%visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
+%visual.makePathMovie(q,x,param,t_vec,folder_name,2,snum_list);
 
 %plot(u0(2,:))
 %plot(u_b(2,:))

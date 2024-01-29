@@ -24,7 +24,7 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
     alpha = 0.05;
     c_pre = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1);
     %c = min(c_pre); % inf t
-    c = 0;%c_pre;
+    c = c_pre;
     ceq = 0;%[];
 end
 
