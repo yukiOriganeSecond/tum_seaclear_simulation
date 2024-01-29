@@ -35,8 +35,8 @@ param_base = system.addParam(param_base,"bar_m",30,"Deterministic",0.20);   % ma
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[0;-6],"White",[0.2;0.2]);
-param_base = system.addParam(param_base,"obs_size",0.8,"White",0.2);
+param_base = system.addParam(param_base,"obs_pos",[0;4],"White",[0.2;0.2]);
+param_base = system.addParam(param_base,"obs_size",1,"White",0.2);
 
 % set limitations
 use_constraint = "thruster";
@@ -87,8 +87,9 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 u0 = u;
 toc
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-seed_list = 1:10;
-[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
+seed_list = 1%:10;
+%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
+[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
 disp(fval)
 
@@ -134,6 +135,7 @@ visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotAbsolutePath(q,x,param,t_vec,folder_name);
 %visual.plotRelativePath(q,x,param,t_vec,folder_name);
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
+visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
 %visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
 %plot(u0(2,:))

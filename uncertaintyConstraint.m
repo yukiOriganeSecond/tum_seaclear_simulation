@@ -17,12 +17,12 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
         x = system.changeCoordinate(q,param);   % output variables
         %x(1:2,:) = q(1:2,:);   % change output values
         %x(3:4,:) = q(7:8,:);
-        dist(i,:) = vecnorm(x-param.obj_pos,2,1)-param.obj_size;
+        dist(i,:) = vecnorm(x([1,3],:)-param.obs_pos,2,1)-param.obs_size;
     end
-    t = -5:0.2:5;
+    t = -5:0.2:1;
     alpha = 0.05;
     c_pre = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1);
-    c = min(C_pre); % inf t
+    c = min(c_pre); % inf t
     ceq = [];
 end
 
