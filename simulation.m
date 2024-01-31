@@ -23,19 +23,19 @@ param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0
 xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
 
 % set viscocity
-param_base = system.addParam(param_base,"mu",400,"Deterministic",0.50);   % viscocity of robot
-param_base = system.addParam(param_base,"Mu_X",1000,"Deterministic",0.50);   % viscocity of vessel  
-param_base = system.addParam(param_base,"Mu_l",300,"Deterministic",0.50);   % viscocity of wire
+param_base = system.addParam(param_base,"mu",400,"Deterministic",0.30);   % viscocity of robot
+param_base = system.addParam(param_base,"Mu_X",1000,"Deterministic",0.30);   % viscocity of vessel  
+param_base = system.addParam(param_base,"Mu_l",300,"Deterministic",0.30);   % viscocity of wire
 
 % other constants
-param_base = system.addParam(param_base,"m",50,"Gaussian",0.20);       % mass of robots (kg)
+param_base = system.addParam(param_base,"m",120,"Gaussian",0.20);       % mass of robots (kg)
 param_base = system.addParam(param_base,"M",1075,"Deterministic",0.01);      % mass of vessel (kg)
-param_base = system.addParam(param_base,"I_l",30,"Deterministic",0.10);      % Inertia to change wire length (kg)
-param_base = system.addParam(param_base,"bar_m",30,"Deterministic",0.20);   % mass of robot under water (substituting floating force)
+param_base = system.addParam(param_base,"I_l",30,"Gaussian",0.10);      % Inertia to change wire length (kg)
+param_base = system.addParam(param_base,"bar_m",90,"Gaussian",0.20);   % mass of robot under water (substituting floating force)
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[0;3],"Deterministic",[0.2;0.2]);
+param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.2;0.2]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.2);
 
 % set limitations
@@ -87,8 +87,8 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 u0 = u;
 %toc
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-%seed_list = 1%:10;
+param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
+%seed_list = 1:10;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
@@ -100,8 +100,8 @@ if exist('u') == 0
     u = u0; opt_cnt = 1;
     seed_list = [1];
 end
-%seed_list = 11:20;
-seed_list = 1;
+seed_list = 1:20;
+%seed_list = 1;
 u_val = u;
 %u_val = u0;
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
