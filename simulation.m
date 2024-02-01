@@ -65,7 +65,7 @@ P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 %u0 = zeros(4,param.Nt);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
 %u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
-u0 = repmat([0;-param_base.bar_m.average*param_base.g.average;0;0],[1,param_base.Nt.average]);
+u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,param_base.Nt.average]);
 param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
 
 %u0 = repmat([0;0;0;0],[1,param.Nt]);
