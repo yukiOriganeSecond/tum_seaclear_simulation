@@ -23,7 +23,9 @@ param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0
 xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
 
 % set time delay of input. if set as dt, it is same as non delay
-param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
+%param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
+param_base = system.addParam(param_base,"T",[0.05; 0.05; 0.05; 0.05],"Deterministic");  % T_theta; T_r; T_l; T_X 
+
 
 % set viscocity
 param_base = system.addParam(param_base,"mu",400,"Deterministic",0.30);   % viscocity of robot
@@ -40,7 +42,7 @@ param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % g
 % set constraints
 param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.2;0.2]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.2);
-param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
+param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
 
 % set limitations
 use_constraint = "thruster";
@@ -95,8 +97,8 @@ u0 = u;
 %toc
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 %seed_list = 1:10;
-[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
+%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
+[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
 disp(fval)
 
