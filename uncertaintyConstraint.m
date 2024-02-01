@@ -13,7 +13,7 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
     for seed = seed_list
         i = i+1;
         [param,W] = system.makeUncertainty(seed, param_base);
-        q = system.steps(param.q0,u,param,opt_cnt,W);           % simulate state variables
+        [q,~] = system.steps(param.q0,u,param,opt_cnt,W);           % simulate state variables
         x = system.changeCoordinate(q,param);   % output variables
         %x(1:2,:) = q(1:2,:);   % change output values
         %x(3:4,:) = q(7:8,:);
@@ -24,7 +24,11 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
     alpha = 0.05;
     c_pre = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1);
     %c = min(c_pre); % inf t
-    c = c_pre;
+    if param.consider_collision == true
+        c = c_pre;
+    else
+        c = 0;
+    end
     ceq = 0;%[];
 end
 

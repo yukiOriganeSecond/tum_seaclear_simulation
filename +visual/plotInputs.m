@@ -1,7 +1,8 @@
-function plotInputs(u,param,t_vec,dimset,folder_name)
+function plotInputs(u,f,param,t_vec,dimset,folder_name)
 %PLOTINPUT plot control inputs u
     ylabset = ["$u_\theta(t)$ (N)","$u_r(t)$ (N)","$U_l(t)$ (N)","$U_X(t)$ (N)"];
     legset = ["$u_\theta(t)$ (N)","$u_r(t)$ (N)","$U_l(t)$","$U_X(t)$"];
+    legset2 = ["$f_\theta(t)$ (N)","$f_r(t)$ (N)","$F_l(t)$","$F_X(t)$"];
     figure
     k = 0;
     for m = 1:size(dimset,1)
@@ -9,17 +10,19 @@ function plotInputs(u,param,t_vec,dimset,folder_name)
             k = k+1;
             subplot(size(dimset,1),size(dimset,2),k)
             plot(t_vec(1:end-1), u(dimset(m,n),1:end-1));
+            hold on
+            plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,1)); % TODO : consider seed
+            hold off
             xlim([0,t_vec(end)])
             yl = ylim;
             if (yl(2)-yl(1))<2
                 ylim([-1 1])
             end
-            hold on
             %yline(xd(1),'--','LineWidth',1,'Color')
             xlabel("Time (s)",'Interpreter','latex');
             ylabel(ylabset(dimset(m,n)),'Interpreter','latex');
             %title(titleset(dimset(m,n)),'Interpreter','latex');
-            legend(legset(dimset(m,n)),'Interpreter','latex')
+            legend([legset(dimset(m,n)),legset2(dimset(m,n))],'Interpreter','latex')
         end
     end
     %figure
