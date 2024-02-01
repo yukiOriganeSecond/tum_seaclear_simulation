@@ -28,21 +28,22 @@ param_base = system.addParam(param_base,"T",[0.05; 0.05; 0.05; 0.05],"Determinis
 
 
 % set viscocity
-param_base = system.addParam(param_base,"mu",400,"Deterministic",0.30);   % viscocity of robot
-param_base = system.addParam(param_base,"Mu_X",1000,"Deterministic",0.30);   % viscocity of vessel  
-param_base = system.addParam(param_base,"Mu_l",300,"Deterministic",0.30);   % viscocity of wire
+param_base = system.addParam(param_base,"mu_r",[120 0 0],"Deterministic",0.30);   % viscocity of robot
+param_base = system.addParam(param_base,"mu_theta",[120 0 0],"Deterministic",0.30);   % viscocity of robot
+param_base = system.addParam(param_base,"Mu_X",[0 1000 0],"Deterministic",0.30);   % viscocity of vessel
+param_base = system.addParam(param_base,"Mu_l",[0 300 0],"Deterministic",0.30);   % viscocity of wire
 
 % other constants
-param_base = system.addParam(param_base,"m",120,"Gaussian",0.20);       % mass of robots (kg)
+param_base = system.addParam(param_base,"m",70,"Gaussian",0.20);       % mass of robots (kg)
 param_base = system.addParam(param_base,"M",1075,"Deterministic",0.01);      % mass of vessel (kg)
 param_base = system.addParam(param_base,"I_l",30,"Gaussian",0.10);      % Inertia to change wire length (kg)
-param_base = system.addParam(param_base,"bar_m",90,"Gaussian",0.20);   % mass of robot under water (substituting floating force)
+param_base = system.addParam(param_base,"bar_m",40,"Gaussian",0.20);   % mass of robot under water (substituting floating force)
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
 param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.2;0.2]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.2);
-param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
+param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
 
 % set limitations
 use_constraint = "thruster";
@@ -64,7 +65,7 @@ P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 %u0 = zeros(4,param.Nt);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
 %u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
-u0 = repmat([0;-param_base.bar_m.average*param_base.g.average;-param_base.bar_m.average*param_base.g.average/2;0],[1,param_base.Nt.average]);
+u0 = repmat([0;-param_base.bar_m.average*param_base.g.average;0;0],[1,param_base.Nt.average]);
 param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
 
 %u0 = repmat([0;0;0;0],[1,param.Nt]);
@@ -112,7 +113,7 @@ seed_list = 1;
 %seed_list = 1;
 u_val = u;
 %u_val = u0;
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(u(:,1)),Nt,length(seed_list));
 x = zeros(length(xd),Nt,length(seed_list));
@@ -149,7 +150,7 @@ visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotRelativePath(q,x,param,t_vec,folder_name);
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
 visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
-%visual.makePathMovie(q,x,param,t_vec,folder_name,2,snum_list);
+%visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
 %plot(u0(2,:))
 %plot(u_b(2,:))
