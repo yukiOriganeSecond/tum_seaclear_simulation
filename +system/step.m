@@ -27,20 +27,27 @@ function [q_next, f_next, mode] = step(qt, ft, ut, param, mode, opt_cnt, dW)
     F_l = ft(3);
     F_X = ft(4);
     
-    X_ddot = (F_X-X_dot*param.Mu_X)/param.M;
+    ang_vel_vs_water = r*theta_dot+X_dot*cos(theta);
+    drag_force_theta = -param.mu_theta(1)*(abs(ang_vel_vs_water)*ang_vel_vs_water)-param.mu_theta(2)*(ang_vel_vs_water)-param.mu_theta(3)*param.bar_m*sign(ang_vel_vs_water)*cos(theta);
+    drag_force_r = -param.mu_r(1)*abs(r_dot)*r_dot-param.mu_r(2)*r_dot-param.mu_r(3)*param.bar_m*sign(r_dot)*sin(theta);
+    drag_force_l = -param.Mu_l(1)*abs(l_dot)*l_dot-param.Mu_l(2)*l_dot-param.Mu_l(3)*sign(l_dot);
+    drag_force_X = -param.Mu_X(1)*abs(X_dot)*X_dot-param.Mu_X(2)*X_dot-param.Mu_X(3)*sign(X_dot);
+
+    X_ddot = (F_X+drag_force_X)/param.M;
     %theta_ddot = (u+param.m*X_ddot*cos(theta)-param.bar_m*param.g*sin(theta)-param.mu*(l*theta_dot-X_dot*cos(theta))-2*l_dot*theta_dot)/l/param.m;
-    theta_ddot = (f_theta+param.m*X_ddot*cos(theta)-param.bar_m*param.g*sin(theta)-param.mu*(r*theta_dot-X_dot*cos(theta)))/r/param.m;
+    theta_ddot = (f_theta+param.m*X_ddot*cos(theta)-param.bar_m*param.g*sin(theta)+drag_force_theta)/r/param.m;
     
     %if r>=l
     T = 0;  % tention force
     if mode == 1    % with wire tention
-        r_ddot = (param.m*X_ddot*sin(theta)+param.m*r*theta_dot^2+param.bar_m*param.g*cos(theta)-(param.mu+param.Mu_l)*r_dot+f_r+F_l)/(param.m+param.I_l);
+        r_ddot = (param.m*X_ddot*sin(theta)+param.m*r*theta_dot^2+param.bar_m*param.g*cos(theta)+drag_force_r+drag_force_l+f_r+F_l)/(param.m+param.I_l);
         l_ddot = r_ddot;
-        T = param.I_l*l_ddot + param.Mu_l*l_dot-F_l;
+        T = param.I_l*l_ddot - drag_force_l-F_l;
     else            % zero wire tention
-        r_ddot = (param.m*X_ddot*sin(theta)+param.m*r*theta_dot^2+param.bar_m*param.g*cos(theta)-param.mu*r_dot+f_r)/param.m;
-        l_ddot = (F_l-l_dot*param.Mu_l)/param.I_l;
+        r_ddot = (param.m*X_ddot*sin(theta)+param.m*r*theta_dot^2+param.bar_m*param.g*cos(theta)+drag_force_r+f_r)/param.m;
+        l_ddot = (F_l+drag_force_l)/param.I_l;
     end
+
     theta_dot_next = theta_dot + param.dt * theta_ddot;
     l_dot_next = l_dot + param.dt*l_ddot;
     X_dot_next = X_dot + param.dt*X_ddot;
