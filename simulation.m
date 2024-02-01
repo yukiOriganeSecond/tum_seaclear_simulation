@@ -22,6 +22,9 @@ param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0
 %xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
 xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
 
+% set time delay of input. if set as dt, it is same as non delay
+param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
+
 % set viscocity
 param_base = system.addParam(param_base,"mu",400,"Deterministic",0.30);   % viscocity of robot
 param_base = system.addParam(param_base,"Mu_X",1000,"Deterministic",0.30);   % viscocity of vessel  
@@ -37,6 +40,7 @@ param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % g
 % set constraints
 param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.2;0.2]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.2);
+param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
 
 % set limitations
 use_constraint = "thruster";
@@ -59,6 +63,8 @@ P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
 %u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
 u0 = repmat([0;-param_base.bar_m.average*param_base.g.average;-param_base.bar_m.average*param_base.g.average/2;0],[1,param_base.Nt.average]);
+param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
+
 %u0 = repmat([0;0;0;0],[1,param.Nt]);
 %u0 = u_b;
 enable_u = [
@@ -89,8 +95,8 @@ u0 = u;
 %toc
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 %seed_list = 1:10;
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
+[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
+%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
 disp(fval)
 
@@ -100,12 +106,13 @@ if exist('u') == 0
     u = u0; opt_cnt = 1;
     seed_list = [1];
 end
-seed_list = 1:20;
+seed_list = 1;
 %seed_list = 1;
 u_val = u;
 %u_val = u0;
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
+f = zeros(length(u(:,1)),Nt,length(seed_list));
 x = zeros(length(xd),Nt,length(seed_list));
 input_energy = zeros(length(seed_list),1);
 constraint_results = zeros(length(seed_list),1);
@@ -113,9 +120,9 @@ i = 0;
 for seed = seed_list
     i = i+1;
     [param,W] = system.makeUncertainty(seed,param_base);
-    q(:,:,i) = system.steps(param.q0,u_val,param,opt_cnt,W);
+    [q(:,:,i),f(:,:,i)] = system.steps(param.q0,u_val,param,opt_cnt,W);
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
-    input_energy(i) = energyEvaluation(u_val,param.q0,xd,Q,R,P,param,opt_cnt);
+    input_energy(i) = energyEvaluation(u_val,f(:,:,i),param.q0,xd,Q,R,P,param,opt_cnt);
     [constraint_results(i),Ceq] = uncertaintyConstraint(u_val,xd,Q,R,P,param_base,opt_cnt,seed);
 end
 
@@ -129,10 +136,10 @@ t_vec = dt:dt:dt*Nt;
 snum_list = 1:length(seed_list);
 %snum_list = [1];
 visual.visualInit();
-visual.plotInputs(u,param,t_vec,[2,3],folder_name);
+visual.plotInputs(u,f,param,t_vec,[2,3],folder_name);
 visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
 visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
-%visual.plotInputs(u,param,t_vec,[1,2;3,4],folder_name);
+%visual.plotInputs(u,f,param,t_vec,[1,2;3,4],folder_name);
 %visual.plotRobotStates(q,param,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
 %visual.plotRobotStates(q,param,t_vec,[5;6],folder_name);
 %visual.plotRobotOutputs(x,xd,param,t_vec,[1,3;2,4],folder_name);
