@@ -1,4 +1,4 @@
-function plotInputs(u_nominal,u_fb,f,param,t_vec,dimset,folder_name,snum_set)
+function plotInputsFB(u_nominal,u_fb,f,param,t_vec,dimset,folder_name,snum_set)
 %PLOTINPUTSFB plot nominal control inputs u and with FB input u_val
     ylabset = ["$u_\theta(t)$ (N)","$u_r(t)$ (N)","$U_l(t)$ (N)","$U_X(t)$ (N)"];
     legset = ["$u_\theta(t)$ (N)","$u_r(t)$ (N)","$U_l(t)$","$U_X(t)$"];
@@ -11,13 +11,15 @@ function plotInputs(u_nominal,u_fb,f,param,t_vec,dimset,folder_name,snum_set)
             subplot(size(dimset,1),size(dimset,2),k)
             plot(t_vec(1:end-1), u_nominal(dimset(m,n),1:end-1),'--','Color',"#0072BD",'LineWidth',0.8);
             hold on
+            plot(t_vec(1:end-1), u_fb(dimset(m,n),1:end-1),'-','Color',"#0072BD",'LineWidth',0.8);
+            
             if length(snum_set) == 1
                 plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,1));
                 legend([legset(dimset(m,n)),legset2(dimset(m,n))],'Interpreter','latex')
             else
                 for s = snum_set
-                    plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,s),1,'-','Color',"#D95319",'LineWidth',0.8);
-                    plot(t_vec(1:end-1), u_fb(dimset(m,n),1:end-1,s),1,'-','Color',"#0072BD",'LineWidth',0.8);
+                    plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,s),'-','Color',"#D95319",'LineWidth',0.8);
+                    plot(t_vec(1:end-1), u_fb(dimset(m,n),1:end-1,s),'-','Color',"#0072BD",'LineWidth',0.8);
                 end
             end
             hold off
