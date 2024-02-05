@@ -19,8 +19,8 @@ param_base = system.addParam(param_base,"Nt",Nt,"Deterministic");
 param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0;0;0;0;0;0]);
 
 % targets
-%xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
-xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
+xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
+%xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
 
 % set time delay of input. if set as dt, it is same as non delay
 param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
@@ -149,6 +149,7 @@ visual.plotInputs(u,f,param,t_vec,[2,3],folder_name);
 visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
 visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotInputs(u,f,param,t_vec,[1,2;3,4],folder_name);
+%visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
 %visual.plotRobotStates(q,param,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
 %visual.plotRobotStates(q,param,t_vec,[5;6],folder_name);
 %visual.plotRobotOutputs(x,xd,param,t_vec,[1,3;2,4],folder_name);
