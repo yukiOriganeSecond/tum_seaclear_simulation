@@ -23,27 +23,27 @@ param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0
 xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
 
 % set time delay of input. if set as dt, it is same as non delay
-%param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
-param_base = system.addParam(param_base,"T",[0.05; 0.05; 0.05; 0.05],"Deterministic");  % T_theta; T_r; T_l; T_X 
+param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
+%param_base = system.addParam(param_base,"T",[0.05; 0.05; 0.05; 0.05],"Deterministic");  % T_theta; T_r; T_l; T_X 
 
 
 % set viscocity
-param_base = system.addParam(param_base,"mu_r",[120 0 0],"Deterministic",0.30);   % viscocity of robot
-param_base = system.addParam(param_base,"mu_theta",[120 0 0],"Deterministic",0.30);   % viscocity of robot
+param_base = system.addParam(param_base,"mu_r",[120 0 0],"White",0.10);   % viscocity of robot
+param_base = system.addParam(param_base,"mu_theta",[120 0 0],"White",0.10);   % viscocity of robot
 param_base = system.addParam(param_base,"Mu_X",[0 1000 0],"Deterministic",0.30);   % viscocity of vessel
 param_base = system.addParam(param_base,"Mu_l",[0 300 0],"Deterministic",0.30);   % viscocity of wire
 
 % other constants
-param_base = system.addParam(param_base,"m",70,"Gaussian",0.20);       % mass of robots (kg)
+param_base = system.addParam(param_base,"m",70,"Deterministic",0.20);       % mass of robots (kg)
 param_base = system.addParam(param_base,"M",1075,"Deterministic",0.01);      % mass of vessel (kg)
-param_base = system.addParam(param_base,"I_l",30,"Gaussian",0.10);      % Inertia to change wire length (kg)
-param_base = system.addParam(param_base,"bar_m",40,"Gaussian",0.20);   % mass of robot under water (substituting floating force)
+param_base = system.addParam(param_base,"I_l",30,"Deterministic",0.10);      % Inertia to change wire length (kg)
+param_base = system.addParam(param_base,"bar_m",40,"Deterministic",0.20);   % mass of robot under water (substituting floating force)
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.2;0.2]);
-param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.2);
-param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
+param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
+param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
 
 % set limitations
 use_constraint = "thruster";
@@ -96,8 +96,8 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 u0 = u;
 %toc
-param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-%seed_list = 1:10;
+param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+seed_list = 1:10;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
@@ -109,11 +109,11 @@ if exist('u') == 0
     u = u0; opt_cnt = 1;
     seed_list = [1];
 end
-seed_list = 1;
+seed_list = 1:20;
 %seed_list = 1;
 u_val = u;
 %u_val = u0;
-param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
+param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(u(:,1)),Nt,length(seed_list));
 x = zeros(length(xd),Nt,length(seed_list));
