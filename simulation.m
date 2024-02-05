@@ -56,6 +56,10 @@ Q = diag([0,0,0,0]);
 R = diag([1, 1, 1, 1])./(param_base.m.average^2);      % cost matrix for input (u_theta, u_r, U_l, U_X)
 P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 
+% Set Low side controller
+param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");    % if false, obstacles is ignored
+
+
 % constant inputs
 %u = zeros(3,param.Nt);    % u,U_l,U_X
 %u = repmat([0;0;-300;0],param.Nt);
@@ -96,8 +100,9 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 u0 = u;
 %toc
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-seed_list = 1:10;
+param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
+%seed_list = 1:10;
+seed_list = 1;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
@@ -109,24 +114,25 @@ if exist('u') == 0
     u = u0; opt_cnt = 1;
     seed_list = [1];
 end
-seed_list = 1:20;
-%seed_list = 1;
-u_val = u;
+%seed_list = 1:20;
+seed_list = 1;
+%u_val = u;
 %u_val = u0;
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(u(:,1)),Nt,length(seed_list));
 x = zeros(length(xd),Nt,length(seed_list));
+u_val = zeros(length(u(:,1)),Nt,length(seed_list));
 input_energy = zeros(length(seed_list),1);
 constraint_results = zeros(length(seed_list),1);
 i = 0;
 for seed = seed_list
     i = i+1;
     [param,W] = system.makeUncertainty(seed,param_base);
-    [q(:,:,i),f(:,:,i)] = system.steps(param.q0,u_val,param,opt_cnt,W);
+    [q(:,:,i),f(:,:,i),u_val(:,:,i)] = system.steps(param.q0,u,param,opt_cnt,W);
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
-    input_energy(i) = energyEvaluation(u_val,f(:,:,i),param.q0,xd,Q,R,P,param,opt_cnt);
-    [constraint_results(i),Ceq] = uncertaintyConstraint(u_val,xd,Q,R,P,param_base,opt_cnt,seed);
+    input_energy(i) = energyEvaluation(u_val(:,:,i),f(:,:,i),param.q0,xd,Q,R,P,param,opt_cnt);
+    [constraint_results(i),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,opt_cnt,seed);
 end
 
 %% save

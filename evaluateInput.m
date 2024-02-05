@@ -12,13 +12,13 @@ function eval_result = evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list)
     eval_result = 0;
     for seed = seed_list
         [param,W] = system.makeUncertainty(seed, param_base);
-        [q,f] = system.steps(param.q0,u,param,opt_cnt,W);           % simulate state variables
+        [q,~,u_use] = system.steps(param.q0,u,param,opt_cnt,W);           % simulate state variables
         x = system.changeCoordinate(q,param);   % output variables
         L = zeros(1,param.Nt);                  % cost function at t
         %x(1:2,:) = q(1:2,:);   % change output values
         %x(3:4,:) = q(7:8,:);
         for t = 1:param.Nt
-            L(1,t) = u(:,t).'*R*u(:,t) + (x(:,t)-xd(:,1)).'*Q*(x(:,t)-xd(:,1));
+            L(1,t) = u_use(:,t).'*R*u_use(:,t) + (x(:,t)-xd(:,1)).'*Q*(x(:,t)-xd(:,1));
         end
         eval_result = eval_result + sum(L(1,:))*param.dt+(x(:,end)-xd(:,1)).'*P*(x(:,end)-xd(:,1));
     end
