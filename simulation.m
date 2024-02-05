@@ -29,8 +29,8 @@ param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic"
 
 
 % set viscocity
-param_base = system.addParam(param_base,"mu_r",[120 0 0],"Deterministic",0.10);   % viscocity of robot
-param_base = system.addParam(param_base,"mu_theta",[120 0 0],"Deterministic",0.10);   % viscocity of robot
+param_base = system.addParam(param_base,"mu_r",[120 0 0],"White",0.20);   % viscocity of robot
+param_base = system.addParam(param_base,"mu_theta",[120 0 0],"White",0.20);   % viscocity of robot
 param_base = system.addParam(param_base,"Mu_X",[0 1000 0],"Deterministic",0.30);   % viscocity of vessel
 param_base = system.addParam(param_base,"Mu_l",[0 300 0],"Deterministic",0.30);   % viscocity of wire
 
@@ -103,10 +103,10 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 %param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 u0 = u;
-%toc
-param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-%seed_list = 1:10;
-seed_list = 1;
+toc
+param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+seed_list = 1:10;
+%seed_list = 1;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
@@ -118,7 +118,7 @@ if exist('u') == 0
     u = u0; opt_cnt = 1;
     seed_list = [1];
 end
-seed_list = 1:5;
+seed_list = 1:20;
 %seed_list = 1;
 %u_val = u;
 %u_val = u0;
