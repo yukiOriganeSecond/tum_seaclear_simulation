@@ -1,8 +1,9 @@
 function plotInputsFB(u_nominal,u_fb,f,param,t_vec,dimset,folder_name,snum_set)
 %PLOTINPUTSFB plot nominal control inputs u and with FB input u_val
     ylabset = ["$u_\theta(t)$ (N)","$u_r(t)$ (N)","$U_l(t)$ (N)","$U_X(t)$ (N)"];
-    legset = ["$u_\theta(t)$ (N)","$u_r(t)$ (N)","$U_l(t)$","$U_X(t)$"];
-    legset2 = ["$f_\theta(t)$ (N)","$f_r(t)$ (N)","$F_l(t)$","$F_X(t)$"];
+    legset = ["$u^r_\theta(t)$ (N)","$u^r_r(t)$ (N)","$U^r_l(t)$","$U^r_X(t)$"];
+    legset2 = ["$u_\theta(t)$ (N)","$u_r(t)$ (N)","$U_l(t)$","$U_X(t)$"];
+    legset3 = ["$f_\theta(t)$ (N)","$f_r(t)$ (N)","$F_l(t)$","$F_X(t)$"];
     figure
     k = 0;
     for m = 1:size(dimset,1)
@@ -15,7 +16,7 @@ function plotInputsFB(u_nominal,u_fb,f,param,t_vec,dimset,folder_name,snum_set)
             
             if length(snum_set) == 1
                 plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,1));
-                legend([legset(dimset(m,n)),legset2(dimset(m,n))],'Interpreter','latex')
+                legend([legset(dimset(m,n)),legset2(dimset(m,n)),legset3(dimset(m,n))],'Interpreter','latex')
             else
                 for s = snum_set
                     plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,s),'-','Color',"#D95319",'LineWidth',0.8);

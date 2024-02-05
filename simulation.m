@@ -1,6 +1,7 @@
 clear
 clc
 %clear system.step
+clear ControllerPID
 clear evaluateInput
 param_base = struct;
 %% 
@@ -28,16 +29,16 @@ param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic"
 
 
 % set viscocity
-param_base = system.addParam(param_base,"mu_r",[120 0 0],"White",0.10);   % viscocity of robot
-param_base = system.addParam(param_base,"mu_theta",[120 0 0],"White",0.10);   % viscocity of robot
+param_base = system.addParam(param_base,"mu_r",[120 0 0],"Deterministic",0.10);   % viscocity of robot
+param_base = system.addParam(param_base,"mu_theta",[120 0 0],"Deterministic",0.10);   % viscocity of robot
 param_base = system.addParam(param_base,"Mu_X",[0 1000 0],"Deterministic",0.30);   % viscocity of vessel
 param_base = system.addParam(param_base,"Mu_l",[0 300 0],"Deterministic",0.30);   % viscocity of wire
 
 % other constants
-param_base = system.addParam(param_base,"m",70,"Deterministic",0.20);       % mass of robots (kg)
+param_base = system.addParam(param_base,"m",70,"White",0.20);       % mass of robots (kg)
 param_base = system.addParam(param_base,"M",1075,"Deterministic",0.01);      % mass of vessel (kg)
 param_base = system.addParam(param_base,"I_l",30,"Deterministic",0.10);      % Inertia to change wire length (kg)
-param_base = system.addParam(param_base,"bar_m",40,"Deterministic",0.20);   % mass of robot under water (substituting floating force)
+param_base = system.addParam(param_base,"bar_m",40,"White",0.20);   % mass of robot under water (substituting floating force)
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
@@ -59,7 +60,7 @@ P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 % Set Low side controller
 %param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
-param_base = system.addParam(param_base,"kp",[1;1;1;1],"Deterministic");
+param_base = system.addParam(param_base,"kp",[1000;1000;1000;1],"Deterministic");
 param_base = system.addParam(param_base,"ki",[0;0;0;0],"Deterministic");
 param_base = system.addParam(param_base,"kd",[0;0;0;0],"Deterministic");
 
@@ -103,7 +104,7 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 u0 = u;
 %toc
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 %seed_list = 1:10;
 seed_list = 1;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
@@ -123,17 +124,35 @@ seed_list = 1:5;
 %u_val = u0;
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
+q_nonFB = q;
+q_nominal = q;
 f = zeros(length(u(:,1)),Nt,length(seed_list));
 x = zeros(length(xd),Nt,length(seed_list));
+x_nonFB = x;
+x_nominal = x;
 u_val = zeros(length(u(:,1)),Nt,length(seed_list));
 input_energy = zeros(length(seed_list),1);
 constraint_results = zeros(length(seed_list),1);
 i = 0;
 for seed = seed_list
     i = i+1;
+    
     [param,W] = system.makeUncertainty(seed,param_base);
-    [q(:,:,i),f(:,:,i),u_val(:,:,i)] = system.steps(param.q0,u,param,opt_cnt,W);
+    [q(:,:,i),f(:,:,i),~] = system.steps(param.q0,u,param,opt_cnt,W);   % nonFB case
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
+    u_val(:,:,i) = u(:,:);
+
+    if param.low_side_controller ~= "none"
+        q_nonFB(:,:,i) = q(:,:,i);
+        x_nonFB(:,:,i) = x(:,:,i);
+        [param_nominal,W] = system.makeUncertainty(seed, param_base, true); % calc nominal parameters
+        [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,opt_cnt,W); % calc nominal values
+        x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param);
+        [param_unc,W] = system.makeUncertainty(seed, param_base, false); % calc uncertained parameters
+        [q(:,:,i),~,u_val(:,:,i)] = system.stepsFB(param_unc.q0,q_nominal,u,param_unc,opt_cnt,W); % calc nominal values
+        x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
+    end
+
     input_energy(i) = energyEvaluation(u_val(:,:,i),f(:,:,i),param.q0,xd,Q,R,P,param,opt_cnt);
     [constraint_results(i),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,opt_cnt,seed);
 end
@@ -153,6 +172,9 @@ visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
 visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotInputs(u,f,param,t_vec,[1,2;3,4],folder_name);
 %visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
+%visual.plotRobotOutputsFB(x,xd,param,t_vec,[1,3;2,4],folder_name);
+%visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
+%visual.plotRobotStatesErrorFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
 %visual.plotRobotStates(q,param,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
 %visual.plotRobotStates(q,param,t_vec,[5;6],folder_name);
 %visual.plotRobotOutputs(x,xd,param,t_vec,[1,3;2,4],folder_name);
@@ -160,6 +182,7 @@ visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotRelativePath(q,x,param,t_vec,folder_name);
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
 visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
+visual.makeSnapsFB(q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,t_vec,folder_name,[1],snum_list);
 %visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
 %plot(u0(2,:))

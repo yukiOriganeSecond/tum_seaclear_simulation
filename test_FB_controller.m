@@ -18,7 +18,7 @@ param_base = system.addParam(param_base,"Nt",Nt,"Deterministic");
 % state variables : q = [theta, theta_dot, l, l_dot, X, X_dot, r, r_dot]
 % output variables: x = (x,x_dot,d,d_dot)
 param_base = system.addParam(param_base,"q0",[0;0;6;0;0;0;6;0],"White",[0;0;0;0;0;0;0;0]);
-qd = repmat([0;0;5;0;0;0;5;0],[1,param_base.Nt.average]);
+qd = repmat([pi/10;0;5;0;0;0;5;0],[1,param_base.Nt.average]);
 
 % targets
 xd = [0; 0; 6; 0];  % target value of (x; x_dot; d; d_dot);
@@ -58,9 +58,9 @@ P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 % Set Low side controller
 %param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
-param_base = system.addParam(param_base,"kp",[1;100;100;1],"Deterministic");
-param_base = system.addParam(param_base,"ki",[0;0;0;0],"Deterministic");
-param_base = system.addParam(param_base,"kd",[0;0;0;0],"Deterministic");
+param_base = system.addParam(param_base,"kp",[1000;100;100;1],"Deterministic");
+param_base = system.addParam(param_base,"ki",[1000;0;0;0],"Deterministic");
+param_base = system.addParam(param_base,"kd",[800;0;0;0],"Deterministic");
 
 % constant inputs
 u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,param_base.Nt.average]);
@@ -106,7 +106,7 @@ snum_list = 1:length(seed_list);
 visual.visualInit();
 visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
-visual.plotRobotStates(q,param,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
+visual.plotRobotStates(q,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
 
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
 visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
