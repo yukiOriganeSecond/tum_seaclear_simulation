@@ -1,4 +1,4 @@
-function [q,f] = steps(q0,u,param,opt_cnt,W)
+function [q,f,u_use] = steps(q0,u,param,opt_cnt,W)
     arguments
         q0      % initial state
         u       % time series of control input (signal input)
@@ -16,7 +16,10 @@ function [q,f] = steps(q0,u,param,opt_cnt,W)
     else
         mode = 2;
     end
+    u_use = u;  % initialuze u_use by u
+
     for t = 1:param.Nt-1
         [q(:,t+1),f(:,t+1),mode] = system.step(q(:,t),f(:,t),u(:,t),param,mode,opt_cnt,W(t+1)-W(t));
     end
+
 end
