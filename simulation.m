@@ -35,10 +35,10 @@ param_base = system.addParam(param_base,"Mu_X",[0 1000 0],"Deterministic",0.30);
 param_base = system.addParam(param_base,"Mu_l",[0 300 0],"Deterministic",0.30);   % viscocity of wire
 
 % other constants
-param_base = system.addParam(param_base,"m",70,"White",0.20);       % mass of robots (kg)
+param_base = system.addParam(param_base,"m",120,"White",0.20);       % mass of robots (kg)
 param_base = system.addParam(param_base,"M",1075,"Deterministic",0.01);      % mass of vessel (kg)
 param_base = system.addParam(param_base,"I_l",30,"Deterministic",0.10);      % Inertia to change wire length (kg)
-param_base = system.addParam(param_base,"bar_m",40,"White",0.20);   % mass of robot under water (substituting floating force)
+param_base = system.addParam(param_base,"bar_m",90,"White",0.20);   % mass of robot under water (substituting floating force)
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
@@ -51,6 +51,8 @@ use_constraint = "thruster";
 %param.use_constraint = "none";
 lb = repmat([-400; -400; -6000; -6000],1,Nt);
 ub = repmat([400; 400; 6000; 6000],1,Nt);
+param_base = system.addParam(param_base,"lb",lb(:,1),"Deterministic",0);
+param_base = system.addParam(param_base,"ub",ub(:,1),"Deterministic",0);
 % Optimize Weight Matrix
 %Q = diag([1,1,1,1]);    % cost matrix for state (x, d)
 Q = diag([0,0,0,0]);
