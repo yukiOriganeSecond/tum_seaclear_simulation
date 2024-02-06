@@ -42,7 +42,7 @@ param_base = system.addParam(param_base,"bar_m",90,"White",0.20);   % mass of ro
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_pos",[0;5],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
 
@@ -109,8 +109,8 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 u0 = u;
 toc
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-seed_list = 1:10;
-%seed_list = 1;
+%seed_list = 1:10;
+seed_list = 1;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
