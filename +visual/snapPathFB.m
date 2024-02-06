@@ -4,7 +4,7 @@ function snapPathFB(t,q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,snum_list)
 for s = snum_list
     plot(x(1,:,s), x(3,:,s),'LineWidth',0.7,'Color','b');
     hold on
-    plot(x_nonFB(1,:,s), x_nonFB(3,:,s),'LineWidth',0.7,'Color','g');
+    %plot(x_nonFB(1,:,s), x_nonFB(3,:,s),'LineWidth',0.7,'Color','g');
     plot(q(5,:,s), zeros(1,param.Nt),'--','LineWidth',0.7,'Color','r');
     plot(q_nonFB(5,:,s), zeros(1,param.Nt),'--','LineWidth',0.7,'Color','m');
 end

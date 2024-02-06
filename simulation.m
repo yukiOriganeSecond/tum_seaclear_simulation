@@ -102,6 +102,8 @@ seed_list = [1];
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 %param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
+%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
+
 u0 = u;
 toc
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
@@ -137,6 +139,9 @@ i = 0;
 for seed = seed_list
     i = i+1;
     
+    [param_nominal,W] = system.makeUncertainty(seed, param_base, true); % calc nominal parameters
+    [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,opt_cnt,W); % calc nominal values
+    x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param_nominal);
     [param,W] = system.makeUncertainty(seed,param_base);
     [q(:,:,i),f(:,:,i),~] = system.steps(param.q0,u,param,opt_cnt,W);   % nonFB case
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
