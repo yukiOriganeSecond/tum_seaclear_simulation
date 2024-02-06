@@ -8,7 +8,7 @@ function [ut_use,et] = ControllerPID(qt, qt_norm, ut_norm, param)
     if isempty(integral_et) % initial step
         integral_et = 0;
     end
-    ut_use = ut_norm + param.kp.*et + param.ki.*integral_et + param.kd.*dt_et;
+    ut_use = ut_norm + param.kp.*et;% + param.ki.*integral_et + param.kd.*dt_et;
     ut_use = ut_use.*(ut_use<=param.ub)+param.ub.*(ut_use>param.ub);    % saturation
     ut_use = ut_use.*(ut_use>=param.lb)+param.lb.*(ut_use<param.lb);    % saturation
     integral_et = integral_et + param.dt*et;

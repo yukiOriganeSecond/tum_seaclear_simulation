@@ -9,6 +9,7 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
     %end
     %u_cnt = u_cnt+1;
     dist = zeros(length(seed_list),param_base.Nt.average);
+    dist_gnd = zeros(length(seed_list),param_base.Nt.average);  % distance from robot to ground
     i = 0;
     for seed = seed_list
         i = i+1;
@@ -26,11 +27,13 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
         %x(1:2,:) = q(1:2,:);   % change output values
         %x(3:4,:) = q(7:8,:);
         dist(i,:) = vecnorm(x([1,3],:)-param.obs_pos,2,1)-param.obs_size;
+        dist_gnd(i,:) = param.ground_depth-x(3,:);
     end
     %t = -2:0.01:0.2;
     t = -0.2;
     alpha = 0.05;
-    c_pre = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1);
+    c_pre(1) = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1);
+    c_pre(2) = t+1/alpha/length(seed_list)*sum(max(max(-dist_gnd,[],2)-t,0),1);
     %c = min(c_pre); % inf t
     if param.consider_collision == true
         c = c_pre;
