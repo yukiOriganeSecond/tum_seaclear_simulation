@@ -27,6 +27,10 @@ xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
 param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
 %param_base = system.addParam(param_base,"T",[0.05; 0.05; 0.05; 0.05],"Deterministic");  % T_theta; T_r; T_l; T_X 
 
+% set noise
+%param_base = system.addParam(param_base,"W_effect",[0.1; 0.1; 0.1; 0.1],"Deterministic");
+param_base = system.addParam(param_base,"W_effect",[0; 0; 0; 0],"Deterministic");   % set wiener effect
+param_base = system.addParam(param_base,"sensing_noise",[0.1; 0.1; 0.1; 0.1],"Deterministic");
 
 % set viscocity
 param_base = system.addParam(param_base,"mu_r",[120 0 0],"White",0.20);   % viscocity of robot
@@ -42,9 +46,10 @@ param_base = system.addParam(param_base,"bar_m",90,"White",0.20);   % mass of ro
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[0;5],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
+param_base = system.addParam(param_base,"ground_depth",5.5,"Deterministic");
 
 % set limitations
 use_constraint = "thruster";
@@ -122,7 +127,7 @@ if exist('u') == 0
     u = u0; opt_cnt = 1;
     seed_list = [1];
 end
-seed_list = 1:20;
+seed_list = 1;
 %seed_list = 1;
 %u_val = u;
 %u_val = u0;
@@ -136,7 +141,7 @@ x_nonFB = x;
 x_nominal = x;
 u_val = zeros(length(u(:,1)),Nt,length(seed_list));
 input_energy = zeros(length(seed_list),1);
-constraint_results = zeros(length(seed_list),1);
+constraint_results = zeros(length(seed_list),2);
 i = 0;
 for seed = seed_list
     i = i+1;
@@ -161,7 +166,7 @@ for seed = seed_list
     end
 
     input_energy(i) = energyEvaluation(u_val(:,:,i),f(:,:,i),param.q0,xd,Q,R,P,param,opt_cnt);
-    [constraint_results(i),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,opt_cnt,seed);
+    [constraint_results(i,:),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,opt_cnt,seed);
 end
 
 %% save
@@ -179,7 +184,7 @@ visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
 visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotInputs(u,f,param,t_vec,[1,2;3,4],folder_name);
 %visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
-%visual.plotRobotOutputsFB(x,xd,param,t_vec,[1,3;2,4],folder_name);
+%visual.plotRobotOutputsFB(x,xd,x_nominal,x_nonFB,param,t_vec,[1,3;2,4],folder_name,snum_list);
 %visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
 %visual.plotRobotStatesErrorFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
 %visual.plotRobotStates(q,param,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
