@@ -30,7 +30,8 @@ param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic"
 % set noise
 %param_base = system.addParam(param_base,"W_effect",[0.1; 0.1; 0.1; 0.1],"Deterministic");
 param_base = system.addParam(param_base,"W_effect",[0; 0; 0; 0],"Deterministic");   % set wiener effect
-param_base = system.addParam(param_base,"sensing_noise",[0.1; 0.1; 0.1; 0.1],"Deterministic");
+%param_base = system.addParam(param_base,"sensing_noise",[0.1; 0.1; 0.1; 0.1],"Deterministic");
+param_base = system.addParam(param_base,"sensing_noise",[0; 0; 0; 0],"Deterministic");
 
 % set viscocity
 param_base = system.addParam(param_base,"mu_r",[120 0 0],"White",0.20);   % viscocity of robot
@@ -48,8 +49,9 @@ param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % g
 % set constraints
 param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
-param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
 param_base = system.addParam(param_base,"ground_depth",5.5,"Deterministic");
+param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
+%param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
 
 % set limitations
 use_constraint = "thruster";
@@ -62,7 +64,7 @@ param_base = system.addParam(param_base,"ub",ub(:,1),"Deterministic",0);
 %Q = diag([1,1,1,1]);    % cost matrix for state (x, d)
 Q = diag([0,0,0,0]);
 R = diag([1, 1, 1, 1])./(param_base.m.average^2);      % cost matrix for input (u_theta, u_r, U_l, U_X)
-P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
+P = diag([1000,1000,1000,1000]); % termination cost matrix for state (x, d)
 
 % Set Low side controller
 %param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
@@ -94,7 +96,7 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 
 %% optimization
 clc
-options = optimoptions(@fmincon,'MaxFunctionEvaluations',30000);
+options = optimoptions(@fmincon,'MaxFunctionEvaluations',30000,'PlotFcn','optimplotfvalconstr','Display','iter');
 tic
 %for opt_cnt = size(param.enable_u,2)
 %    if param.use_constraint == "thruster"
@@ -113,11 +115,12 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 
 u0 = u;
 toc
+tic
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 %seed_list = 1:10;
 seed_list = 1;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
+%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 toc
 disp(fval)
 
