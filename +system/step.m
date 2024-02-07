@@ -75,4 +75,6 @@ function [q_next, f_next, mode] = step(qt, ft, ut, param, mode, opt_cnt, dW)
     q_next(3) = l_next;
     q_next(5) = X_next;
     q_next(7) = r_next;
+
+    q_next([2,4,6,8]) = q_next([2,4,6,8]) + dW*param.W_effect.';
 end

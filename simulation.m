@@ -27,6 +27,10 @@ xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
 param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
 %param_base = system.addParam(param_base,"T",[0.05; 0.05; 0.05; 0.05],"Deterministic");  % T_theta; T_r; T_l; T_X 
 
+% set noise
+%param_base = system.addParam(param_base,"W_effect",[0.1; 0.1; 0.1; 0.1],"Deterministic");
+param_base = system.addParam(param_base,"W_effect",[0; 0; 0; 0],"Deterministic");   % set wiener effect
+param_base = system.addParam(param_base,"sensing_noise",[0.1; 0.1; 0.1; 0.1],"Deterministic");
 
 % set viscocity
 param_base = system.addParam(param_base,"mu_r",[120 0 0],"White",0.20);   % viscocity of robot
@@ -123,7 +127,7 @@ if exist('u') == 0
     u = u0; opt_cnt = 1;
     seed_list = [1];
 end
-seed_list = 1:20;
+seed_list = 1;
 %seed_list = 1;
 %u_val = u;
 %u_val = u0;

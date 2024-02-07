@@ -29,7 +29,7 @@ function [q,f,u_use] = steps(q0,q_nominal,u_nominal,param,opt_cnt,W)
         if param.low_side_controller == "PID"
             clear system.ControllerPID  % clear persistent variables
             for t = 1:param.Nt-1
-                u_use(:,t) = system.ControllerPID(q(:,t),q_nominal(:,t),u_nominal(:,t),param);
+                u_use(:,t) = system.ControllerPID(q(:,t),q_nominal(:,t),u_nominal(:,t),param,W(t+1)-W(t));
                 [q(:,t+1),f(:,t+1),mode] = system.step(q(:,t),f(:,t),u_use(:,t),param,mode,opt_cnt,W(t+1)-W(t));
             end
         end
