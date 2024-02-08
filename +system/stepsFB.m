@@ -1,4 +1,4 @@
-function [q,f,u_use] = steps(q0,q_nominal,u_nominal,param,opt_cnt,W)
+function [q,f,u_use] = stepsFB(q0,q_nominal,u_nominal,param,opt_cnt,W)
     arguments
         q0      % initial state
         q_nominal   % nominal states (target trajectory)
