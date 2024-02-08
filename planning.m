@@ -2,12 +2,14 @@ function [u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,opti
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
     
-    u_last = [];
+    us_last = [];
 
     fun = @evalInput;
     cfun = @evalConstraint;
 
     Ns = length(seed_list);
+    Nu = param_base.Nt.average/param_base.input_prescale.average;
+    Nt = param_base.Nt.average;
     q = zeros(length(param_base.q0.average),param_base.Nt.average,Ns);
     x = zeros(length(xd),param_base.Nt.average,Ns);
     dist = zeros(length(seed_list),param_base.Nt.average);
@@ -15,21 +17,22 @@ function [u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,opti
     eval_result = 0;
     grad = 0;
 
-    [u,fval] = fmincon(fun,u0,[],[],[],[],param_base.enable_u.average.*lb,param_base.enable_u.average.*ub,cfun,options);
+    [us,fval] = fmincon(fun,u0(:,1:param_base.input_prescale.average:Nt),[],[],[],[],param_base.enable_u.average.*repmat(lb,1,Nu),param_base.enable_u.average.*repmat(ub,1,Nu),cfun,options);
+    u = repelem(us,1,param_base.input_prescale.average); % insert missing section
 
-    function [eval_result_,grad_] = evalInput(u)
-        if ~isequal(u,u_last)
-            [q,x,eval_result,grad,dist,dist_gnd] = system.evaluateCommon(u,xd,Q,R,P,param_base,opt_cnt,seed_list);
-            u_last = u;
+    function [eval_result_,grad_] = evalInput(us)
+        if ~isequal(us,us_last)
+            [q,x,eval_result,grad,dist,dist_gnd] = system.evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,seed_list);
+            us_last = us;
         end
         eval_result_ = eval_result/length(seed_list);
         grad_ = grad/length(seed_list);
     end
 
-    function [c,ceq] = evalConstraint(u)
-        if ~isequal(u,u_last)
-            [q,x,eval_result,grad,dist,dist_gnd] = system.evaluateCommon(u,xd,Q,R,P,param_base,opt_cnt,seed_list);
-            u_last = u;
+    function [c,ceq] = evalConstraint(us)
+        if ~isequal(us,us_last)
+            [q,x,eval_result,grad,dist,dist_gnd] = system.evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,seed_list);
+            us_last = us;
         end
         t = -0.2;
         alpha = 0.05;

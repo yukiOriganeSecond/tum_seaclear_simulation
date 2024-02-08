@@ -4,6 +4,7 @@ clc
 clear ControllerPID
 clear evaluateInput
 param_base = struct;
+% parpool
 %% 
 % simulation parameters
 dt = 0.05;
@@ -22,6 +23,11 @@ param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0
 % targets
 xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
 %xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
+
+% set input rate
+input_prescale = 8;
+Nu = Nt/input_prescale;
+param_base = system.addParam(param_base,"input_prescale",input_prescale,"Deterministic");
 
 % set time delay of input. if set as dt, it is same as non delay
 param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
@@ -56,14 +62,14 @@ param_base = system.addParam(param_base,"consider_collision",false,"Deterministi
 % set limitations
 use_constraint = "thruster";
 %param.use_constraint = "none";
-lb = repmat([-400; -400; -6000; -6000],1,Nt);
-ub = repmat([400; 400; 6000; 6000],1,Nt);
+lb = [-400; -400; -6000; -6000];
+ub = [400; 400; 6000; 6000];
 param_base = system.addParam(param_base,"lb",lb(:,1),"Deterministic",0);
 param_base = system.addParam(param_base,"ub",ub(:,1),"Deterministic",0);
 % Optimize Weight Matrix
 %Q = diag([1,1,1,1]);    % cost matrix for state (x, d)
 Q = diag([0,0,0,0]);
-R = diag([1, 1, 1, 1])./(param_base.m.average^2);      % cost matrix for input (u_theta, u_r, U_l, U_X)
+R = diag([1, 1, 1, 1])./(param_base.m.average^2)/(Nt*dt);      % cost matrix for input (u_theta, u_r, U_l, U_X)
 %P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 P = diag([0,0,0,0]);
 % Set Low side controller
@@ -82,10 +88,10 @@ param_base = system.addParam(param_base,"kd",[0;0;0;0],"Deterministic");
 %u0 = zeros(4,param.Nt);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
 %u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
-u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,param_base.Nt.average]);
+u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,Nt]);
 param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
 
-%u0 = repmat([0;0;0;0],[1,param.Nt]);
+%u0 = repmat([0;0;0;0],[1,param.Nu]);
 %u0 = u_b;
 enable_u = [
     1;
@@ -100,8 +106,9 @@ options = optimoptions(@fmincon, ...
     'MaxFunctionEvaluations',30000, ...
     'PlotFcn','optimplotfvalconstr', ...
     'Display','iter', ...
-    'SpecifyObjectiveGradient',true, ...
-    'UseParallel',true);
+    'SpecifyObjectiveGradient',false, ...
+    'UseParallel',true, ...
+    'OptimalityTolerance',3e-3);
 tic
 %for opt_cnt = size(param.enable_u,2)
 %    if param.use_constraint == "thruster"

@@ -1,4 +1,5 @@
-function [q,x,eval_result,grad,dist,dist_gnd] = evaluateCommon(u,xd,Q,R,P,param_base,opt_cnt,seed_list)
+function [q,x,eval_result,grad,dist,dist_gnd] = evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,seed_list)
+    u = repelem(us,1,param_base.input_prescale.average); % insert missing section
 
     Ns = length(seed_list);
     q = zeros(length(param_base.q0.average),param_base.Nt.average,Ns);
