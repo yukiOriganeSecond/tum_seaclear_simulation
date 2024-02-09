@@ -36,8 +36,8 @@ param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic"
 % set noise
 %param_base = system.addParam(param_base,"W_effect",[0.1; 0.1; 0.1; 0.1],"Deterministic");
 param_base = system.addParam(param_base,"W_effect",[0; 0; 0; 0],"Deterministic");   % set wiener effect
-%param_base = system.addParam(param_base,"sensing_noise",[0.1; 0.1; 0.1; 0.1],"Deterministic");
-param_base = system.addParam(param_base,"sensing_noise",[0; 0; 0; 0],"Deterministic");
+param_base = system.addParam(param_base,"sensing_noise",[0.1; 0.1; 0.1; 0.1],"Deterministic");
+%param_base = system.addParam(param_base,"sensing_noise",[0; 0; 0; 0],"Deterministic");
 
 % set viscocity
 param_base = system.addParam(param_base,"mu_r",[120 0 0],"White",0.20);   % viscocity of robot
@@ -53,11 +53,11 @@ param_base = system.addParam(param_base,"bar_m",90,"White",0.20);   % mass of ro
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_pos",[0;5],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 %param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
-param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
+param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
 
 % set limitations
 use_constraint = "thruster";
@@ -103,7 +103,7 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 %% optimization
 clc
 options = optimoptions(@fmincon, ...
-    'MaxFunctionEvaluations',5000, ...
+    'MaxFunctionEvaluations',10000, ...
     'PlotFcn','optimplotfvalconstr', ...
     'Display','iter', ...
     'SpecifyObjectiveGradient',false, ...
@@ -122,15 +122,17 @@ tic
 opt_cnt = 1;
 seed_list = [1];
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
+param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");
 %param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)terminationConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
-%[u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options);
+[u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options);
 
-%u0 = u;
+u0 = u;
 toc
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
 seed_list = 1:10;
 %seed_list = 1;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
