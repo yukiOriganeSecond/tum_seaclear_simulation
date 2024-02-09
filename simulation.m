@@ -46,18 +46,20 @@ param_base = system.addParam(param_base,"Mu_X",[0 1000 0],"Deterministic",0.30);
 param_base = system.addParam(param_base,"Mu_l",[0 300 0],"Deterministic",0.30);   % viscocity of wire
 
 % other constants
-param_base = system.addParam(param_base,"m",120,"White",0.20);       % mass of robots (kg)
+param_base = system.addParam(param_base,"m",70,"White",0.20);       % mass of robots (kg)
 param_base = system.addParam(param_base,"M",1075,"Deterministic",0.01);      % mass of vessel (kg)
 param_base = system.addParam(param_base,"I_l",30,"Deterministic",0.10);      % Inertia to change wire length (kg)
-param_base = system.addParam(param_base,"bar_m",90,"White",0.20);   % mass of robot under water (substituting floating force)
+param_base = system.addParam(param_base,"bar_m",40,"White",0.20);   % mass of robot under water (substituting floating force)
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[0;5],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
+param_base = system.addParam(param_base,"right_side",0,"Deterministic");
 %param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
+param_base = system.addParam(param_base,"right_side_constraints",true,"Deterministic");
 
 % set limitations
 use_constraint = "thruster";
@@ -70,8 +72,8 @@ param_base = system.addParam(param_base,"ub",ub(:,1),"Deterministic",0);
 %Q = diag([1,1,1,1]);    % cost matrix for state (x, d)
 Q = diag([0,0,0,0]);
 R = diag([1, 1, 1, 1])./(param_base.m.average^2);      % cost matrix for input (u_theta, u_r, U_l, U_X)
-P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
-%P = diag([0,0,0,0]);
+%P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
+P = diag([0,0,0,0]);
 % Set Low side controller
 %param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
@@ -106,9 +108,9 @@ options = optimoptions(@fmincon, ...
     'MaxFunctionEvaluations',10000, ...
     'PlotFcn','optimplotfvalconstr', ...
     'Display','iter', ...
-    'SpecifyObjectiveGradient',false, ...
+    'SpecifyObjectiveGradient',true, ...
     'UseParallel',true, ...
-    'OptimalityTolerance',3e-3, ...
+    'OptimalityTolerance',1e-3, ...
     'EnableFeasibilityMode', false);
 tic
 %for opt_cnt = size(param.enable_u,2)

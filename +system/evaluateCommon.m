@@ -1,4 +1,4 @@
-function [q,x,eval_result,grad,dist,dist_gnd] = evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,param_nominal,param_sets,W_nominal,W_sets)
+function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,param_nominal,param_sets,W_nominal,W_sets)
     u = repelem(us,1,param_base.input_prescale.average); % insert missing section
 
     Ns = length(param_sets);
@@ -6,6 +6,7 @@ function [q,x,eval_result,grad,dist,dist_gnd] = evaluateCommon(us,xd,Q,R,P,param
     x = zeros(length(xd),param_base.Nt.average,Ns);
     dist = zeros(Ns,param_base.Nt.average);
     dist_gnd = zeros(Ns,param_base.Nt.average);  % distance from robot to ground
+    dist_right = zeros(Ns,param_base.Nt.average);
     eval_result = 0;
     grad = 0;
 
@@ -28,12 +29,13 @@ function [q,x,eval_result,grad,dist,dist_gnd] = evaluateCommon(us,xd,Q,R,P,param
         x_ = system.changeCoordinate(q(:,:,i),param);   % output variables
         dist(i,:) = vecnorm(x_([1,3],:)-param.obs_pos,2,1)-param.obs_size;
         dist_gnd(i,:) = param.ground_depth-x_(3,:);
+        dist_right(i,:) = param.right_side-x_(1,:)+(x_(3,:)<4)*10;  % if upper than 4m, it is OK
         x(:,:,i) = x_;
         L(1,i) = sum(param_sets(i).dt*dot(R*u_use(:,:),u_use(:,:)));% + param_sets(i).dt*dot(Q*(x(:,:,i)-xd(:,1)),(x(:,:,i)-xd(:,1))));
     end
 
     eval_result = sum(L(:,:))+sum(dot(pagemtimes(P,(x(:,end,:)-xd(:,1))), x(:,end,:)-xd(:,1)));
-    grad = 0;%grad + param_sets(i).dt*(R*u_use(:,:));  % if Q and P = 0 only case
+    grad = param_nominal.dt*(R*us(:,:));  % if Q and P = 0 only case
 end
 
 

@@ -14,6 +14,7 @@ function [u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,opti
     x = zeros(length(xd),param_base.Nt.average,Ns);
     dist = zeros(length(seed_list),param_base.Nt.average);
     dist_gnd = zeros(length(seed_list),param_base.Nt.average);  % distance from robot to ground
+    dist_right = zeros(length(seed_list),param_base.Nt.average);  % distance from robot to ground
     eval_result = 0;
     grad = 0;
     
@@ -29,28 +30,31 @@ function [u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,opti
 
     function [eval_result_,grad_] = evalInput(us)
         if ~isequal(us,us_last)
-            [q,x,eval_result,grad,dist,dist_gnd] = system.evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,param_nominal,param_sets,W_nominal,W_sets);
+            [q,x,eval_result,grad,dist,dist_gnd,dist_right] = system.evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,param_nominal,param_sets,W_nominal,W_sets);
             us_last = us;
         end
         eval_result_ = eval_result/length(seed_list);
-        grad_ = grad/length(seed_list);
+        grad_ = grad;%/length(seed_list);
     end
 
     function [c,ceq] = evalConstraint(us)
         if ~isequal(us,us_last)
-            [q,x,eval_result,grad,dist,dist_gnd] = system.evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,param_nominal,param_sets,W_nominal,W_sets);
+            [q,x,eval_result,grad,dist,dist_gnd,dist_right] = system.evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,param_nominal,param_sets,W_nominal,W_sets);
             us_last = us;
         end
         t = -0.2;
         alpha = 0.05;
-        %c(1) = mean(vecnorm(x([1,3],end,:)-xd([1,3],1),2,1),3)-0.1;
-        %c(2) = mean(vecnorm(x([2,4],end,:)-xd([2,4],1),2,1),3)-0.1;
+        
+        c = zeros(1,5);
         if param_base.consider_collision.average == true
             c(1) = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1);
             c(2) = t+1/alpha/length(seed_list)*sum(max(max(-dist_gnd,[],2)-t,0),1);
-        else
-            c = 0;
         end
+        if param_base.right_side_constraints.average == true
+            c(3) = t+1/alpha/length(seed_list)*sum(max(max(-dist_right,[],2)-t,0),1);
+        end
+        c(4) = mean(vecnorm(x([1,3],end,:)-xd([1,3],1),2,1),3)-0.1;
+        c(5) = mean(vecnorm(x([2,4],end,:)-xd([2,4],1),2,1),3)-0.1;
         ceq = 0;
     end
     
