@@ -1,4 +1,4 @@
-function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list)
+function [c,ceq] = terminationConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list)
 %EVALUATEINPUT この関数の概要をここに記述
 %   詳細説明をここに記述
     %persistent u_cnt
@@ -8,8 +8,6 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
     %    U_r_list = zeros(3000,param.Nt);
     %end
     %u_cnt = u_cnt+1;
-    dist = zeros(length(seed_list),param_base.Nt.average);
-    dist_gnd = zeros(length(seed_list),param_base.Nt.average);  % distance from robot to ground
     i = 0;
     for seed = seed_list
         i = i+1;
@@ -26,20 +24,11 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
         x = system.changeCoordinate(q,param);   % output variables
         %x(1:2,:) = q(1:2,:);   % change output values
         %x(3:4,:) = q(7:8,:);
-        dist(i,:) = vecnorm(x([1,3],:)-param.obs_pos,2,1)-param.obs_size;
-        dist_gnd(i,:) = param.ground_depth-x(3,:);
     end
-    t = -1:0.001:0;
-    %t = -0.2;
-    alpha = 0.05;
-    c_pre(1) = min(t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1));
-    c_pre(2) = min(t+1/alpha/length(seed_list)*sum(max(max(-dist_gnd,[],2)-t,0),1));
-    c = c_pre; % inf t
-    if param.consider_collision == true
-        c = c_pre;
-    else
-        c = 0;
-    end
+    %t = -2:0.01:0.2;
+
+    c(1) = (x([1,3],end)-xd([1,3],1)).'*(x([1,3],end)-xd([1,3],1))-0.01;
+    c(2) = (x([2,4],end)-xd([2,4],1)).'*(x([2,4],end)-xd([2,4],1))-0.01;
     ceq = 0;%[];
 end
 
