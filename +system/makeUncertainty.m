@@ -13,7 +13,7 @@ end
             param.(fname) = param_base.(fname).uncertainCalc(false); % sample parameters
         end
     end
-    dW = sqrt(param.dt)*randn(1,param.Nt);
+    dW = sqrt(param.dt)*randn(1,param.Nt)*(~param_base.force_deterministic.average);
     W = cumsum(dW); % generate Wiener Process 
 end
 

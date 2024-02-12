@@ -29,12 +29,12 @@ function [c,ceq] = uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list
         dist(i,:) = vecnorm(x([1,3],:)-param.obs_pos,2,1)-param.obs_size;
         dist_gnd(i,:) = param.ground_depth-x(3,:);
     end
-    %t = -2:0.01:0.2;
-    t = -0.2;
+    t = -1:0.001:0;
+    %t = -0.2;
     alpha = 0.05;
-    c_pre(1) = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1);
-    c_pre(2) = t+1/alpha/length(seed_list)*sum(max(max(-dist_gnd,[],2)-t,0),1);
-    %c = min(c_pre); % inf t
+    c_pre(1) = min(t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1));
+    c_pre(2) = min(t+1/alpha/length(seed_list)*sum(max(max(-dist_gnd,[],2)-t,0),1));
+    c = c_pre; % inf t
     if param.consider_collision == true
         c = c_pre;
     else

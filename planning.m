@@ -1,4 +1,4 @@
-function [u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options)
+function [u,fval,t_end] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
     
@@ -25,10 +25,18 @@ function [u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,opti
         [param_sets(i),W_sets(i,:)] = system.makeUncertainty(seed, param_base, false);
     end
 
-    [us,fval] = fmincon(fun,u0(:,1:param_base.input_prescale.average:Nt),[],[],[],[],param_base.enable_u.average.*repmat(lb,1,Nu),param_base.enable_u.average.*repmat(ub,1,Nu),cfun,options);
-    u = repelem(us,1,param_base.input_prescale.average); % insert missing section
+    [ust,fval,~,output] = fmincon(fun,[u0(:,1:param_base.input_prescale.average:Nt),[-0.2;0;0;0]],[],[],[],[],[param_base.enable_u.average.*repmat(lb,1,Nu),[-inf;0;0;0]],[param_base.enable_u.average.*repmat(ub,1,Nu),[+inf;0;0;0]],cfun,options);
+    if output.constrviolation > 1e-6
+        ust = output.bestfeasible.x;
+        fval = output.bestfeasible.fval;
+        disp("WARN: use best feasible point")
+    end
+    u = repelem(ust(:,1:end-1),1,param_base.input_prescale.average); % insert missing section
+    t_end = ust(1,end);
 
-    function [eval_result_,grad_] = evalInput(us)
+    function [eval_result_,grad_] = evalInput(ust)
+        us = ust(:,1:end-1);
+        %t = ust(end,1);
         if ~isequal(us,us_last)
             [q,x,eval_result,grad,dist,dist_gnd,dist_right] = system.evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,param_nominal,param_sets,W_nominal,W_sets);
             us_last = us;
@@ -37,24 +45,27 @@ function [u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,opti
         grad_ = grad;%/length(seed_list);
     end
 
-    function [c,ceq] = evalConstraint(us)
+    function [c,ceq] = evalConstraint(ust)
+        us = ust(:,1:end-1);
+        t = ust(1,end);
         if ~isequal(us,us_last)
             [q,x,eval_result,grad,dist,dist_gnd,dist_right] = system.evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,param_nominal,param_sets,W_nominal,W_sets);
             us_last = us;
         end
-        t = -0.2;
-        alpha = 0.05;
         
         c = zeros(1,5);
         if param_base.consider_collision.average == true
-            c(1) = t+1/alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1);
-            c(2) = t+1/alpha/length(seed_list)*sum(max(max(-dist_gnd,[],2)-t,0),1);
+            %c(1) = param_nominal.t+1/param_nominal.alpha/length(seed_list)*sum(max(max(-dist,[],2)-param_nominal.t,0),1);
+            %c(2) = param_nominal.t+1/param_nominal.alpha/length(seed_list)*sum(max(max(-dist_gnd,[],2)-param_nominal.t,0),1);
+            t = -1:0.001:0;
+            c(1) = min(t+1/param_nominal.alpha/length(seed_list)*sum(max(max(-dist,[],2)-t,0),1));
+            c(2) = min(t+1/param_nominal.alpha/length(seed_list)*sum(max(max(-dist_gnd,[],2)-t,0),1));
         end
         if param_base.right_side_constraints.average == true
-            c(3) = t+1/alpha/length(seed_list)*sum(max(max(-dist_right,[],2)-t,0),1);
+            c(3) = param_nominal.t+1/param_nominal.alpha/length(seed_list)*sum(max(max(-dist_right,[],2)-param_nominal.t,0),1);
         end
-        c(4) = mean(vecnorm(x([1,3],end,:)-xd([1,3],1),2,1),3)-0.1;
-        c(5) = mean(vecnorm(x([2,4],end,:)-xd([2,4],1),2,1),3)-0.1;
+        c(4) = mean(vecnorm(x([1,3],end,:)-xd([1,3],1),2,1),3)-0.3;
+        c(5) = mean(vecnorm(x([2,4],end,:)-xd([2,4],1),2,1),3)-0.3;
         ceq = 0;
     end
     

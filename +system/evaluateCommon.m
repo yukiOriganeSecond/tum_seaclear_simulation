@@ -35,7 +35,7 @@ function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,
     end
 
     eval_result = sum(L(:,:))+sum(dot(pagemtimes(P,(x(:,end,:)-xd(:,1))), x(:,end,:)-xd(:,1)));
-    grad = param_nominal.dt*(R*us(:,:));  % if Q and P = 0 only case
+    grad = [param_nominal.dt*(R*us(:,:)), [0;0;0;0]];  % if Q and P = 0 only case
 end
 
 

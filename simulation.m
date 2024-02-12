@@ -57,6 +57,8 @@ param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
+param_base = system.addParam(param_base,"alpha",0.5,"Deterministic");
+param_base = system.addParam(param_base,"t",-0.2,"Deterministic");
 %param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
 param_base = system.addParam(param_base,"right_side_constraints",true,"Deterministic");
@@ -110,8 +112,9 @@ options = optimoptions(@fmincon, ...
     'Display','iter', ...
     'SpecifyObjectiveGradient',true, ...
     'UseParallel',true, ...
+    'EnableFeasibilityMode', false, ...
     'OptimalityTolerance',1e-3, ...
-    'EnableFeasibilityMode', false);
+    'ScaleProblem',false);
 tic
 %for opt_cnt = size(param.enable_u,2)
 %    if param.use_constraint == "thruster"
@@ -129,17 +132,17 @@ param_base = system.addParam(param_base,"consider_collision",false,"Deterministi
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)terminationConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
-[u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options);
+[u,~,~] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options);
 
 u0 = u;
 toc
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
-seed_list = 1:10;
+seed_list = 1:20;
 %seed_list = 1;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
-[u,fval] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options);
+[u,fval,t_end] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options);
 toc
 disp(fval)
 
@@ -201,11 +204,11 @@ t_vec = dt:dt:dt*Nt;
 snum_list = 1:length(seed_list);
 %snum_list = [1];
 visual.visualInit();
-visual.plotInputs(u,f,param,t_vec,[2,3],folder_name);
+%visual.plotInputs(u,f,param,t_vec,[2,3],folder_name);
 visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
 visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotInputs(u,f,param,t_vec,[1,2;3,4],folder_name);
-%visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
+visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
 %visual.plotRobotOutputsFB(x,xd,x_nominal,x_nonFB,param,t_vec,[1,3;2,4],folder_name,snum_list);
 %visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
 %visual.plotRobotStatesErrorFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
@@ -217,6 +220,7 @@ visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
 visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
 visual.makeSnapsFB(q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,t_vec,folder_name,[1],snum_list);
+title("\alpha = "+string(param_nominal.alpha)+", val = "+string(fval))
 %visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
 %plot(u0(2,:))
