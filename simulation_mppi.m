@@ -55,7 +55,7 @@ param_base = system.addParam(param_base,"bar_m",40,"White",0.20);   % mass of ro
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"constraint_penalty",1000,"Deterministic");
+param_base = system.addParam(param_base,"constraint_penalty",1000^2,"Deterministic");
 param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
@@ -103,10 +103,10 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 
 %% simulation and planning
 tic
-seed_sample_list = 1:100;
+seed_sample_list = 1:50;
 seed_list = 10;
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");
+param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
 [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
 x = system.changeCoordinate(q,param_valid);
 u_val = u;

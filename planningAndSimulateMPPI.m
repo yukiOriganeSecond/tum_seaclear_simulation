@@ -34,6 +34,7 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
 
     function [us_ F] = ControllerMPPI(t_now, qt, ft, u0s)
         epsilons = pagemtimes(repmat(sqrt(pinv(R)),[1,1,length(param_sets)]),randn(size(u0s,1),size(u0s,2),length(param_sets)));
+        v = zeros(size(epsilons));
         S = zeros(1,length(param_sets));
         x = zeros(length(xd),param_valid.predict_steps,length(param_sets)+1);
         for k = 1:length(param_sets)
@@ -52,9 +53,9 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
             else
                 vs_ = epsilons(:,:,k);
             end
-            v_ = repelem(vs_,1,param_sets(k).input_prescale);
+            v(:,:,k) = repelem(vs_,1,param_sets(k).input_prescale);
             for t_sample = 1:param_sets(k).predict_steps-1
-                [q_(:,t_sample+1), f_(:,t_sample+1), mode] = system.step(q_(:,t_sample), f_(:,t_sample), v_(:,t_sample), param_sets(k), mode, 1, W_sets(k,t_sample+1)-W_sets(k,t_sample));
+                [q_(:,t_sample+1), f_(:,t_sample+1), mode] = system.step(q_(:,t_sample), f_(:,t_sample), v(:,t_sample,k), param_sets(k), mode, 1, W_sets(k,t_sample+1)-W_sets(k,t_sample));
             end
             x(:,:,k) = system.changeCoordinate(q_,param_sets(k));
             S(1,k) = evaluateStates(q_,xd,param_sets(k),Q,R,P);
@@ -65,7 +66,8 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
         rho = min(S);
         eta = sum(exp(-1/param_valid.lambda*(S-rho)));
         w = exp(-1/param_valid.lambda*(S-rho))/eta;
-        us_ = u0s + sgolayfilt(permute(tensorprod(w,epsilons,2,3),[2,3,1]),3,71,[],2);
+        %us_ = u0s + sgolayfilt(permute(tensorprod(w,epsilons,2,3),[2,3,1]),3,71,[],2);
+        us_ = sgolayfilt(permute(tensorprod(w,v,2,3),[2,3,1]),3,71,[],2);
         [q_,~,~] = system.steps(qt,repelem(us_(:,1:end-1),1,param_valid.input_prescale),param_valid,1,W_valid,param_valid.predict_steps);
         x(:,:,k+1) = system.changeCoordinate(q_,param_valid);
         F = [];
