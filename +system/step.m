@@ -27,7 +27,7 @@ function [q_next, f_next, mode] = step(qt, ft, ut, param, mode, opt_cnt, dW)
     F_l = ft(3);
     F_X = ft(4);
     
-    ang_vel_vs_water = r*theta_dot+X_dot*cos(theta);
+    ang_vel_vs_water = r*theta_dot-X_dot*cos(theta);
     drag_force_theta = -param.mu_theta(1)*(abs(ang_vel_vs_water)*ang_vel_vs_water)-param.mu_theta(2)*(ang_vel_vs_water)-param.mu_theta(3)*param.bar_m*sign(ang_vel_vs_water)*cos(theta);
     drag_force_r = -param.mu_r(1)*abs(r_dot)*r_dot-param.mu_r(2)*r_dot-param.mu_r(3)*param.bar_m*sign(r_dot)*sin(theta);
     drag_force_l = -param.Mu_l(1)*abs(l_dot)*l_dot-param.Mu_l(2)*l_dot-param.Mu_l(3)*sign(l_dot);

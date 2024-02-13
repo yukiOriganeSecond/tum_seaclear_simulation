@@ -1,4 +1,4 @@
-function snapPathFB(t,q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,snum_list)
+function snapPathFB(t,q,q_nonFB,~,x,~,x_nominal,param,snum_list)
 %SNAPPATH この関数の概要をここに記述
 %   詳細説明をここに記述
 for s = snum_list

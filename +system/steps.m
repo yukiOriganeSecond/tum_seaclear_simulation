@@ -1,11 +1,13 @@
-function [q,f,u_use] = steps(q0,u,param,opt_cnt,W)
+function [q,f,u_use] = steps(q0,u,param,opt_cnt,W,Nt)
     arguments
         q0      % initial state
         u       % time series of control input (signal input)
         param   % parameters set
         opt_cnt % optimization count
         W       % Winner Process
+        Nt = param.Nt % timestep
     end
+    param.Nt = Nt;  % overrite by defined Nt value
     q = zeros(length(q0),param.Nt); % state variables
     f = zeros(length(u(:,1)),param.Nt);  % force input
     q(:,1) = q0;
