@@ -28,7 +28,8 @@ param_base = system.addParam(param_base,"input_prescale",input_prescale,"Determi
 
 % MPPI parameters
 param_base = system.addParam(param_base,"predict_steps",200,"Deterministic");
-param_base = system.addParam(param_base,"lambda",1,"Deterministic");
+param_base = system.addParam(param_base,"lambda",1000,"Deterministic");
+param_base = system.addParam(param_base,"visual_capture",true,"Deterministic");
 
 % set time delay of input. if set as dt, it is same as non delay
 param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
@@ -101,13 +102,15 @@ enable_u = [
 param_base = system.addParam(param_base,"enable_u",enable_u);
 
 %% simulation and planning
+tic
 seed_sample_list = 1:100;
 seed_list = 10;
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");
-[q,f,u,param_valid] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
+[q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
 x = system.changeCoordinate(q,param_valid);
 u_val = u;
+toc
 
 %% save
 folder_name = "data/"+string(datetime('now','Format','yyyyMMdd/HH_mm_ss/'));
@@ -139,3 +142,13 @@ visual.makeSnapsFB(q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,t_vec,folder_na
 title("\alpha = "+string(param_nominal.alpha)+", val = "+string(fval))
 %visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
+%% 
+if param.visual_capture
+    v = VideoWriter(folder_name+"sampling",'MPEG-4');
+    %v = VideoWriter(filename,'MPEG-4');
+    v.FrameRate = round(1/param.dt);
+    open(v);
+    writeVideo(v,F(1:end-1));
+    close(v);
+    disp("Animation : finish saving")
+end

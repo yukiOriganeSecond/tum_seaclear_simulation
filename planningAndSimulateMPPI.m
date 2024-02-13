@@ -1,4 +1,4 @@
-function [q,f,u,param_valid] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_list_sample,seed_valid,lb,ub)
+function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_list_sample,seed_valid,lb,ub)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 
@@ -16,10 +16,13 @@ function [q,f,u,param_valid] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,se
     q(:,1) = param_valid.q0;
     f(:,1) = param_valid.f0;
     us_pred = repmat(u0(:,1),1,param_valid.predict_steps/param_valid.input_prescale+1);
-
+    
+    j = 0;
+    F(ceil(param_valid.Nt/param_valid.input_prescale)) = struct('cdata',[],'colormap',[]);
     for t_sys = 1:param_valid.Nt-1    % system loop
         if (mod(t_sys,param_valid.input_prescale) == 1) || (t_sys == 1) || (param_valid.input_prescale == 1)
-            us_pred = ControllerMPPI(t_sys, q(:,t_sys), f(:,t_sys), us_pred);
+            j = j+1;
+            [us_pred F(j)] = ControllerMPPI(t_sys, q(:,t_sys), f(:,t_sys), us_pred);
             u(:,t_sys) = us_pred(:,1);
             us_pred(:,1:end-1) = us_pred(:,2:end);
             us_pred(:,end) = u0(:,end);
@@ -29,7 +32,7 @@ function [q,f,u,param_valid] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,se
         [q(:,t_sys+1), f(:,t_sys+1), mode] = system.step(q(:,t_sys), f(:,t_sys), u(:,t_sys), param_valid, mode, 1, W_valid(t_sys+1)-W_valid(t_sys));
     end
 
-    function us_ = ControllerMPPI(t_now, qt, ft, u0s)
+    function [us_ F] = ControllerMPPI(t_now, qt, ft, u0s)
         epsilons = pagemtimes(repmat(sqrt(pinv(R)),[1,1,length(param_sets)]),randn(size(u0s,1),size(u0s,2),length(param_sets)));
         S = zeros(1,length(param_sets));
         x = zeros(length(xd),param_valid.predict_steps,length(param_sets)+1);
@@ -62,11 +65,11 @@ function [q,f,u,param_valid] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,se
         rho = min(S);
         eta = sum(exp(-1/param_valid.lambda*(S-rho)));
         w = exp(-1/param_valid.lambda*(S-rho))/eta;
-        us_ = u0s + permute(tensorprod(w,epsilons,2,3),[2,3,1]);
+        us_ = u0s + sgolayfilt(permute(tensorprod(w,epsilons,2,3),[2,3,1]),3,71,[],2);
         [q_,~,~] = system.steps(qt,repelem(us_(:,1:end-1),1,param_valid.input_prescale),param_valid,1,W_valid,param_valid.predict_steps);
         x(:,:,k+1) = system.changeCoordinate(q_,param_valid);
-        is_view = false;
-        if is_view
+        F = [];
+        if param_valid.visual_capture
             for k = 1:length(param_sets)
                 plot(x(1,:,k), x(3,:,k), 'b');
                 hold on
@@ -76,7 +79,7 @@ function [q,f,u,param_valid] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,se
             hold off
             ylim([-1,7])
             xlim([-4,4])
-            a = 1;
+            F = getframe;
         end
     end
 
