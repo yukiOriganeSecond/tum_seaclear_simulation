@@ -47,8 +47,8 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
             f_ = zeros(size(u0s,1),param_sets(k).predict_steps);
             q_(:,1) = qt;
             f_(:,1) = ft;
-            alpha = 0.5;        % debug
-            if k<(1-alpha)*size(u0s,2)
+            alpha = 0;        % debug
+            if k<=(1-param_sets(k).alpha_MPPI)*length(param_sets)
                 vs_ = u0s + epsilons(:,:,k);
             else
                 vs_ = epsilons(:,:,k);

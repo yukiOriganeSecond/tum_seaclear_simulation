@@ -30,6 +30,7 @@ param_base = system.addParam(param_base,"input_prescale",input_prescale,"Determi
 param_base = system.addParam(param_base,"predict_steps",200,"Deterministic");
 param_base = system.addParam(param_base,"lambda",1000,"Deterministic");
 param_base = system.addParam(param_base,"visual_capture",true,"Deterministic");
+param_base = system.addParam(param_base,"alpha_MPPI",0,"Deterministic");
 
 % set time delay of input. if set as dt, it is same as non delay
 param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
@@ -138,8 +139,8 @@ visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
 %visual.plotRelativePath(q,x,param,t_vec,folder_name);
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
 visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
-visual.makeSnapsFB(q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,t_vec,folder_name,[1],snum_list);
-title("\alpha = "+string(param_nominal.alpha)+", val = "+string(fval))
+%visual.makeSnapsFB(q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,t_vec,folder_name,[1],snum_list);
+%title("\alpha = "+string(param_nominal.alpha)+", val = "+string(fval))
 %visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
 %% 
@@ -152,3 +153,4 @@ if param.visual_capture
     close(v);
     disp("Animation : finish saving")
 end
+clear F
