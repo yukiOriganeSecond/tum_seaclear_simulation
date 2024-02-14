@@ -37,7 +37,7 @@ function [q_next, f_next, mode] = step(qt, ft, ut, param, mode, opt_cnt, dW)
 
     q_ddot(3) = (F_X+drag_force_X)/param.M;
     %theta_ddot = (u+param.m*X_ddot*cos(theta)-param.bar_m*param.g*sin(theta)-param.mu*(l*theta_dot-X_dot*cos(theta))-2*l_dot*theta_dot)/l/param.m;
-    q_ddot(1) = (f_theta+param.m*q_ddot(3)*cos(theta)-param.bar_m*param.g*sin(theta)+drag_force_theta)/r/param.m;
+    q_ddot(1) = (f_theta+param.m*q_ddot(3)*cos(theta)-param.bar_m*param.g*sin(theta)-2*r_dot*theta_dot+drag_force_theta)/r/param.m;
     
     %if r>=l
     T = 0;  % tention force

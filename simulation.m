@@ -138,7 +138,7 @@ u0 = u;
 toc
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
-seed_list = 1:20;
+seed_list = 1:10;
 %seed_list = 1;
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
