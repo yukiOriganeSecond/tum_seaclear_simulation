@@ -1,5 +1,5 @@
 
-function [q_next, f_next, mode] = step(qt, ft, ut, param, mode, opt_cnt, dW)
+function [q_next, f_next, mode, q_ddot] = step(qt, ft, ut, param, mode, opt_cnt, dW)
     arguments
         qt      % state vector at time t
         ft      % force input vector at time t

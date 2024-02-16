@@ -33,7 +33,7 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
         else
             u(:,t_sys) = u(:,t_sys-1);
         end
-        [q(:,t_sys+1), f(:,t_sys+1), mode] = system.step(q(:,t_sys), f(:,t_sys), u(:,t_sys), param_valid, mode, 1, W_valid(t_sys+1)-W_valid(t_sys));
+        [q(:,t_sys+1), f(:,t_sys+1), mode, ~] = system.step(q(:,t_sys), f(:,t_sys), u(:,t_sys), param_valid, mode, 1, W_valid(t_sys+1)-W_valid(t_sys));
     end
 
     function [us_, F] = ControllerMPPI(~, qt, ft, u0s)

@@ -21,7 +21,7 @@ function [q,f,u_use] = steps(q0,u,param,opt_cnt,W,Nt)
     u_use = u;  % initialuze u_use by u
 
     for t = 1:param.Nt-1
-        [q(:,t+1),f(:,t+1),mode] = system.step(q(:,t),f(:,t),u(:,t),param,mode,opt_cnt,W(t+1)-W(t));
+        [q(:,t+1),f(:,t+1),mode,~] = system.step(q(:,t),f(:,t),u(:,t),param,mode,opt_cnt,W(t+1)-W(t));
     end
 
 end

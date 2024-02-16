@@ -25,7 +25,7 @@ xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
 %xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
 
 % set input rate
-input_prescale = 1;
+input_prescale = 4;
 Nu = Nt/input_prescale;
 param_base = system.addParam(param_base,"input_prescale",input_prescale,"Deterministic");
 
@@ -79,7 +79,7 @@ P = diag([0,0,0,0]);
 % Set Low side controller
 %param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
-param_base = system.addParam(param_base,"kp",[1000;1000;1000;1],"Deterministic");
+param_base = system.addParam(param_base,"kp",[2000;2000;2000;2000],"Deterministic");
 param_base = system.addParam(param_base,"ki",[0;0;0;0],"Deterministic");
 param_base = system.addParam(param_base,"kd",[0;0;0;0],"Deterministic");
 
@@ -108,7 +108,7 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 %% optimization
 clc
 options = optimoptions(@fmincon, ...
-    'MaxFunctionEvaluations',30000, ...
+    'MaxFunctionEvaluations',20000, ...
     'PlotFcn','optimplotfvalconstr', ...
     'Display','iter', ...
     'SpecifyObjectiveGradient',true, ...
@@ -192,9 +192,10 @@ for seed = seed_list
         x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
     end
 
-    input_energy(i) = energyEvaluation(u_val(:,:,i),f(:,:,i),param.q0,xd,Q,R,P,param,opt_cnt);
+    
     [constraint_results(i,:),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,opt_cnt,seed);
 end
+input_energy = energyEvaluation(u_val(:,:,:),f(:,:,:),param.q0,xd,Q,R,P,param,opt_cnt);
 
 %% save
 folder_name = "data/"+string(datetime('now','Format','yyyyMMdd/HH_mm_ss/'));
