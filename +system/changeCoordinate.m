@@ -1,9 +1,9 @@
 function x = changeCoordinate(q,param)
 
-    x = zeros(4,param.Nt);
+    x = zeros(4,size(q,2));
     sq = sin(q(1,:)); cq = cos(q(1,:));
-    x([2,4],:) = q(8,:).*[-sq;cq]+q(7,:).*q(2,:).*[-cq;-sq]+[q(6,:);zeros(1,param.Nt)];
-    x([1,3],:) = q(7,:).*[-sq;cq]+[q(5,:);zeros(1,param.Nt)];
+    x([2,4],:) = q(8,:).*[-sq;cq]+q(7,:).*q(2,:).*[-cq;-sq]+[q(6,:);zeros(1,size(q,2))];
+    x([1,3],:) = q(7,:).*[-sq;cq]+[q(5,:);zeros(1,size(q,2))];
     %for t = 1:param.Nt
         %theta = q(1,t);
         %theta_dot= q(2,t);
