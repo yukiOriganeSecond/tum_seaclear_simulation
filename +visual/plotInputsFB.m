@@ -19,8 +19,8 @@ function plotInputsFB(u_nominal,u_fb,f,param,t_vec,dimset,folder_name,snum_set)
                 legend([legset(dimset(m,n)),legset2(dimset(m,n)),legset3(dimset(m,n))],'Interpreter','latex')
             else
                 for s = snum_set
-                   % plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,s),'-','Color',"#D95319",'LineWidth',0.8);
-                    plot(t_vec(1:end-1), u_fb(dimset(m,n),1:end-1,s),'-','Color',"#0072BD",'LineWidth',0.8);
+                   plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,s),'-','Color',"#0072BD",'LineWidth',0.8);
+                   % plot(t_vec(1:end-1), u_fb(dimset(m,n),1:end-1,s),'-','Color',"#0072BD",'LineWidth',0.8);
                     plot(t_vec(1:end-1), u_nominal(dimset(m,n),1:end-1),'-','Color',"r",'LineWidth',1.2);
                 end
             end

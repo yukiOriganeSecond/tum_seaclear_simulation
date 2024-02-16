@@ -22,7 +22,11 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
     for t_sys = 1:param_valid.Nt-1    % system loop
         if (mod(t_sys,param_valid.input_prescale) == 1) || (t_sys == 1) || (param_valid.input_prescale == 1)
             j = j+1;
-            [us_pred F(j)] = ControllerMPPI(t_sys, q(:,t_sys), f(:,t_sys), us_pred);
+            if param_valid.visual_capture
+                [us_pred, F(j)] = ControllerMPPI(t_sys, q(:,t_sys), f(:,t_sys), us_pred);
+            else
+                [us_pred, ~] = ControllerMPPI(t_sys, q(:,t_sys), f(:,t_sys), us_pred);
+            end
             u(:,t_sys) = us_pred(:,1);
             us_pred(:,1:end-1) = us_pred(:,2:end);
             us_pred(:,end) = u0(:,end);
@@ -32,7 +36,7 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
         [q(:,t_sys+1), f(:,t_sys+1), mode] = system.step(q(:,t_sys), f(:,t_sys), u(:,t_sys), param_valid, mode, 1, W_valid(t_sys+1)-W_valid(t_sys));
     end
 
-    function [us_ F] = ControllerMPPI(t_now, qt, ft, u0s)
+    function [us_, F] = ControllerMPPI(~, qt, ft, u0s)
         epsilons = pagemtimes(repmat(sqrt(pinv(R)),[1,1,length(param_sets)]),randn(size(u0s,1),size(u0s,2),length(param_sets)));
         v = zeros(size(epsilons));
         S = zeros(1,length(param_sets));

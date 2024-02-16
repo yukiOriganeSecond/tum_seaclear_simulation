@@ -29,7 +29,6 @@ param_base = system.addParam(param_base,"input_prescale",input_prescale,"Determi
 % MPPI parameters
 param_base = system.addParam(param_base,"predict_steps",200,"Deterministic");
 param_base = system.addParam(param_base,"lambda",1000,"Deterministic");
-param_base = system.addParam(param_base,"visual_capture",true,"Deterministic");
 param_base = system.addParam(param_base,"alpha_MPPI",0.2,"Deterministic");
 
 % set time delay of input. if set as dt, it is same as non delay
@@ -49,15 +48,15 @@ param_base = system.addParam(param_base,"Mu_X",[0 1000 0],"Deterministic",0.30);
 param_base = system.addParam(param_base,"Mu_l",[0 300 0],"Deterministic",0.30);   % viscocity of wire
 
 % other constants
-param_base = system.addParam(param_base,"m",70,"White",0.20);       % mass of robots (kg)
+param_base = system.addParam(param_base,"m",120,"White",0.20);       % mass of robots (kg)
 param_base = system.addParam(param_base,"M",1075,"Deterministic",0.01);      % mass of vessel (kg)
 param_base = system.addParam(param_base,"I_l",30,"Deterministic",0.10);      % Inertia to change wire length (kg)
-param_base = system.addParam(param_base,"bar_m",40,"White",0.20);   % mass of robot under water (substituting floating force)
+param_base = system.addParam(param_base,"bar_m",90,"White",0.20);   % mass of robot under water (substituting floating force)
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
 param_base = system.addParam(param_base,"constraint_penalty",1000^2,"Deterministic");
-param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_pos",[0;5],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
@@ -89,8 +88,8 @@ P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 %U_X = 1000;      % input for vessel position      (m/s^2)
 %u0 = zeros(4,param_base.predict_steps.average);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
-%u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
-u0 = repmat([param_base.bar_m.average*param_base.g.average*sin(pi/6);0;-param_base.bar_m.average*param_base.g.average*cos(pi/6);0],[1,param_base.predict_steps.average]);
+u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,param_base.predict_steps.average]);
+%u0 = repmat([param_base.bar_m.average*param_base.g.average*sin(pi/6);0;-param_base.bar_m.average*param_base.g.average*cos(pi/6);0],[1,param_base.predict_steps.average]);
 param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
 
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
@@ -104,17 +103,28 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 
 %% simulation and planning
 tic
-seed_sample_list = 1:50;
-seed_list = 10;
-param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
+seed_sample_list = 1:20;
+seed_list = 1:10;
+param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
-[q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
-x = system.changeCoordinate(q,param_valid);
+param_base = system.addParam(param_base,"visual_capture",false,"Deterministic");
+q = zeros(length(param_base.q0.average),Nt,length(seed_list));
+f = zeros(length(ub),Nt,length(seed_list));
+u = f;
+i = 0;
+for seed = seed_list
+    i = i+1;
+    disp(string(i)+"/"+string(length(seed_list)))
+    %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
+    [q(:,:,i),f(:,:,i),u(:,:,i),param_valid,~] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed,lb,ub);
+    x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid);
+    input_energy(i) = energyEvaluation(u(:,:,i),f(:,:,i),param_valid.q0,xd,Q,R,P,param_valid,1);
+end
 u_val = u;
 toc
 
 %% save
-folder_name = "data/"+string(datetime('now','Format','yyyyMMdd/HH_mm_ss/'));
+folder_name = "data/mppi_"+string(datetime('now','Format','yyyyMMdd/HH_mm_ss/'));
 mkdir(folder_name);
 save(folder_name+"simulation.mat")
 
@@ -128,7 +138,7 @@ visual.visualInit();
 visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
 visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotInputs(u,f,param,t_vec,[1,2;3,4],folder_name);
-visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
+visual.plotInputsFB(u(:,:,1),u(:,:,:),f,param,t_vec,[1,2;3,4],folder_name,snum_list);
 %visual.plotRobotOutputsFB(x,xd,x_nominal,x_nonFB,param,t_vec,[1,3;2,4],folder_name,snum_list);
 %visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
 %visual.plotRobotStatesErrorFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
@@ -140,7 +150,7 @@ visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
 visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
 %visual.makeSnapsFB(q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,t_vec,folder_name,[1],snum_list);
-%title("\alpha = "+string(param_nominal.alpha)+", val = "+string(fval))
+title("val = "+string(input_energy(1)))
 %visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
 %% 

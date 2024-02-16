@@ -25,7 +25,7 @@ xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
 %xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
 
 % set input rate
-input_prescale = 8;
+input_prescale = 1;
 Nu = Nt/input_prescale;
 param_base = system.addParam(param_base,"input_prescale",input_prescale,"Deterministic");
 
@@ -46,18 +46,18 @@ param_base = system.addParam(param_base,"Mu_X",[0 1000 0],"Deterministic",0.30);
 param_base = system.addParam(param_base,"Mu_l",[0 300 0],"Deterministic",0.30);   % viscocity of wire
 
 % other constants
-param_base = system.addParam(param_base,"m",70,"White",0.20);       % mass of robots (kg)
+param_base = system.addParam(param_base,"m",120,"White",0.20);       % mass of robots (kg)
 param_base = system.addParam(param_base,"M",1075,"Deterministic",0.01);      % mass of vessel (kg)
 param_base = system.addParam(param_base,"I_l",30,"Deterministic",0.10);      % Inertia to change wire length (kg)
-param_base = system.addParam(param_base,"bar_m",40,"White",0.20);   % mass of robot under water (substituting floating force)
+param_base = system.addParam(param_base,"bar_m",90,"White",0.20);   % mass of robot under water (substituting floating force)
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_pos",[0;5],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
-param_base = system.addParam(param_base,"alpha",0.5,"Deterministic");
+param_base = system.addParam(param_base,"alpha",0.05,"Deterministic");
 param_base = system.addParam(param_base,"t",-0.2,"Deterministic");
 %param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
@@ -89,10 +89,11 @@ param_base = system.addParam(param_base,"kd",[0;0;0;0],"Deterministic");
 %u = 0;      % input for robot (N)
 %U_l = 0;      % input for crane (wire control) (m/s^2)
 %U_X = 1000;      % input for vessel position      (m/s^2)
-u0 = zeros(4,Nt);
+%u0 = zeros(4,Nt);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
 %u0 = repmat([0;0;-param.bar_m*param.g;0],[1,param.Nt]);
 %u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,Nt]);
+u0 = repmat([0;-param_base.bar_m.average*param_base.g.average/2;-param_base.bar_m.average*param_base.g.average/2;0],[1,Nt]);
 param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
 
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
@@ -107,14 +108,15 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 %% optimization
 clc
 options = optimoptions(@fmincon, ...
-    'MaxFunctionEvaluations',10000, ...
+    'MaxFunctionEvaluations',30000, ...
     'PlotFcn','optimplotfvalconstr', ...
     'Display','iter', ...
     'SpecifyObjectiveGradient',true, ...
     'UseParallel',true, ...
     'EnableFeasibilityMode', false, ...
     'OptimalityTolerance',1e-3, ...
-    'ScaleProblem',false);
+    'ScaleProblem',false, ...
+    'StepTolerance',1e-12);
 tic
 %for opt_cnt = size(param.enable_u,2)
 %    if param.use_constraint == "thruster"
@@ -132,7 +134,7 @@ param_base = system.addParam(param_base,"consider_collision",false,"Deterministi
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
 %[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)terminationConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
-[u,~,~] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options);
+[u,fval,~] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options);
 
 u0 = u;
 toc
@@ -186,7 +188,7 @@ for seed = seed_list
         [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,opt_cnt,W); % calc nominal values
         x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param);
         [param_unc,W] = system.makeUncertainty(seed, param_base, false); % calc uncertained parameters
-        [q(:,:,i),~,u_val(:,:,i)] = system.stepsFB(param_unc.q0,q_nominal,u,param_unc,opt_cnt,W); % calc nominal values
+        [q(:,:,i),f(:,:,i),u_val(:,:,i)] = system.stepsFB(param_unc.q0,q_nominal,u,param_unc,opt_cnt,W); % calc nominal values
         x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
     end
 
@@ -211,6 +213,7 @@ visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
 %visual.plotRobotOutputsFB(x,xd,x_nominal,x_nonFB,param,t_vec,[1,3;2,4],folder_name,snum_list);
 %visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
+visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1;2],folder_name,1:length(seed_list));
 %visual.plotRobotStatesErrorFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
 %visual.plotRobotStates(q,param,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
 %visual.plotRobotStates(q,param,t_vec,[5;6],folder_name);
