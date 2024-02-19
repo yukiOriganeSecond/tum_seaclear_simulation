@@ -43,8 +43,8 @@ classdef CBF
             v_r = dr-dX*sin(theta);
             v_theta = r*dtheta-dX*cos(theta);
             
-            eta_r = mu(1)*(2/(1+exp(-sigmoid_a*v_r))-1)*v_r;
-            eta_theta = mu(2)*(2/(1+exp(-sigmoid_a*v_theta))-1)*v_theta;
+            eta_r = mu(1)*(2/(1+exp(-sigmoid_a*v_r))-1)*v_r^2;
+            eta_theta = mu(2)*(2/(1+exp(-sigmoid_a*v_theta))-1)*v_theta^2;
             eta_l = mu(3)*dl;
             eta_X = mu(4)*dX;
             
@@ -111,7 +111,7 @@ classdef CBF
             obj.gamma2_h_with_param = subs(obj.gamma2_h, [param_names_1, param_names_2, param_names_3], [param_vals_1, param_vals_2, param_val_3]);
         end
 
-        function [A,b] = calculateConstraint(obj,q,q_ddot,f)
+        function [A,b,h] = calculateConstraint(obj,q,q_ddot,f)
             syms r(t) theta(t) l(t) X(t) dr(t) dtheta(t) dl(t) dX(t) ddr(t) ddtheta(t) ddl(t) ddX(t)
             syms f_r(t) f_theta(t) F_l(t) F_X(t)
             state_name_1 = [theta(t), dtheta(t), l(t), dl(t), X(t), dX(t), r(t), dr(t), ddtheta(t), ddl(t), ddX(t), ddr(t)];
@@ -123,6 +123,7 @@ classdef CBF
             gamma2_h_ = subs(obj.gamma2_h_with_param, [state_name_1, state_name_2], [state_val_1,state_val_2]);
             A = -double(Lgh_);
             b = double(Lfh_)+double(gamma2_h_);
+            h = double(gamma2_h_);
         end
     end
 end

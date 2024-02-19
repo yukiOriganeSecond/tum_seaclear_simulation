@@ -16,7 +16,7 @@ param_base = system.addParam(param_base,"Nt",Nt,"Deterministic");
 % initial values
 % state variables : q = [theta, theta_dot, l, l_dot, X, X_dot, r, r_dot]
 % output variables: x = (x,x_dot,d,d_dot)
-param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0;0;0;0;0;0]);
+param_base = system.addParam(param_base,"q0",[0;0;3;0;0;0;3;0],"White",[0;0;0;0;0;0;0;0]);
 
 % targets
 xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
@@ -70,7 +70,7 @@ param_base = system.addParam(param_base,"right_side_constraints",true,"Determini
 
 % CBF
 param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
-param_base = system.addParam(param_base,"gamma",[1 1 1],"Deterministic");
+param_base = system.addParam(param_base,"gamma",[2 3 1],"Deterministic");
 
 % set limitations
 use_constraint = "thruster";

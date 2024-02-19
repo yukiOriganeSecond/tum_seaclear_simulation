@@ -51,7 +51,7 @@ function [q_next, f_next, mode, q_ddot] = step(qt, ft, ut, param, mode, opt_cnt,
         q_ddot(4) = (param.m*q_ddot(3)*sin(theta)+param.m*r*theta_dot^2+param.bar_m*param.g*cos(theta)+drag_force_r+f_r)/param.m;
         q_ddot(2) = (F_l+drag_force_l)/param.I_l;
     end
-    q_ddot([2,4]) = 0;  % DEBUG CODE HERE !!!!
+    %q_ddot([2,4]) = 0;  % DEBUG CODE HERE !!!!
     q_next = zeros(8,1);
     q_next([2,4,6,8],1) = qt([2,4,6,8],1) + param.dt*q_ddot;
     q_next([1,3,5,7],1) = qt([1,3,5,7],1) + param.dt*qt([2,4,6,8],1);
