@@ -34,7 +34,7 @@ classdef CBF
             ddy = diff(dy,t);
             ddy = subs(ddy, to_all_old, to_all_new);
             h = y.'*y+2*(1/gamma_0+1/gamma_1)*dy.'*y+2/gamma_0/gamma_1*(ddy.'*y+dy.'*dy)-a^2;
-            q_bar = [r(t) theta(t) X(t) l(t) dr(t) dtheta(t) dl(t) dX(t) ddr(t) ddtheta(t) ddl(t) ddX(t)].';
+            q_bar = [r(t) theta(t) l(t) X(t) dr(t) dtheta(t) dl(t) dX(t) ddr(t) ddtheta(t) ddl(t) ddX(t)].';
             
             nabla_h = gradient(h,q_bar);
             
@@ -57,7 +57,7 @@ classdef CBF
                 ];
             % self vector
             sys_f_ddt = [
-                m*ddX*sin(theta)+m*r*dtheta^2+m_bar*g*r*cos(theta)-eta_r-eta_l;
+                m*ddX*sin(theta)+m*r*dtheta^2+m_bar*g*cos(theta)-eta_r-eta_l;
                 m*ddX*r*cos(theta)-2*m*r*dr*dtheta-m_bar*g*r*sin(theta)-r*eta_theta;
                 0;
                 -eta_X
@@ -66,13 +66,19 @@ classdef CBF
             sys_f = subs(sys_f, diff(ddX, t), 0);   % this term is move to left hand side
             sys_f = sys_f + [
                 -1/T_r*f_r-1/T_l*F_l;
-                -2*m*r*dr*ddtheta-1/T_theta*f_theta;
+                -2*m*r*dr*ddtheta+(dr-r/T_theta)*f_theta;
                 0;
                 -1/T_X*F_X
                 ];
+            %sys_g = [
+            %    1/T_r, 0, 1/T_l, 0;
+            %    0, r*1/T_theta, 0, 0;
+            %    0, 0, 0, 0;
+            %    0, 0, 0, 1/T_X
+            %    ];
             sys_g = [
-                1/T_r, 0, 1/T_l, 0;
-                0, r*1/T_theta, 0, 0;
+                0, 1/T_r, 1/T_l, 0;
+                r*1/T_theta, 0, 0, 0;
                 0, 0, 0, 0;
                 0, 0, 0, 1/T_X
                 ];

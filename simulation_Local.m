@@ -29,7 +29,7 @@ param_base = system.addParam(param_base,"input_prescale",input_prescale,"Determi
 % parameter for Local
 param_base = system.addParam(param_base,"qd",[0;0;1;0;0;0;1;0],"Deterministic");    % target state
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
-param_base = system.addParam(param_base,"kp",[300;300;300;300],"Deterministic");
+param_base = system.addParam(param_base,"kp",[0;0;0;0],"Deterministic");
 param_base = system.addParam(param_base,"ki",[0;0;0;0],"Deterministic");
 param_base = system.addParam(param_base,"kd",[0;0;0;0],"Deterministic");
 
@@ -44,21 +44,21 @@ param_base = system.addParam(param_base,"sensing_noise",[0.1; 0.1; 0.1; 0.1],"De
 %param_base = system.addParam(param_base,"sensing_noise",[0; 0; 0; 0],"Deterministic");
 
 % set viscocity
-param_base = system.addParam(param_base,"mu_r",[120 0 0],"White",0.20);   % viscocity of robot
-param_base = system.addParam(param_base,"mu_theta",[120 0 0],"White",0.20);   % viscocity of robot
+param_base = system.addParam(param_base,"mu_r",[0 0 0],"White",0.20);   % viscocity of robot
+param_base = system.addParam(param_base,"mu_theta",[0 0 0],"White",0.20);   % viscocity of robot
 param_base = system.addParam(param_base,"Mu_X",[0 1000 0],"Deterministic",0.30);   % viscocity of vessel
-param_base = system.addParam(param_base,"Mu_l",[0 300 0],"Deterministic",0.30);   % viscocity of wire
+param_base = system.addParam(param_base,"Mu_l",[0 0 0],"Deterministic",0.30);   % viscocity of wire
 
 % other constants
-param_base = system.addParam(param_base,"m",120,"White",0.20);       % mass of robots (kg)
+param_base = system.addParam(param_base,"m",70,"White",0.20);       % mass of robots (kg)
 param_base = system.addParam(param_base,"M",1075,"Deterministic",0.01);      % mass of vessel (kg)
 param_base = system.addParam(param_base,"I_l",30,"Deterministic",0.10);      % Inertia to change wire length (kg)
-param_base = system.addParam(param_base,"bar_m",90,"White",0.20);   % mass of robot under water (substituting floating force)
+param_base = system.addParam(param_base,"bar_m",30,"White",0.20);   % mass of robot under water (substituting floating force)
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
 param_base = system.addParam(param_base,"constraint_penalty",1000^2,"Deterministic");
-param_base = system.addParam(param_base,"obs_pos",[0;5],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_pos",[0;6],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
@@ -69,7 +69,7 @@ param_base = system.addParam(param_base,"consider_collision",true,"Deterministic
 param_base = system.addParam(param_base,"right_side_constraints",true,"Deterministic");
 
 % CBF
-param_base = system.addParam(param_base,"enable_CBF",true,"Deterministic");
+param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
 param_base = system.addParam(param_base,"gamma",[1 1 1],"Deterministic");
 
 % set limitations
@@ -96,7 +96,8 @@ P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
 u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,Nt]);
 %u0 = repmat([param_base.bar_m.average*param_base.g.average*sin(pi/6);0;-param_base.bar_m.average*param_base.g.average*cos(pi/6);0],[1,param_base.predict_steps.average]);
-param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
+%param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
+param_base = system.addParam(param_base,"f0",[0; 0; 0; 0],"Deterministic");
 
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
 %u0 = u_b;
@@ -115,6 +116,7 @@ param_base = system.addParam(param_base,"visual_capture",false,"Deterministic");
 
 % non uncertainty
 seed_list = 1;
+param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 [q_nominal(:,:),f_nominal(:,:),u_nominal(:,:),param_valid] = planningAndSimulateLocal(u0,xd,Q,R,P,param_base,seed_list,lb,ub);
 x_nominal(:,:) = system.changeCoordinate(q_nominal(:,:),param_valid);
@@ -126,8 +128,8 @@ q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(ub),Nt,length(seed_list));
 u = f;
 %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-
+param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
+param_base = system.addParam(param_base,"enable_CBF",true,"Deterministic");
 [q(:,:,:),f(:,:,:),u(:,:,:),param_valid] = planningAndSimulateLocal(u0,xd,Q,R,P,param_base,seed_list,lb,ub);
 for i = 1:length(seed_list)
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid);
@@ -151,7 +153,7 @@ visual.visualInit();
 visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
 visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotInputs(u,f,param,t_vec,[1,2;3,4],folder_name);
-visual.plotInputsFB(u(:,:,1),u(:,:,:),f,param,t_vec,[1,2;3,4],folder_name,snum_list);
+visual.plotInputsFB(u_nominal(:,:),u(:,:,:),f,param,t_vec,[1,2;3,4],folder_name,snum_list);
 %visual.plotRobotOutputsFB(x,xd,x_nominal,x_nonFB,param,t_vec,[1,3;2,4],folder_name,snum_list);
 %visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
 %visual.plotRobotStatesErrorFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
