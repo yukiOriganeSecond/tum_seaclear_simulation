@@ -34,6 +34,7 @@ classdef CBF
             ddy = diff(dy,t);
             ddy = subs(ddy, to_all_old, to_all_new);
             h = y.'*y+2*(1/gamma_0+1/gamma_1)*dy.'*y+2/gamma_0/gamma_1*(ddy.'*y+dy.'*dy)-a^2;
+            %h = y.'*y+2*(1/gamma_0+1/gamma_1)*dy.'*y+2/gamma_0/gamma_1*(ddy.'*y)-a^2;
             q_bar = [r(t) theta(t) l(t) X(t) dr(t) dtheta(t) dl(t) dX(t) ddr(t) ddtheta(t) ddl(t) ddX(t)].';
             
             nabla_h = gradient(h,q_bar);

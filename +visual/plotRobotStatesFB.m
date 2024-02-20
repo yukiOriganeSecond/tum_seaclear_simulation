@@ -33,11 +33,11 @@ end
                     legend(legset(dimset(m,n)),'Interpreter','latex')
                 end
             else
-                plot(t_vec, q_nominal(dimset(m,n),:,1),'Color','k','LineWidth',1.2);
+                plot(t_vec, q_nominal(dimset(m,n),:,1),'Color','r','LineWidth',1.2);
                 hold on
                 for s = sum_set
                     plot(t_vec, q(dimset(m,n),:,s),'Color','b','LineWidth',0.8);
-                    plot(t_vec, q_nonFB(dimset(m,n),:,s),'Color','g','LineWidth',0.8);
+                    %plot(t_vec, q_nonFB(dimset(m,n),:,s),'Color','g','LineWidth',0.8);
                     %if (ismember(dimset(m,n),[7,8]))    % also show l,l_dot when show r, r_dot
                     %    plot(t_vec, q(dimset(m,n)-4,:,s),'Color','r','LineWidth',0.8);
                     %end

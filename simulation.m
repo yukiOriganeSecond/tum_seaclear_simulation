@@ -195,7 +195,7 @@ for seed = seed_list
     
     [constraint_results(i,:),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,opt_cnt,seed);
 end
-input_energy = energyEvaluation(u_val(:,:,:),f(:,:,:),param.q0,xd,Q,R,P,param,opt_cnt);
+max_energy_consumption = energyEvaluation(u_val(:,:,:),f(:,:,:),param.q0,xd,Q,R,P,param,opt_cnt);
 
 %% save
 folder_name = "data/"+string(datetime('now','Format','yyyyMMdd/HH_mm_ss/'));
