@@ -34,13 +34,13 @@ function [q,f,u,param_nominal] = planningAndSimulateLocal(u0,xd,Q,R,P,param_base
             %[u(:,t,i), ~] = system.ControllerPID(q(:,t,i), param.qd, W_*[sin(q(1,t,i));0;-cos(q(1,t,i));0], param, W(t+1)-W(t));
             [u(:,t,i), ~] = system.ControllerPID(q(:,t,i), qdt, W_*[sin(q(1,t,i));0;-cos(q(1,t,i));0], param, W(t+1)-W(t));
             if param.enable_CBF
-                [A,b,h] = cbf.calculateConstraint(q(:,t,i)+q(:,t,i).*param.sensing_noise*(W(t+1)-W(t)),q_ddot+q_ddot.*param.acc_noise*(W(t+1)-W(t)),f(:,t,i)+f(:,t,i).*param.force_noise_coeff*(W(t+1)-W(t)));
+                [A,b,h] = cbf.calculateConstraint(q(:,t,i)+param.sensing_noise*(W(t+1)-W(t)),q_ddot+q_ddot.*param.acc_noise*(W(t+1)-W(t)),f(:,t,i)+f(:,t,i).*param.force_noise_coeff*(W(t+1)-W(t)));
                 if h<0
                     disp("WARN: missing constraint h("+string(t)+")="+string(h))
                 end
                 du = quadprog(eye(4,4),[],A,b-A*u(:,t,i),[],[],param.lb-u(:,t,i),param.ub-u(:,t,i),[],opt);
                 if size(du,1)~=size(u(:,t,i))
-                    u(:,t,i) = 0;   % if no solution, u should be 0
+                    %u(:,t,i) = 0;   % if no solution, u should be 0
                     disp("WARN: cbf no solution")
                 else
                     u(:,t,i) = u(:,t,i) + du;

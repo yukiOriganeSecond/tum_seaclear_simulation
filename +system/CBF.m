@@ -103,13 +103,20 @@ classdef CBF
             syms mu [1 4]
             param_names_1 = [gamma_0, gamma_1, gamma_2];
             param_vals_1 = param.gamma;
-            param_names_2 = [m, I_l, m_bar, M, g, xo, do, a];
-            param_vals_2 = [param.m, param.I_l, param.bar_m, param.M, param.g, param.obs_pos(1), param.obs_pos(2), param.obs_size];
+            param_names_2 = [m, I_l, m_bar, M, g];
+            param_vals_2 = [param.m, param.I_l, param.bar_m, param.M, param.g];
             param_names_3 = [T_theta, T_r, T_l, T_X, mu];
             param_val_3 = [param.T.', param.mu_r(1), param.mu_theta(1), param.Mu_l(2), param.Mu_X(2)];
-            obj.Lfh_with_param = subs(obj.Lfh, [param_names_1, param_names_2, param_names_3], [param_vals_1, param_vals_2, param_val_3]);
-            obj.Lgh_with_param = subs(obj.Lgh, [param_names_1, param_names_2, param_names_3], [param_vals_1, param_vals_2, param_val_3]);
-            obj.gamma2_h_with_param = subs(obj.gamma2_h, [param_names_1, param_names_2, param_names_3], [param_vals_1, param_vals_2, param_val_3]);
+            param_names_4 = [xo, do, a];
+            obj.Lfh_with_param = sym('Lfh', [size(param.obs_pos,2), 1]);
+            obj.Lgh_with_param = sym('Lgh', [size(param.obs_pos,2), 4]);
+            obj.gamma2_h_with_param = sym('gh', [size(param.obs_pos,2), 1]);
+            for j = 1:size(param.obs_pos,2)
+                param_val_4 = [param.obs_pos(1,j), param.obs_pos(2,j), param.obs_size(1,j)];
+                obj.Lfh_with_param(j,1) = subs(obj.Lfh, [param_names_1, param_names_2, param_names_3, param_names_4], [param_vals_1, param_vals_2, param_val_3, param_val_4]);
+                obj.Lgh_with_param(j,:) = subs(obj.Lgh, [param_names_1, param_names_2, param_names_3, param_names_4], [param_vals_1, param_vals_2, param_val_3, param_val_4]);
+                obj.gamma2_h_with_param(j,1) = subs(obj.gamma2_h, [param_names_1, param_names_2, param_names_3, param_names_4], [param_vals_1, param_vals_2, param_val_3, param_val_4]);
+            end
         end
 
         function [A,b,h] = calculateConstraint(obj,q,q_ddot,f)

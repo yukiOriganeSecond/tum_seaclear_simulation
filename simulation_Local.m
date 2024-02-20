@@ -27,7 +27,7 @@ Nu = Nt/input_prescale;
 param_base = system.addParam(param_base,"input_prescale",input_prescale,"Deterministic");
 
 % parameter for Local
-param_base = system.addParam(param_base,"qd",[0;0;1;0;0;0;1;0],"Deterministic");    % target state
+param_base = system.addParam(param_base,"qd",[0;0;1;0;2;0;1;0],"Deterministic");    % target state
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
 param_base = system.addParam(param_base,"kp",[800;800;800;800],"Deterministic");
 param_base = system.addParam(param_base,"ki",[0;0;0;0],"Deterministic");
@@ -60,8 +60,8 @@ param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % g
 
 % set constraints
 param_base = system.addParam(param_base,"constraint_penalty",1000^2,"Deterministic");
-param_base = system.addParam(param_base,"obs_pos",[0;4],"Deterministic",[0.10;0.10]);
-param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
+param_base = system.addParam(param_base,"obs_pos",[[0;4.5],[0;6]],"Deterministic",[0.10 0.10;0.10 0.10]);
+param_base = system.addParam(param_base,"obs_size",[1 1],"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
 param_base = system.addParam(param_base,"alpha",0.5,"Deterministic");
@@ -125,7 +125,7 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 x_nominal(:,:) = system.changeCoordinate(q_nominal(:,:),param_valid);
 
 % with uncertainty
-seed_list = 1:2;
+seed_list = [6,9];
 %seed_list = 1;
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(ub),Nt,length(seed_list));
@@ -155,7 +155,7 @@ save(folder_name+"simulation.mat")
 param = param_valid;
 t_vec = dt:dt:dt*Nt;
 snum_list = 1:length(seed_list);
-%snum_list = [1];
+%snum_list = [2,3];
 visual.visualInit();
 %visual.plotInputs(u,f,param,t_vec,[2,3],folder_name);
 visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
@@ -163,8 +163,8 @@ visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
 %visual.plotInputs(u,f,param,t_vec,[1,2;3,4],folder_name);
 visual.plotInputsFB(u_nominal(:,:),u(:,:,:),f,param,t_vec,[1,2;3,4],folder_name,snum_list);
 %visual.plotRobotOutputsFB(x,xd,x_nominal,x_nominal,param,t_vec,[1,3;2,4],folder_name,snum_list);
-%visual.plotRobotStatesFB(q,q_nominal,q,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
-%visual.plotRobotStatesErrorFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
+%visual.plotRobotStatesFB(q,q_nominal,q_nominal,param,t_vec,[1,7;2,8],folder_name,snum_list);
+%visual.plotRobotStatesErrorFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,snum_list);
 %visual.plotRobotStates(q,param,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
 %visual.plotRobotStates(q,param,t_vec,[5;6],folder_name);
 %visual.plotRobotOutputs(x,xd,param,t_vec,[1,3;2,4],folder_name);
