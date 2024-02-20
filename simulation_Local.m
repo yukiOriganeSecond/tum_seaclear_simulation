@@ -125,7 +125,7 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 x_nominal(:,:) = system.changeCoordinate(q_nominal(:,:),param_valid);
 
 % with uncertainty
-seed_list = [6,9];
+seed_list = 1:10;
 %seed_list = 1;
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(ub),Nt,length(seed_list));
@@ -171,8 +171,8 @@ visual.plotInputsFB(u_nominal(:,:),u(:,:,:),f,param,t_vec,[1,2;3,4],folder_name,
 %visual.plotAbsolutePath(q,x,param,t_vec,folder_name);
 %visual.plotRelativePath(q,x,param,t_vec,folder_name);
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
-visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
-%visual.makeSnapsFB(q,q_nominal,q_nominal,x,x_nominal,x_nominal,param,t_vec,folder_name,[1],snum_list);
+%visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
+visual.makeSnapsFB(q,q_nominal,q_nominal,x,x_nominal,x_nominal,param,t_vec,folder_name,[1],snum_list);
 title("max energy consumption = "+string(max_energy_consumption))
 %visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
