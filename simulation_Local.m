@@ -61,7 +61,7 @@ param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % g
 % set constraints
 param_base = system.addParam(param_base,"constraint_penalty",1000^2,"Deterministic");
 param_base = system.addParam(param_base,"obs_pos",[[0;4.5],[0;6]],"Deterministic",[0.10 0.10;0.10 0.10]);
-param_base = system.addParam(param_base,"obs_size",[1 1],"Deterministic",0.1);
+param_base = system.addParam(param_base,"obs_size",[1 1 1],"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
 param_base = system.addParam(param_base,"alpha",0.5,"Deterministic");

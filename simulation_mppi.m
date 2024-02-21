@@ -19,7 +19,8 @@ param_base = system.addParam(param_base,"Nt",Nt,"Deterministic");
 param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0;0;0;0;0;0]);
 
 % targets
-xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
+%xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
+xd = [2; 0; 1; 0; 2; 0];
 
 % set input rate
 input_prescale = 1;
@@ -56,8 +57,8 @@ param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % g
 
 % set constraints
 param_base = system.addParam(param_base,"constraint_penalty",1000^2,"Deterministic");
-param_base = system.addParam(param_base,"obs_pos",[0;5],"Deterministic",[0.10;0.10]);
-param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
+param_base = system.addParam(param_base,"obs_pos",[[0;4],[0;5],[0;6]],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_size",[1 1 1],"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
 param_base = system.addParam(param_base,"alpha",0.5,"Deterministic");
@@ -75,9 +76,10 @@ param_base = system.addParam(param_base,"lb",lb(:,1),"Deterministic",0);
 param_base = system.addParam(param_base,"ub",ub(:,1),"Deterministic",0);
 % Optimize Weight Matrix
 %Q = diag([1,1,1,1]);    % cost matrix for state (x, d)
-Q = diag([100,100,100,100]);
+Q = diag([100,100,100,100,100,100]);
 R = diag([1, 1, 1, 1])./(param_base.m.average^2);      % cost matrix for input (u_theta, u_r, U_l, U_X)
-P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
+%P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
+P = diag([10000,10000,10000,10000,10000,10000]);
 %P = diag([0,0,0,0]);
 
 % constant inputs
@@ -104,7 +106,7 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 %% simulation and planning
 tic
 seed_sample_list = 1:20;
-seed_list = 1:10;
+seed_list = 1:1;
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
 param_base = system.addParam(param_base,"visual_capture",false,"Deterministic");
@@ -117,9 +119,10 @@ for seed = seed_list
     disp(string(i)+"/"+string(length(seed_list)))
     %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
     [q(:,:,i),f(:,:,i),u(:,:,i),param_valid,~] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed,lb,ub);
-    x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid);
-    input_energy(i) = energyEvaluation(u(:,:,i),f(:,:,i),param_valid.q0,xd,Q,R,P,param_valid,1);
+    x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid,xd);
+    %input_energy(i) = energyEvaluation(u(:,:,i),f(:,:,i),param_valid.q0,xd,Q,R,P,param_valid,1);
 end
+max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,Q,R,P,param_valid,1);
 u_val = u;
 toc
 
@@ -150,7 +153,7 @@ visual.plotInputsFB(u(:,:,1),u(:,:,:),f,param,t_vec,[1,2;3,4],folder_name,snum_l
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
 visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
 %visual.makeSnapsFB(q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,t_vec,folder_name,[1],snum_list);
-title("val = "+string(input_energy(1)))
+title("max energy consumption = "+string(max_energy_consumption))
 %visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
 %% 

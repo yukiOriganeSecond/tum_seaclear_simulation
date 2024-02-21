@@ -21,8 +21,10 @@ param_base = system.addParam(param_base,"Nt",Nt,"Deterministic");
 param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0;0;0;0;0;0]);
 
 % targets
-xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
+%xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
+xd = [2; 0; 1; 0; 2; 0];    % target value of (x; x_dot; d; d_dot; X; X_dot);
 %xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
+param_base = system.addParam(param_base,"equality_slack",[0.3; 0.3],"Deterministic");   % slack variables for termination constraint [x; xdot]
 
 % set input rate
 input_prescale = 8;
@@ -53,11 +55,11 @@ param_base = system.addParam(param_base,"bar_m",90,"White",0.20);   % mass of ro
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[[0;5]],"Deterministic",[0.10 0.10]);
-param_base = system.addParam(param_base,"obs_size",[1 1],"Deterministic",0.1);
+param_base = system.addParam(param_base,"obs_pos",[[0;4.5],[0;6]],"Deterministic",[0.10 0.10 0.10]);
+param_base = system.addParam(param_base,"obs_size",[1 1 1],"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
-param_base = system.addParam(param_base,"alpha",0.01,"Deterministic");
+param_base = system.addParam(param_base,"alpha",0.02,"Deterministic");
 param_base = system.addParam(param_base,"t",-0.2,"Deterministic");
 %param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
@@ -75,7 +77,8 @@ param_base = system.addParam(param_base,"ub",ub(:,1),"Deterministic",0);
 Q = diag([0,0,0,0]);
 R = diag([1, 1, 1, 1])./(param_base.m.average^2);      % cost matrix for input (u_theta, u_r, U_l, U_X)
 %P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
-P = diag([0,0,0,0]);
+%P = diag([0,0,0,0,0,0]);
+P = zeros(length(xd));
 % Set Low side controller
 %param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
@@ -175,10 +178,10 @@ for seed = seed_list
     
     [param_nominal,W] = system.makeUncertainty(seed, param_base, true); % calc nominal parameters
     [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,opt_cnt,W); % calc nominal values
-    x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param_nominal);
+    x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param_nominal,xd);
     [param,W] = system.makeUncertainty(seed,param_base);
     [q(:,:,i),f(:,:,i),~] = system.steps(param.q0,u,param,opt_cnt,W);   % nonFB case
-    x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
+    x(:,:,i) = system.changeCoordinate(q(:,:,i),param,xd);
     u_val(:,:,i) = u(:,:);
 
     if param.low_side_controller ~= "none"
@@ -186,10 +189,10 @@ for seed = seed_list
         x_nonFB(:,:,i) = x(:,:,i);
         [param_nominal,W] = system.makeUncertainty(seed, param_base, true); % calc nominal parameters
         [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,opt_cnt,W); % calc nominal values
-        x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param);
+        x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param,xd);
         [param_unc,W] = system.makeUncertainty(seed, param_base, false); % calc uncertained parameters
         [q(:,:,i),f(:,:,i),u_val(:,:,i)] = system.stepsFB(param_unc.q0,q_nominal,u,param_unc,opt_cnt,W); % calc nominal values
-        x(:,:,i) = system.changeCoordinate(q(:,:,i),param);
+        x(:,:,i) = system.changeCoordinate(q(:,:,i),param,xd);
     end
 
     
@@ -225,7 +228,7 @@ visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1;2],folder_name,1:len
 visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
 visual.makeSnapsFB(q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,t_vec,folder_name,[1],snum_list);
 %title("\alpha = "+string(param_nominal.alpha)+", val = "+string(fval))
-title("\alpha = "+string(param_nominal.alpha)+", max_energy_consumption = "+string(max_energy_consumption))
+title("\alpha = "+string(param_nominal.alpha)+", max energy consumption = "+string(max_energy_consumption))
 %visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
 %plot(u0(2,:))

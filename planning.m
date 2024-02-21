@@ -64,8 +64,13 @@ function [u,fval,t_end] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,u
         if param_base.right_side_constraints.average == true
             c(3) = param_nominal.t+1/param_nominal.alpha/length(seed_list)*sum(max(max(-dist_right,[],2)-param_nominal.t,0),1);
         end
-        c(4) = mean(vecnorm(x([1,3],end,:)-xd([1,3],1),2,1),3)-0.3;
-        c(5) = mean(vecnorm(x([2,4],end,:)-xd([2,4],1),2,1),3)-0.3;
+        if size(xd,1)==4
+            c(4) = mean(vecnorm(x([1,3],end,:)-xd([1,3],1),2,1),3)-param_nominal.equality_slack(1);
+            c(5) = mean(vecnorm(x([2,4],end,:)-xd([2,4],1),2,1),3)-param_nominal.equality_slack(2);
+        else
+            c(4) = mean(vecnorm(x([1,3,5],end,:)-xd([1,3,5],1),2,1),3)-param_nominal.equality_slack(1);
+            c(5) = mean(vecnorm(x([2,4,6],end,:)-xd([2,4,6],1),2,1),3)-param_nominal.equality_slack(2);
+        end
         ceq = 0;
     end
     

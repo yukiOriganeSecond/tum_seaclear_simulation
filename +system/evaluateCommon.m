@@ -27,7 +27,7 @@ function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,
             [q(:,:,i),~,u_use] = system.stepsFB(param_sets(i).q0,q_nominal,u,param_sets(i),opt_cnt,W_sets(i,:));  % steps with feedback
         end
         param = param_sets(i);
-        x_ = system.changeCoordinate(q(:,:,i),param);   % output variables
+        x_ = system.changeCoordinate(q(:,:,i),param,xd);   % output variables
         for j = 1:size(param.obs_pos,2)
             dist(i,:) = min(dist(i,:), vecnorm(x_([1,3],:)-param.obs_pos(:,j),2,1)-param.obs_size(:,j));
         end

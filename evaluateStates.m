@@ -1,6 +1,6 @@
 function result = evaluateStates(q,xd,param,Q,R,P)
 
-    x = system.changeCoordinate(q,param);
+    x = system.changeCoordinate(q,param,xd);
     result = 0;
     result = result + param.dt*sum(dot(Q*(x(:,:)-xd(:,1)),(x(:,:)-xd(:,1))));
     if param.consider_collision

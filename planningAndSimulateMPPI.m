@@ -61,7 +61,7 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
             for t_sample = 1:param_sets(k).predict_steps-1
                 [q_(:,t_sample+1), f_(:,t_sample+1), mode] = system.step(q_(:,t_sample), f_(:,t_sample), v(:,t_sample,k), param_sets(k), mode, 1, W_sets(k,t_sample+1)-W_sets(k,t_sample));
             end
-            x(:,:,k) = system.changeCoordinate(q_,param_sets(k));
+            x(:,:,k) = system.changeCoordinate(q_,param_sets(k),xd);
             S(1,k) = evaluateStates(q_,xd,param_sets(k),Q,R,P);
             S(1,k) = S(1,k) + sum(dot(R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_sets(k).dt*param_sets(k).input_prescale;
             
@@ -73,7 +73,7 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
         %us_ = u0s + sgolayfilt(permute(tensorprod(w,epsilons,2,3),[2,3,1]),3,71,[],2);
         us_ = sgolayfilt(permute(tensorprod(w,v,2,3),[2,3,1]),3,71,[],2);
         [q_,~,~] = system.steps(qt,repelem(us_(:,1:end-1),1,param_valid.input_prescale),param_valid,1,W_valid,param_valid.predict_steps);
-        x(:,:,k+1) = system.changeCoordinate(q_,param_valid);
+        x(:,:,k+1) = system.changeCoordinate(q_,param_valid,xd);
         F = [];
         if param_valid.visual_capture
             for k = 1:length(param_sets)

@@ -12,7 +12,6 @@ function [q,f,u,param_nominal] = planningAndSimulateLocal(u0,xd,Q,R,P,param_base
     opt = optimoptions(@quadprog, ...
     'Display','off');
     
-
     i = 0;
     for seed = seed_list
         i = i+1;
