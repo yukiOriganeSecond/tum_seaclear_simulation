@@ -18,7 +18,8 @@ function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,
     
     L = zeros(1,Ns);
 
-    parfor i = 1:Ns
+    %parfor i = 1:Ns
+    for i = 1:Ns
         %[param_unc,W] = system.makeUncertainty(seed, param_base, false); % calc uncertained parameters
         if param_sets(i).low_side_controller == "none"
             [q(:,:,i),~,u_use] = system.steps(param_sets(i).q0,u,param_sets(i),opt_cnt,W_sets(i,:)); % steps openloop
@@ -27,7 +28,9 @@ function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,
         end
         param = param_sets(i);
         x_ = system.changeCoordinate(q(:,:,i),param);   % output variables
-        dist(i,:) = vecnorm(x_([1,3],:)-param.obs_pos,2,1)-param.obs_size;
+        for j = 1:size(param.obs_pos,2)
+            dist(i,:) = min(dist(i,:), vecnorm(x_([1,3],:)-param.obs_pos(:,j),2,1)-param.obs_size(:,j));
+        end
         dist_gnd(i,:) = param.ground_depth-x_(3,:);
         dist_right(i,:) = param.right_side-x_(1,:)+(x_(3,:)<4)*10;  % if upper than 4m, it is OK
         x(:,:,i) = x_;

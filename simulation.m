@@ -25,7 +25,7 @@ xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
 %xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
 
 % set input rate
-input_prescale = 4;
+input_prescale = 8;
 Nu = Nt/input_prescale;
 param_base = system.addParam(param_base,"input_prescale",input_prescale,"Deterministic");
 
@@ -36,7 +36,7 @@ param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic"
 % set noise
 %param_base = system.addParam(param_base,"W_effect",[0.1; 0.1; 0.1; 0.1],"Deterministic");
 param_base = system.addParam(param_base,"W_effect",[0; 0; 0; 0],"Deterministic");   % set wiener effect
-param_base = system.addParam(param_base,"sensing_noise",[0.1; 0.1; 0.1; 0.1],"Deterministic");
+param_base = system.addParam(param_base,"sensing_noise",0.2*[1; 1; 1; 1; 1; 1; 1; 1],"Deterministic");
 %param_base = system.addParam(param_base,"sensing_noise",[0; 0; 0; 0],"Deterministic");
 
 % set viscocity
@@ -53,11 +53,11 @@ param_base = system.addParam(param_base,"bar_m",90,"White",0.20);   % mass of ro
 param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % gravitational acceleration (m/s^2)                
 
 % set constraints
-param_base = system.addParam(param_base,"obs_pos",[0;5],"Deterministic",[0.10;0.10]);
-param_base = system.addParam(param_base,"obs_size",1,"Deterministic",0.1);
+param_base = system.addParam(param_base,"obs_pos",[[0;5]],"Deterministic",[0.10 0.10]);
+param_base = system.addParam(param_base,"obs_size",[1 1],"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
-param_base = system.addParam(param_base,"alpha",0.05,"Deterministic");
+param_base = system.addParam(param_base,"alpha",0.01,"Deterministic");
 param_base = system.addParam(param_base,"t",-0.2,"Deterministic");
 %param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
@@ -79,9 +79,9 @@ P = diag([0,0,0,0]);
 % Set Low side controller
 %param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
-param_base = system.addParam(param_base,"kp",[2000;2000;2000;2000],"Deterministic");
+param_base = system.addParam(param_base,"kp",[800;800;800;800],"Deterministic");
 param_base = system.addParam(param_base,"ki",[0;0;0;0],"Deterministic");
-param_base = system.addParam(param_base,"kd",[0;0;0;0],"Deterministic");
+param_base = system.addParam(param_base,"kd",[80;80;80;80],"Deterministic");
 
 % constant inputs
 %u = zeros(3,param.Nt);    % u,U_l,U_X
@@ -108,7 +108,7 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 %% optimization
 clc
 options = optimoptions(@fmincon, ...
-    'MaxFunctionEvaluations',20000, ...
+    'MaxFunctionEvaluations',10000, ...
     'PlotFcn','optimplotfvalconstr', ...
     'Display','iter', ...
     'SpecifyObjectiveGradient',true, ...
@@ -193,7 +193,7 @@ for seed = seed_list
     end
 
     
-    [constraint_results(i,:),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,opt_cnt,seed);
+   % [constraint_results(i,:),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,opt_cnt,seed);
 end
 max_energy_consumption = energyEvaluation(u_val(:,:,:),f(:,:,:),param.q0,xd,Q,R,P,param,opt_cnt);
 
@@ -224,7 +224,8 @@ visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1;2],folder_name,1:len
 %visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
 visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
 visual.makeSnapsFB(q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,t_vec,folder_name,[1],snum_list);
-title("\alpha = "+string(param_nominal.alpha)+", val = "+string(fval))
+%title("\alpha = "+string(param_nominal.alpha)+", val = "+string(fval))
+title("\alpha = "+string(param_nominal.alpha)+", max_energy_consumption = "+string(max_energy_consumption))
 %visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
 
 %plot(u0(2,:))
