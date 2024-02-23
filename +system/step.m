@@ -1,12 +1,11 @@
 
-function [q_next, f_next, mode, q_ddot] = step(qt, ft, ut, param, mode, opt_cnt, dW)
+function [q_next, f_next, mode, q_ddot] = step(qt, ft, ut, param, mode, dW)
     arguments
         qt      % state vector at time t
         ft      % force input vector at time t
         ut      % signal input vector at time t
         param   % parameter sets
         mode    % hybrid mode
-        opt_cnt % optimization count
         dW      % time difference of Winner process
     end
     theta = qt(1);

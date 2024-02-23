@@ -133,7 +133,7 @@ param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
 for i = 1:length(seed_list)
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid);
 end
-max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,Q,R,P,param_valid,1);
+max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,Q,R,P,param_valid);
 u_val = u;
 toc
 

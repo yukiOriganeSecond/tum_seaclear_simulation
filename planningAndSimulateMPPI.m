@@ -33,7 +33,7 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
         else
             u(:,t_sys) = u(:,t_sys-1);
         end
-        [q(:,t_sys+1), f(:,t_sys+1), mode, ~] = system.step(q(:,t_sys), f(:,t_sys), u(:,t_sys), param_valid, mode, 1, W_valid(t_sys+1)-W_valid(t_sys));
+        [q(:,t_sys+1), f(:,t_sys+1), mode, ~] = system.step(q(:,t_sys), f(:,t_sys), u(:,t_sys), param_valid, mode, W_valid(t_sys+1)-W_valid(t_sys));
     end
 
     function [us_, F] = ControllerMPPI(~, qt, ft, u0s)
@@ -59,12 +59,11 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
             end
             v(:,:,k) = repelem(vs_,1,param_sets(k).input_prescale);
             for t_sample = 1:param_sets(k).predict_steps-1
-                [q_(:,t_sample+1), f_(:,t_sample+1), mode] = system.step(q_(:,t_sample), f_(:,t_sample), v(:,t_sample,k), param_sets(k), mode, 1, W_sets(k,t_sample+1)-W_sets(k,t_sample));
+                [q_(:,t_sample+1), f_(:,t_sample+1), mode] = system.step(q_(:,t_sample), f_(:,t_sample), v(:,t_sample,k), param_sets(k), mode, W_sets(k,t_sample+1)-W_sets(k,t_sample));
             end
             x(:,:,k) = system.changeCoordinate(q_,param_sets(k),xd);
             S(1,k) = evaluateStates(q_,xd,param_sets(k),Q,R,P);
             S(1,k) = S(1,k) + sum(dot(R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_sets(k).dt*param_sets(k).input_prescale;
-            
         end
         S(isnan(S)) = 1000^2;   % replace NaN as safficient large value
         rho = min(S);
@@ -72,7 +71,7 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
         w = exp(-1/param_valid.lambda*(S-rho))/eta;
         %us_ = u0s + sgolayfilt(permute(tensorprod(w,epsilons,2,3),[2,3,1]),3,71,[],2);
         us_ = sgolayfilt(permute(tensorprod(w,v,2,3),[2,3,1]),3,71,[],2);
-        [q_,~,~] = system.steps(qt,repelem(us_(:,1:end-1),1,param_valid.input_prescale),param_valid,1,W_valid,param_valid.predict_steps);
+        [q_,~,~] = system.steps(qt,repelem(us_(:,1:end-1),1,param_valid.input_prescale),param_valid,W_valid,param_valid.predict_steps);
         x(:,:,k+1) = system.changeCoordinate(q_,param_valid,xd);
         F = [];
         if param_valid.visual_capture

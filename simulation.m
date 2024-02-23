@@ -115,23 +115,11 @@ options = optimoptions(@fmincon, ...
     'ScaleProblem',false, ...
     'StepTolerance',1e-12);
 tic
-%for opt_cnt = size(param.enable_u,2)
-%    if param.use_constraint == "thruster"
-%        [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],lb,ub,[],options);
-%    else
-%        [u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],[],[],[],options);
-%    end
-%    u0 = u; % repeat optimization using former solution as initial solution
-%end
-opt_cnt = 1;
 seed_list = [1];
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");
-%param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)terminationConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
-[u,fval,~] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options);
+
+[u,fval,~] = planning(u0,xd,Q,R,P,param_base,seed_list,lb,ub,options);
 
 u0 = u;
 toc
@@ -139,16 +127,14 @@ param_base = system.addParam(param_base,"force_deterministic",false,"Determinist
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
 seed_list = 1:1;
 %seed_list = 1;
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,[],options);
-%[u,fval] = fmincon(@(u)evaluateInput(u,xd,Q,R,P,param_base,opt_cnt,seed_list),u0,[],[],[],[],enable_u.*lb,enable_u.*ub,@(u)uncertaintyConstraint(u,xd,Q,R,P,param_base,opt_cnt,seed_list),options);
-[u,fval,t_end] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,ub,options);
+[u,fval,t_end] = planning(u0,xd,Q,R,P,param_base,seed_list,lb,ub,options);
 toc
 disp(fval)
 
 %% simulation
 %evaluateInput(u,q0,xd,Q,R,W,param)
 if exist('u') == 0
-    u = u0; opt_cnt = 1;
+    u = u0;
     seed_list = [1];
 end
 seed_list = 1:20;
@@ -171,10 +157,10 @@ for seed = seed_list
     i = i+1;
     
     [param_nominal,W] = system.makeUncertainty(seed, param_base, true); % calc nominal parameters
-    [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,opt_cnt,W); % calc nominal values
+    [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,W); % calc nominal values
     x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param_nominal,xd);
     [param,W] = system.makeUncertainty(seed,param_base);
-    [q(:,:,i),f(:,:,i),~] = system.steps(param.q0,u,param,opt_cnt,W);   % nonFB case
+    [q(:,:,i),f(:,:,i),~] = system.steps(param.q0,u,param,W);   % nonFB case
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param,xd);
     u_val(:,:,i) = u(:,:);
 
@@ -182,17 +168,17 @@ for seed = seed_list
         q_nonFB(:,:,i) = q(:,:,i);
         x_nonFB(:,:,i) = x(:,:,i);
         [param_nominal,W] = system.makeUncertainty(seed, param_base, true); % calc nominal parameters
-        [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,opt_cnt,W); % calc nominal values
+        [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,W); % calc nominal values
         x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param,xd);
         [param_unc,W] = system.makeUncertainty(seed, param_base, false); % calc uncertained parameters
-        [q(:,:,i),f(:,:,i),u_val(:,:,i)] = system.stepsFB(param_unc.q0,q_nominal,u,param_unc,opt_cnt,W); % calc nominal values
+        [q(:,:,i),f(:,:,i),u_val(:,:,i)] = system.stepsFB(param_unc.q0,q_nominal,u,param_unc,W); % calc nominal values
         x(:,:,i) = system.changeCoordinate(q(:,:,i),param,xd);
     end
 
     
-   % [constraint_results(i,:),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,opt_cnt,seed);
+   % [constraint_results(i,:),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,seed);
 end
-max_energy_consumption = energyEvaluation(u_val(:,:,:),f(:,:,:),param.q0,xd,Q,R,P,param,opt_cnt);
+max_energy_consumption = energyEvaluation(u_val(:,:,:),f(:,:,:),param.q0,xd,Q,R,P,param);
 
 %% save
 folder_name = "data/"+string(datetime('now','Format','yyyyMMdd/HH_mm_ss/'));

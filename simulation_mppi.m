@@ -115,9 +115,8 @@ for seed = seed_list
     %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
     [q(:,:,i),f(:,:,i),u(:,:,i),param_valid,~] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed,lb,ub);
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid,xd);
-    %input_energy(i) = energyEvaluation(u(:,:,i),f(:,:,i),param_valid.q0,xd,Q,R,P,param_valid,1);
 end
-max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,Q,R,P,param_valid,1);
+max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,Q,R,P,param_valid);
 u_val = u;
 toc
 
