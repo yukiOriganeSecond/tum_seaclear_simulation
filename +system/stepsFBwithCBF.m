@@ -1,13 +1,18 @@
-function [q,f,u_use] = stepsFBwithCBF(q0,q_nominal,u_nominal,param,opt_cnt,W,cbf)
+function [q,f,u] = stepsFBwithCBF(q0,param,param_nominal,W,cbf,q_nominal,u_nominal)
     arguments
         q0      % initial state
-        q_nominal   % nominal states (target trajectory)
-        u_nominal       % time series of control input (signal input)
         param   % parameters set
-        opt_cnt % optimization count
+        param_nominal   % nominal parameter
         W       % Winner Process
-        cbf     % cbf Object
+        cbf     % cbf object
+        q_nominal = zeros(size(q0,1),param.Nt)   % nominal states (target trajectory)
+        u_nominal = zeros(length(param.f0),param.Nt)   % time series of control input (signal input)
     end
+    opt = optimoptions(@quadprog, ...
+    'Display','off');
+    cbf = cbf.substituteParameters(param_nominal);  % CBF uses nominal model
+    %cbf = cbf.substituteParameters(param);  % CBF uses real model
+
     if ~isfield(param,"low_side_controller")  % If not defined
         param.low_side_controller = "none"; % treated as FF system
     end
@@ -21,18 +26,32 @@ function [q,f,u_use] = stepsFBwithCBF(q0,q_nominal,u_nominal,param,opt_cnt,W,cbf
     else
         mode = 2;
     end
-    u_use = u_nominal;  % initialuze u_use by u
-    if param.low_side_controller == "none"
-        for t = 1:param.Nt-1
-            [q(:,t+1),f(:,t+1),mode,~] = system.step(q(:,t),f(:,t),u_nominal(:,t),param,mode,opt_cnt,W(t+1)-W(t));
+    u = u_nominal;  % initialuze u_use by u
+    q_ddot = zeros(4,1);
+
+    for t = 1:param.Nt-1
+        if param.use_gravity_compensate
+            u_nominal(:,t) = param_nominal.bar_m*param_nominal.g*[sin(q(1,t));0;-cos(q(1,t));0];
         end
-    else
+        if param.use_heuristic_trajectory
+            q_nominal(:,t) = (param.qd-param.q0)/param_nominal.Nt*t+param.q0;
+        end
         if param.low_side_controller == "PID"
-            clear system.ControllerPID  % clear persistent variables
-            for t = 1:param.Nt-1
-                u_use(:,t) = system.ControllerPID(q(:,t),q_nominal(:,t),u_nominal(:,t),param,W(t+1)-W(t));
-                [q(:,t+1),f(:,t+1),mode,~] = system.step(q(:,t),f(:,t),u_use(:,t),param,mode,opt_cnt,W(t+1)-W(t));
+            [u(:,t), ~] = system.ControllerPID(q(:,t), q_nominal(:,t), u_nominal(:,t), param, W(t+1)-W(t));
+        end
+        if param.enable_CBF
+            [A,b,h] = cbf.calculateConstraint(q(:,t)+param.sensing_noise*(W(t+1)-W(t)),q_ddot+q_ddot.*param.acc_noise*(W(t+1)-W(t)),f(:,t)+f(:,t).*param.force_noise_coeff*(W(t+1)-W(t)));
+            if h<0
+                disp("WARN: missing constraint h("+string(t)+")="+string(h))
+            end
+            du = quadprog(eye(4,4),[],A,b-A*u(:,t),[],[],param.lb-u(:,t),param.ub-u(:,t),[],opt);
+            if size(du,1)~=size(u(:,t))
+                %u(:,t,i) = 0;   % if no solution, u should be 0
+                disp("WARN: cbf no solution")
+            else
+                u(:,t) = u(:,t) + du;
             end
         end
+        [q(:,t+1),f(:,t+1),mode,q_ddot] = system.step(q(:,t),f(:,t),u(:,t),param,mode,1,W(t+1)-W(t));
     end
 end

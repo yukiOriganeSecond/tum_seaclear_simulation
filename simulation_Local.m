@@ -27,11 +27,13 @@ Nu = Nt/input_prescale;
 param_base = system.addParam(param_base,"input_prescale",input_prescale,"Deterministic");
 
 % parameter for Local
-param_base = system.addParam(param_base,"qd",[0;0;1;0;2;0;1;0],"Deterministic");    % target state
+param_base = system.addParam(param_base,"qd",[0;0;1;0;0;0;1;0],"Deterministic");    % target state
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
 param_base = system.addParam(param_base,"kp",[800;800;800;800],"Deterministic");
 param_base = system.addParam(param_base,"ki",[0;0;0;0],"Deterministic");
 param_base = system.addParam(param_base,"kd",[80;80;80;0],"Deterministic");
+param_base = system.addParam(param_base,"use_gravity_compensate",true,"Deterministic");
+param_base = system.addParam(param_base,"use_heuristic_trajectory",true,"Deterministic");
 
 % set time delay of input. if set as dt, it is same as non delay
 param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
@@ -60,7 +62,7 @@ param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % g
 
 % set constraints
 param_base = system.addParam(param_base,"constraint_penalty",1000^2,"Deterministic");
-param_base = system.addParam(param_base,"obs_pos",[[0;4.5],[0;6]],"Deterministic",[0.10 0.10;0.10 0.10]);
+param_base = system.addParam(param_base,"obs_pos",[[0;4]],"Deterministic",[0.10 0.10;0.10 0.10]);
 param_base = system.addParam(param_base,"obs_size",[1 1 1],"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");

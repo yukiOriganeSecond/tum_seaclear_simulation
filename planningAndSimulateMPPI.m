@@ -85,6 +85,12 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
             hold off
             ylim([-1,7])
             xlim([-4,4])
+            if param_valid.consider_collision
+                for l = 1:size(param_valid.obs_pos,2)
+                    objpos(l,:) = [(param_valid.obs_pos(:,l)-param_valid.obs_size(1,l)).', (2*param_valid.obs_size(:,l))*[1 1]];
+                    rectangle('Position',objpos(l,:),'Curvature',[1 1]);
+                end
+            end
             F = getframe;
         end
     end

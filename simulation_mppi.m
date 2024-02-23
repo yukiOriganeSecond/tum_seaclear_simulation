@@ -19,8 +19,8 @@ param_base = system.addParam(param_base,"Nt",Nt,"Deterministic");
 param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0;0;0;0;0;0]);
 
 % targets
-%xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
-xd = [2; 0; 1; 0; 2; 0];
+xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
+%xd = [0; 0; 1; 0; 0; 0];
 
 % set input rate
 input_prescale = 1;
@@ -30,7 +30,7 @@ param_base = system.addParam(param_base,"input_prescale",input_prescale,"Determi
 % MPPI parameters
 param_base = system.addParam(param_base,"predict_steps",200,"Deterministic");
 param_base = system.addParam(param_base,"lambda",1000,"Deterministic");
-param_base = system.addParam(param_base,"alpha_MPPI",0.2,"Deterministic");
+param_base = system.addParam(param_base,"alpha_MPPI",0,"Deterministic");
 
 % set time delay of input. if set as dt, it is same as non delay
 param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
@@ -57,7 +57,7 @@ param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % g
 
 % set constraints
 param_base = system.addParam(param_base,"constraint_penalty",1000^2,"Deterministic");
-param_base = system.addParam(param_base,"obs_pos",[[0;4],[0;5],[0;6]],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_pos",[[0;4.5],[0;6]],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",[1 1 1],"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
@@ -65,7 +65,7 @@ param_base = system.addParam(param_base,"alpha",0.5,"Deterministic");
 param_base = system.addParam(param_base,"t",-0.2,"Deterministic");
 %param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
-param_base = system.addParam(param_base,"right_side_constraints",true,"Deterministic");
+param_base = system.addParam(param_base,"right_side_constraints",false,"Deterministic");
 
 % set limitations
 use_constraint = "thruster";
@@ -76,10 +76,11 @@ param_base = system.addParam(param_base,"lb",lb(:,1),"Deterministic",0);
 param_base = system.addParam(param_base,"ub",ub(:,1),"Deterministic",0);
 % Optimize Weight Matrix
 %Q = diag([1,1,1,1]);    % cost matrix for state (x, d)
-Q = diag([100,100,100,100,100,100]);
+%Q = diag([100,100,100,100,100,100]);
+Q = diag([100,100,100,100]);
 R = diag([1, 1, 1, 1])./(param_base.m.average^2);      % cost matrix for input (u_theta, u_r, U_l, U_X)
-%P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
-P = diag([10000,10000,10000,10000,10000,10000]);
+P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
+%P = diag([10000,10000,10000,10000,10000,10000]);
 %P = diag([0,0,0,0]);
 
 % constant inputs
@@ -90,8 +91,8 @@ P = diag([10000,10000,10000,10000,10000,10000]);
 %U_X = 1000;      % input for vessel position      (m/s^2)
 %u0 = zeros(4,param_base.predict_steps.average);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
-u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,param_base.predict_steps.average]);
-%u0 = repmat([param_base.bar_m.average*param_base.g.average*sin(pi/6);0;-param_base.bar_m.average*param_base.g.average*cos(pi/6);0],[1,param_base.predict_steps.average]);
+%u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,param_base.predict_steps.average]);
+u0 = repmat([param_base.bar_m.average*param_base.g.average*sin(pi/6);0;-param_base.bar_m.average*param_base.g.average*cos(pi/6);0],[1,param_base.predict_steps.average]);
 param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
 
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
@@ -106,7 +107,7 @@ param_base = system.addParam(param_base,"enable_u",enable_u);
 %% simulation and planning
 tic
 seed_sample_list = 1:20;
-seed_list = 1:1;
+seed_list = 1:10;
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
 param_base = system.addParam(param_base,"visual_capture",false,"Deterministic");
