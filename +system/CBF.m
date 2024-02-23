@@ -37,7 +37,7 @@ classdef CBF
             %h = y.'*y+2*(1/gamma_0+1/gamma_1)*dy.'*y+2/gamma_0/gamma_1*(ddy.'*y)-a^2;
             q_bar = [r(t) theta(t) l(t) X(t) dr(t) dtheta(t) dl(t) dX(t) ddr(t) ddtheta(t) ddl(t) ddX(t)].';
             
-            nabla_h = gradient(h,q_bar);
+            nabla_h_q = gradient(h,q_bar);
             
             % drag force
             sigmoid_a = 100;                % constant value for sigmoid function
@@ -58,19 +58,17 @@ classdef CBF
                 ];
             % self vector
             sys_f_ddt = [
-                m*ddX*sin(theta)+m*r*dtheta^2+m_bar*g*cos(theta)-eta_r-eta_l;
-                m*ddX*r*cos(theta)-2*m*r*dr*dtheta-m_bar*g*r*sin(theta)-r*eta_theta;
+                m*r*dtheta^2+m_bar*g*cos(theta)-eta_r-eta_l+f_r+F_l;
+                2*m*r*dr*dtheta-m_bar*g*r*sin(theta)-r*eta_theta+r*f_theta;
                 0;
-                -eta_X
+                -eta_X+F_X
                 ];
-            sys_f = subs(diff(sys_f_ddt, t), to_all_old, to_all_new);
-            sys_f = subs(sys_f, diff(ddX, t), 0);   % this term is move to left hand side
-            sys_f = sys_f + [
-                -1/T_r*f_r-1/T_l*F_l;
-                -2*m*r*dr*ddtheta+(dr-r/T_theta)*f_theta;
-                0;
-                -1/T_X*F_X
-                ];
+            Tinv = diag([1/T_r, 1/T_theta, 1/T_l, 1/T_X]);
+            F = [f_r(t); f_theta(t); F_l(t); F_X(t)];
+            d_ddq_dF = jacobian(sys_M_mat\sys_f_ddt, F);
+            nabla_h_x = nabla_h_q.'*blkdiag(eye(8),d_ddq_dF);  % transfer from q to x
+            %nabla_h_x(9:12) = nabla_h_q(9:12).'*d_ddq_dF;    % change q to x by chain rule, d_q/dF = d_dq/dF = 0 
+            sys_f = [dr; dtheta; dl; dX; sys_M_mat\sys_f_ddt; -Tinv*F];
             %sys_g = [
             %    1/T_r, 0, 1/T_l, 0;
             %    0, r*1/T_theta, 0, 0;
@@ -78,20 +76,20 @@ classdef CBF
             %    0, 0, 0, 1/T_X
             %    ];
             sys_g = [
-                0, 1/T_r, 1/T_l, 0;
-                r*1/T_theta, 0, 0, 0;
-                0, 0, 0, 0;
+                0, 1/T_r, 0, 0;
+                1/T_theta, 0, 0, 0;
+                0, 0, 1/T_l, 0;
                 0, 0, 0, 1/T_X
                 ];
-            bar_f = sys_M_mat\sys_f;
-            bar_g = sys_M_mat\sys_g;
+            bar_f = sys_f;
+            bar_g = [zeros(8,4); sys_g];
             
             %% calc constraint
             
-            bar_f_vec = [dr dtheta dl dX ddr ddtheta ddl ddX bar_f.'].';
-            bar_g_mat = [zeros(8,4); bar_g];
-            obj.Lfh = nabla_h.'*bar_f_vec;
-            obj.Lgh = nabla_h.'*bar_g_mat;
+            %bar_f_vec = [dr dtheta dl dX ddr ddtheta ddl ddX bar_f.'].';
+            %bar_g_mat = [zeros(8,4); bar_g];
+            obj.Lfh = nabla_h_x*bar_f;
+            obj.Lgh = nabla_h_x*bar_g;
             
             obj.gamma2_h = gamma_2 * h;
         end

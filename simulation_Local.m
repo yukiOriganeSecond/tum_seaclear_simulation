@@ -31,7 +31,7 @@ param_base = system.addParam(param_base,"qd",[0;0;1;0;0;0;1;0],"Deterministic");
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
 param_base = system.addParam(param_base,"kp",[800;800;800;800],"Deterministic");
 param_base = system.addParam(param_base,"ki",[0;0;0;0],"Deterministic");
-param_base = system.addParam(param_base,"kd",[80;80;80;0],"Deterministic");
+param_base = system.addParam(param_base,"kd",[80;80;80;80],"Deterministic");
 param_base = system.addParam(param_base,"use_gravity_compensate",true,"Deterministic");
 param_base = system.addParam(param_base,"use_heuristic_trajectory",true,"Deterministic");
 
@@ -75,7 +75,7 @@ param_base = system.addParam(param_base,"right_side_constraints",true,"Determini
 % CBF
 param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
 %param_base = system.addParam(param_base,"gamma",[2 3 0.1],"Deterministic");
-param_base = system.addParam(param_base,"gamma",[2 3 10],"Deterministic");
+param_base = system.addParam(param_base,"gamma",[10 10 1],"Deterministic");
 
 % set limitations
 use_constraint = "thruster";
