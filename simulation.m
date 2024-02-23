@@ -22,7 +22,7 @@ param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0
 
 % targets
 %xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
-xd = [2; 0; 1; 0; 2; 0];    % target value of (x; x_dot; d; d_dot; X; X_dot);
+xd = [0; 0; 1; 0; 0; 0];    % target value of (x; x_dot; d; d_dot; X; X_dot);
 %xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
 param_base = system.addParam(param_base,"equality_slack",[0.3; 0.3],"Deterministic");   % slack variables for termination constraint [x; xdot]
 
@@ -120,8 +120,8 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");
 
 [u,fval,~] = planning(u0,xd,Q,R,P,param_base,seed_list,lb,ub,options);
-
 u0 = u;
+
 toc
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
