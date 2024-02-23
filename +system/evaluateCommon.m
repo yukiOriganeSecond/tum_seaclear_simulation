@@ -1,4 +1,4 @@
-function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,Q,R,P,param_base,opt_cnt,param_nominal,param_sets,W_nominal,W_sets)
+function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,Q,R,P,param_base,param_nominal,param_sets,W_nominal,W_sets)
     u = repelem(us,1,param_base.input_prescale.average); % insert missing section
 
     Ns = length(param_sets);
@@ -14,7 +14,7 @@ function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,
         param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");  % treated as FF systen
     end
     %[param_nominal,W] = system.makeUncertainty(seed_list(1), param_base, true); % calc nominal parameters
-    [q_nominal,~,~] = system.steps(param_nominal.q0,u,param_nominal,opt_cnt,W_nominal); % calc nominal values
+    [q_nominal,~,~] = system.steps(param_nominal.q0,u,param_nominal,W_nominal); % calc nominal values
     
     L = zeros(1,Ns);
 
@@ -22,9 +22,9 @@ function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,
     for i = 1:Ns
         %[param_unc,W] = system.makeUncertainty(seed, param_base, false); % calc uncertained parameters
         if param_sets(i).low_side_controller == "none"
-            [q(:,:,i),~,u_use] = system.steps(param_sets(i).q0,u,param_sets(i),opt_cnt,W_sets(i,:)); % steps openloop
+            [q(:,:,i),~,u_use] = system.steps(param_sets(i).q0,u,param_sets(i),W_sets(i,:)); % steps openloop
         else
-            [q(:,:,i),~,u_use] = system.stepsFB(param_sets(i).q0,q_nominal,u,param_sets(i),opt_cnt,W_sets(i,:));  % steps with feedback
+            [q(:,:,i),~,u_use] = system.stepsFB(param_sets(i).q0,q_nominal,u,param_sets(i),W_sets(i,:));  % steps with feedback
         end
         param = param_sets(i);
         x_ = system.changeCoordinate(q(:,:,i),param,xd);   % output variables

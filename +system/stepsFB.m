@@ -1,10 +1,9 @@
-function [q,f,u_use] = stepsFB(q0,q_nominal,u_nominal,param,opt_cnt,W)
+function [q,f,u_use] = stepsFB(q0,q_nominal,u_nominal,param,W)
     arguments
         q0      % initial state
         q_nominal   % nominal states (target trajectory)
         u_nominal       % time series of control input (signal input)
         param   % parameters set
-        opt_cnt % optimization count
         W       % Winner Process
     end
     if ~isfield(param,"low_side_controller")  % If not defined
@@ -23,14 +22,14 @@ function [q,f,u_use] = stepsFB(q0,q_nominal,u_nominal,param,opt_cnt,W)
     u_use = u_nominal;  % initialuze u_use by u
     if param.low_side_controller == "none"
         for t = 1:param.Nt-1
-            [q(:,t+1),f(:,t+1),mode,~] = system.step(q(:,t),f(:,t),u_nominal(:,t),param,mode,opt_cnt,W(t+1)-W(t));
+            [q(:,t+1),f(:,t+1),mode,~] = system.step(q(:,t),f(:,t),u_nominal(:,t),param,mode,W(t+1)-W(t));
         end
     else
         if param.low_side_controller == "PID"
             clear system.ControllerPID  % clear persistent variables
             for t = 1:param.Nt-1
                 u_use(:,t) = system.ControllerPID(q(:,t),q_nominal(:,t),u_nominal(:,t),param,W(t+1)-W(t));
-                [q(:,t+1),f(:,t+1),mode,~] = system.step(q(:,t),f(:,t),u_use(:,t),param,mode,opt_cnt,W(t+1)-W(t));
+                [q(:,t+1),f(:,t+1),mode,~] = system.step(q(:,t),f(:,t),u_use(:,t),param,mode,W(t+1)-W(t));
             end
         end
     end

@@ -52,6 +52,6 @@ function [q,f,u] = stepsFBwithCBF(q0,param,param_nominal,W,cbf,q_nominal,u_nomin
                 u(:,t) = u(:,t) + du;
             end
         end
-        [q(:,t+1),f(:,t+1),mode,q_ddot] = system.step(q(:,t),f(:,t),u(:,t),param,mode,1,W(t+1)-W(t));
+        [q(:,t+1),f(:,t+1),mode,q_ddot] = system.step(q(:,t),f(:,t),u(:,t),param,mode,W(t+1)-W(t));
     end
 end

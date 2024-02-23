@@ -1,12 +1,11 @@
 
-function [q_next, f_next, mode, q_ddot] = step(qt, ft, ut, param, mode, opt_cnt, dW)
+function [q_next, f_next, mode, q_ddot] = step(qt, ft, ut, param, mode, dW)
     arguments
         qt      % state vector at time t
         ft      % force input vector at time t
         ut      % signal input vector at time t
         param   % parameter sets
         mode    % hybrid mode
-        opt_cnt % optimization count
         dW      % time difference of Winner process
     end
     theta = qt(1);
@@ -17,11 +16,7 @@ function [q_next, f_next, mode, q_ddot] = step(qt, ft, ut, param, mode, opt_cnt,
     X_dot = qt(6);
     r = qt(7);
     r_dot = qt(8);
-    %u_theta = ut(1)*param.enable_u(1,opt_cnt);
-    %u_r = ut(2)*param.enable_u(2,opt_cnt);
-    %U_l = ut(3)*param.enable_u(3,opt_cnt);
-    %U_X = ut(4)*param.enable_u(4,opt_cnt);
-    f_next = ft + param.dt./param.T.*(-ft+ut.*param.enable_u);
+    f_next = ft + param.dt./param.T.*(-ft+ut);
     f_theta = ft(1);
     f_r = ft(2);
     F_l = ft(3);
