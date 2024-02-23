@@ -97,20 +97,14 @@ param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*pa
 
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
 %u0 = u_b;
-enable_u = [
-    1;
-    1;
-    1;
-    1];  % do not use u_r at first optimization
-param_base = system.addParam(param_base,"enable_u",enable_u);
 
 %% simulation and planning
 tic
 seed_sample_list = 1:20;
-seed_list = 1:10;
+seed_list = 1:1;
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
-param_base = system.addParam(param_base,"visual_capture",false,"Deterministic");
+param_base = system.addParam(param_base,"visual_capture",true,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(ub),Nt,length(seed_list));
 u = f;

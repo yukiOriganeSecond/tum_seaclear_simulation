@@ -25,7 +25,7 @@ function [u,fval,t_end] = planning(u0,xd,Q,R,P,param_base,opt_cnt,seed_list,lb,u
         [param_sets(i),W_sets(i,:)] = system.makeUncertainty(seed, param_base, false);
     end
 
-    [ust,fval,~,output] = fmincon(fun,[u0(:,1:param_base.input_prescale.average:Nt),[-0.2;0;0;0]],[],[],[],[],[param_base.enable_u.average.*repmat(lb,1,Nu),[-inf;0;0;0]],[param_base.enable_u.average.*repmat(ub,1,Nu),[+inf;0;0;0]],cfun,options);
+    [ust,fval,~,output] = fmincon(fun,[u0(:,1:param_base.input_prescale.average:Nt),[-0.2;0;0;0]],[],[],[],[],[repmat(lb,1,Nu),[-inf;0;0;0]],[repmat(ub,1,Nu),[+inf;0;0;0]],cfun,options);
     if (output.constrviolation > 1e-6) && (~isempty(output.bestfeasible))
         ust = output.bestfeasible.x;
         fval = output.bestfeasible.fval;

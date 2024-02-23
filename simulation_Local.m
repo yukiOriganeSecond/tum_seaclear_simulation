@@ -106,12 +106,6 @@ param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*pa
 
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
 %u0 = u_b;
-enable_u = [
-    1;
-    1;
-    1;
-    1];  % do not use u_r at first optimization
-param_base = system.addParam(param_base,"enable_u",enable_u);
 
 %% simulation and planning
 tic
@@ -127,14 +121,14 @@ param_base = system.addParam(param_base,"force_deterministic",true,"Deterministi
 x_nominal(:,:) = system.changeCoordinate(q_nominal(:,:),param_valid);
 
 % with uncertainty
-seed_list = 1:10;
+seed_list = 1:1;
 %seed_list = 1;
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(ub),Nt,length(seed_list));
 u = f;
 %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-param_base = system.addParam(param_base,"enable_CBF",true,"Deterministic");
+param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
 [q(:,:,:),f(:,:,:),u(:,:,:),param_valid] = planningAndSimulateLocal(u0,xd,Q,R,P,param_base,seed_list,lb,ub);
 for i = 1:length(seed_list)
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid);
