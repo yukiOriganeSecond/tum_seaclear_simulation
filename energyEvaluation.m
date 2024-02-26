@@ -1,4 +1,4 @@
-function [eval_max] = energyEvaluation(u,f,q0,xd,param)
+function [eval_max] = energyEvaluation(u,f,param)
 %EVALUATEINPUT この関数の概要をここに記述
 %   詳細説明をここに記述
     persistent u_cnt

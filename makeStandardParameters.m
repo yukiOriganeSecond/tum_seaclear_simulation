@@ -57,6 +57,7 @@ function param_base = makeStandardParameters(method)
     % targets
     %xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
     xd = [0; 0; 1; 0; 0; 0];    % target value of (x; x_dot; d; d_dot; X; X_dot);
+    param_base = system.addParam(param_base,"xd",[0; 0; 1; 0; 0; 0],"Deterministic");
     param_base = system.addParam(param_base,"equality_slack",[0.3; 0.3],"Deterministic");   % slack variables for termination constraint [x; xdot]
     
     % set input rate

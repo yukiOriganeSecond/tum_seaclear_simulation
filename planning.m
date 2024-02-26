@@ -3,7 +3,7 @@ function [u,fval,t_end] = planning(u0,xd,param_base,seed_list,options)
 %   詳細説明をここに記述
     
     us_last = [];
-
+    
     fun = @evalInput;
     cfun = @evalConstraint;
 

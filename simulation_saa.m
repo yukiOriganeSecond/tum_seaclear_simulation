@@ -23,6 +23,7 @@ param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0
 % targets
 %xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
 xd = [0; 0; 1; 0; 0; 0];    % target value of (x; x_dot; d; d_dot; X; X_dot);
+param_base = system.addParam(param_base,"xd",xd,"Deterministic");
 %xd = [0; 0; 1; 0];  % target value of (theta; theta_dot; r; r_dot);
 param_base = system.addParam(param_base,"equality_slack",[0.3; 0.3],"Deterministic");   % slack variables for termination constraint [x; xdot]
 
@@ -86,89 +87,21 @@ param_base = system.addParam(param_base,"kd",[80;80;80;80],"Deterministic");
 
 % constant inputs
 %u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,Nt]);
-u0 = repmat([0;-param_base.bar_m.average*param_base.g.average/2;-param_base.bar_m.average*param_base.g.average/2;0],[1,Nt]);
+%u0 = repmat([0;-param_base.bar_m.average*param_base.g.average/2;-param_base.bar_m.average*param_base.g.average/2;0],[1,Nt]);
+gravity_force = param_base.bar_m.average*param_base.g.average;
+param_base = system.addParam(param_base,"u0",[0;-gravity_force/2;-gravity_force/2;0],"Deterministic");  % TODO: repmat
 param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
 
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
 %u0 = u_b;
 
-%% optimization
-clc
-options = optimoptions(@fmincon, ...
-    'MaxFunctionEvaluations',10000, ...
-    'PlotFcn','optimplotfvalconstr', ...
-    'Display','iter', ...
-    'SpecifyObjectiveGradient',true, ...
-    'UseParallel',true, ...
-    'EnableFeasibilityMode', false, ...
-    'OptimalityTolerance',1e-3, ...
-    'ScaleProblem',false, ...
-    'StepTolerance',1e-12);
-tic
-seed_list = [1];
-param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");
-
-[u,fval,~] = planning(u0,xd,param_base,seed_list,options);
-u0 = u;
-
-toc
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
-seed_list = 1:1;
-%seed_list = 1;
-[u,fval,t_end] = planning(u0,xd,param_base,seed_list,options);
-toc
-disp(fval)
-
-%% simulation
-%evaluateInput(u,q0,xd,Q,R,W,param)
-if exist('u') == 0
-    u = u0;
-    seed_list = [1];
+seed_plan = 1;
+seed_simulate = 1:20;
+[q,f,u,param_nominal] = planningAndSimulateSAA(param_base,seed_plan,seed_simulate);
+for i = 1:length(seed_simulate)
+    x(:,:,i) = system.changeCoordinate(q(:,:,i),param_nominal);
 end
-seed_list = 1:20;
-%seed_list = 1;
-%u_val = u;
-%u_val = u0;
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
-q = zeros(length(param_base.q0.average),Nt,length(seed_list));
-q_nonFB = q;
-q_nominal = q;
-f = zeros(length(u(:,1)),Nt,length(seed_list));
-x = zeros(length(xd),Nt,length(seed_list));
-x_nonFB = x;
-x_nominal = x;
-u_val = zeros(length(u(:,1)),Nt,length(seed_list));
-input_energy = zeros(length(seed_list),1);
-constraint_results = zeros(length(seed_list),2);
-i = 0;
-for seed = seed_list
-    i = i+1;
-    
-    [param_nominal,W] = system.makeUncertainty(seed, param_base, true); % calc nominal parameters
-    [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,W); % calc nominal values
-    x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param_nominal,xd);
-    [param,W] = system.makeUncertainty(seed,param_base);
-    [q(:,:,i),f(:,:,i),~] = system.steps(param.q0,u,param,W);   % nonFB case
-    x(:,:,i) = system.changeCoordinate(q(:,:,i),param,xd);
-    u_val(:,:,i) = u(:,:);
-
-    if param.low_side_controller ~= "none"
-        q_nonFB(:,:,i) = q(:,:,i);
-        x_nonFB(:,:,i) = x(:,:,i);
-        [param_nominal,W] = system.makeUncertainty(seed, param_base, true); % calc nominal parameters
-        [q_nominal(:,:,i),~,~] = system.steps(param_nominal.q0,u,param_nominal,W); % calc nominal values
-        x_nominal(:,:,i) = system.changeCoordinate(q_nominal(:,:,i),param,xd);
-        [param_unc,W] = system.makeUncertainty(seed, param_base, false); % calc uncertained parameters
-        [q(:,:,i),f(:,:,i),u_val(:,:,i)] = system.stepsFB(param_unc.q0,q_nominal,u,param_unc,W); % calc nominal values
-        x(:,:,i) = system.changeCoordinate(q(:,:,i),param,xd);
-    end
-
-    
-   % [constraint_results(i,:),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,seed);
-end
-max_energy_consumption = energyEvaluation(u_val(:,:,:),f(:,:,:),param.q0,xd,param);
+max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_nominal);
 
 %% save
 folder_name = "data/"+string(datetime('now','Format','yyyyMMdd/HH_mm_ss/'));
@@ -177,29 +110,29 @@ save(folder_name+"simulation.mat")
 
 %% Visualize
 t_vec = dt:dt:dt*Nt;
-snum_list = 1:length(seed_list);
+snum_list = 1:length(seed_simulate);
 %snum_list = [1];
 visual.visualInit();
-%visual.plotInputs(u,f,param,t_vec,[2,3],folder_name);
-visual.plotRobotStates(q,param,t_vec,[7,8],folder_name,snum_list);
-visual.plotRobotOutputs(x,xd,param,t_vec,[1 3; 2 4],folder_name,snum_list);
-%visual.plotInputs(u,f,param,t_vec,[1,2;3,4],folder_name);
-visual.plotInputsFB(u,u_val,f,param,t_vec,[1,2;3,4],folder_name,snum_list);
-%visual.plotRobotOutputsFB(x,xd,x_nominal,x_nonFB,param,t_vec,[1,3;2,4],folder_name,snum_list);
-%visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
-visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param,t_vec,[1;2],folder_name,1:length(seed_list));
-%visual.plotRobotStatesErrorFB(q,q_nominal,q_nonFB,param,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
-%visual.plotRobotStates(q,param,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
-%visual.plotRobotStates(q,param,t_vec,[5;6],folder_name);
-%visual.plotRobotOutputs(x,xd,param,t_vec,[1,3;2,4],folder_name);
-%visual.plotAbsolutePath(q,x,param,t_vec,folder_name);
-%visual.plotRelativePath(q,x,param,t_vec,folder_name);
-%visual.makeSnaps(q,x,param,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
-visual.makeSnaps(q,x,param,t_vec,folder_name,[1],snum_list);
+%visual.plotInputs(u,f,param_nominal,t_vec,[2,3],folder_name);
+visual.plotRobotStates(q,param_nominal,t_vec,[7,8],folder_name,snum_list);
+visual.plotRobotOutputs(x,xd,param_nominal,t_vec,[1 3; 2 4],folder_name,snum_list);
+visual.plotInputs(u,f,param_nominal,t_vec,[1,2;3,4],folder_name,snum_list);
+%visual.plotInputsFB(u,u_val,f,param_nominal,t_vec,[1,2;3,4],folder_name,snum_list);
+%visual.plotRobotOutputsFB(x,xd,x_nominal,x_nonFB,param_nominal,t_vec,[1,3;2,4],folder_name,snum_list);
+%visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param_nominal,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
+visual.plotRobotStatesFB(q,q_nominal,q_nonFB,param_nominal,t_vec,[1;2],folder_name,1:length(seed_list));
+%visual.plotRobotStatesErrorFB(q,q_nominal,q_nonFB,param_nominal,t_vec,[1,7;2,8],folder_name,1:length(seed_list));
+%visual.plotRobotStates(q,param_nominal,t_vec,[1,7,5;2,8,6],folder_name,1:length(seed_list));
+%visual.plotRobotStates(q,param_nominal,t_vec,[5;6],folder_name);
+%visual.plotRobotOutputs(x,xd,param_nominal,t_vec,[1,3;2,4],folder_name);
+%visual.plotAbsolutePath(q,x,param_nominal,t_vec,folder_name);
+%visual.plotRelativePath(q,x,param_nominal,t_vec,folder_name);
+%visual.makeSnaps(q,x,param_nominal,t_vec,folder_name,[1,40,80;120,160,200],snum_list);
+visual.makeSnaps(q,x,param_nominal,t_vec,folder_name,[1],snum_list);
 visual.makeSnapsFB(q,q_nonFB,q_nominal,x,x_nonFB,x_nominal,param,t_vec,folder_name,[1],snum_list);
 %title("\alpha = "+string(param_nominal.alpha)+", val = "+string(fval))
 title("\alpha = "+string(param_nominal.alpha)+", max energy consumption = "+string(max_energy_consumption))
-%visual.makePathMovie(q,x,param,t_vec,folder_name,1,snum_list);
+%visual.makePathMovie(q,x,param_nominal,t_vec,folder_name,1,snum_list);
 
 %plot(u0(2,:))
 %plot(u_b(2,:))

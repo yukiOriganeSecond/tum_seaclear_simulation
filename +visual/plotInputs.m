@@ -1,4 +1,4 @@
-function plotInputs(u,f,param,t_vec,dimset,folder_name)
+function plotInputs(u,f,param,t_vec,dimset,folder_name,snum_set)
 %PLOTINPUT plot control inputs u
     ylabset = ["$u_\theta(t)$ (N)","$u_r(t)$ (N)","$U_l(t)$ (N)","$U_X(t)$ (N)"];
     legset = ["$u_\theta(t)$ (N)","$u_r(t)$ (N)","$U_l(t)$","$U_X(t)$"];
@@ -9,10 +9,19 @@ function plotInputs(u,f,param,t_vec,dimset,folder_name)
         for n = 1:size(dimset,2)
             k = k+1;
             subplot(size(dimset,1),size(dimset,2),k)
-            plot(t_vec(1:end-1), u(dimset(m,n),1:end-1));
-            hold on
-            plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,1)); % TODO : consider seed
-            hold off
+            if length(snum_set) == 1
+                plot(t_vec(1:end-1), u(dimset(m,n),1:end-1),'-','Color',"#0072BD",'LineWidth',0.8);
+                hold on
+                plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,1));
+                legend([legset(dimset(m,n)),legset2(dimset(m,n)),legset3(dimset(m,n))],'Interpreter','latex')
+            else
+                for s = snum_set
+                   plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,s),'-','Color',"#0072BD",'LineWidth',0.8);
+                   hold on
+                   % plot(t_vec(1:end-1), u_fb(dimset(m,n),1:end-1,s),'-','Color',"#0072BD",'LineWidth',0.8);
+                   % plot(t_vec(1:end-1), u_nominal(dimset(m,n),1:end-1),'-','Color',"r",'LineWidth',1.2);
+                end
+            end
             xlim([0,t_vec(end)])
             yl = ylim;
             if (yl(2)-yl(1))<2
@@ -22,7 +31,6 @@ function plotInputs(u,f,param,t_vec,dimset,folder_name)
             xlabel("Time (s)",'Interpreter','latex');
             ylabel(ylabset(dimset(m,n)),'Interpreter','latex');
             %title(titleset(dimset(m,n)),'Interpreter','latex');
-            legend([legset(dimset(m,n)),legset2(dimset(m,n))],'Interpreter','latex')
         end
     end
     %figure
