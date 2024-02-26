@@ -26,7 +26,13 @@ scenario_setting_param.visualize_initial_condition = true;
 make_scenario_list = 1:Nsc;  % if you want remake, please modify this list
 
 scenario = makeScenario(make_scenario_list,scenario_setting_param);
+save(folder_name+"/scenario_param.mat","scenario_setting_param","scenario")
 
 layout = [1,2];
 %layout = [];
 visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
+
+%% run simulation
+load(folder_name+"/scenario_param.mat")
+
+
