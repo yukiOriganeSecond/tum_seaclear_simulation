@@ -85,10 +85,9 @@ ub = [400; 400; 6000; 6000];
 param_base = system.addParam(param_base,"lb",lb(:,1),"Deterministic",0);
 param_base = system.addParam(param_base,"ub",ub(:,1),"Deterministic",0);
 % Optimize Weight Matrix
-%Q = diag([1,1,1,1]);    % cost matrix for state (x, d)
-Q = diag([100,100,100,100]);
-R = diag([1, 1, 1, 1])./(param_base.m.average^2);      % cost matrix for input (u_theta, u_r, U_l, U_X)
-P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
+param_base = system.addParam(param_base,"Q",diag([100,100,100,100]),"Deterministic");   % cost matrix for state (x, d)
+param_base = system.addParam(param_base,"R",diag([1, 1, 1, 1])./(param_base.m.average^2),"Deterministic");   % cost matrix for input (u_theta, u_r, U_l, U_X)  
+param_base = system.addParam(param_base,"P",diag([10000,10000,10000,10000]),"Deterministic");
 %P = diag([0,0,0,0]);
 
 % constant inputs
@@ -117,7 +116,7 @@ param_base = system.addParam(param_base,"visual_capture",false,"Deterministic");
 seed_list = 1;
 param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-[q_nominal(:,:),f_nominal(:,:),u_nominal(:,:),param_valid] = planningAndSimulateLocal(u0,xd,Q,R,P,param_base,seed_list,lb,ub);
+[q_nominal(:,:),f_nominal(:,:),u_nominal(:,:),param_valid] = planningAndSimulateLocal(u0,xd,param_base,seed_list,lb,ub);
 x_nominal(:,:) = system.changeCoordinate(q_nominal(:,:),param_valid);
 
 % with uncertainty
@@ -129,11 +128,11 @@ u = f;
 %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
-[q(:,:,:),f(:,:,:),u(:,:,:),param_valid] = planningAndSimulateLocal(u0,xd,Q,R,P,param_base,seed_list,lb,ub);
+[q(:,:,:),f(:,:,:),u(:,:,:),param_valid] = planningAndSimulateLocal(u0,xd,param_base,seed_list,lb,ub);
 for i = 1:length(seed_list)
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid);
 end
-max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,Q,R,P,param_valid);
+max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,param_valid);
 u_val = u;
 toc
 

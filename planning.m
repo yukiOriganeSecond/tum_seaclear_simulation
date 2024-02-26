@@ -1,4 +1,4 @@
-function [u,fval,t_end] = planning(u0,xd,Q,R,P,param_base,seed_list,lb,ub,options)
+function [u,fval,t_end] = planning(u0,xd,param_base,seed_list,lb,ub,options)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
     
@@ -38,7 +38,7 @@ function [u,fval,t_end] = planning(u0,xd,Q,R,P,param_base,seed_list,lb,ub,option
         us = ust(:,1:end-1);
         %t = ust(end,1);
         if ~isequal(us,us_last)
-            [q,x,eval_result,grad,dist,dist_gnd,dist_right] = system.evaluateCommon(us,xd,Q,R,P,param_base,param_nominal,param_sets,W_nominal,W_sets);
+            [q,x,eval_result,grad,dist,dist_gnd,dist_right] = system.evaluateCommon(us,xd,param_base,param_nominal,param_sets,W_nominal,W_sets);
             us_last = us;
         end
         eval_result_ = eval_result/length(seed_list);
@@ -49,7 +49,7 @@ function [u,fval,t_end] = planning(u0,xd,Q,R,P,param_base,seed_list,lb,ub,option
         us = ust(:,1:end-1);
         t = ust(1,end);
         if ~isequal(us,us_last)
-            [q,x,eval_result,grad,dist,dist_gnd,dist_right] = system.evaluateCommon(us,xd,Q,R,P,param_base,param_nominal,param_sets,W_nominal,W_sets);
+            [q,x,eval_result,grad,dist,dist_gnd,dist_right] = system.evaluateCommon(us,xd,param_base,param_nominal,param_sets,W_nominal,W_sets);
             us_last = us;
         end
         

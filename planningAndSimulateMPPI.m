@@ -1,4 +1,4 @@
-function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_list_sample,seed_valid,lb,ub)
+function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,param_base,seed_list_sample,seed_valid,lb,ub)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 
@@ -37,7 +37,7 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
     end
 
     function [us_, F] = ControllerMPPI(~, qt, ft, u0s)
-        epsilons = pagemtimes(repmat(sqrt(pinv(R)),[1,1,length(param_sets)]),randn(size(u0s,1),size(u0s,2),length(param_sets)));
+        epsilons = pagemtimes(repmat(sqrt(pinv(param_valid.R)),[1,1,length(param_sets)]),randn(size(u0s,1),size(u0s,2),length(param_sets)));
         v = zeros(size(epsilons));
         S = zeros(1,length(param_sets));
         x = zeros(length(xd),param_valid.predict_steps,length(param_sets)+1);
@@ -62,8 +62,8 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,
                 [q_(:,t_sample+1), f_(:,t_sample+1), mode] = system.step(q_(:,t_sample), f_(:,t_sample), v(:,t_sample,k), param_sets(k), mode, W_sets(k,t_sample+1)-W_sets(k,t_sample));
             end
             x(:,:,k) = system.changeCoordinate(q_,param_sets(k),xd);
-            S(1,k) = evaluateStates(q_,xd,param_sets(k),Q,R,P);
-            S(1,k) = S(1,k) + sum(dot(R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_sets(k).dt*param_sets(k).input_prescale;
+            S(1,k) = evaluateStates(q_,xd,param_sets(k));
+            S(1,k) = S(1,k) + sum(dot(param_sets(k).R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_sets(k).dt*param_sets(k).input_prescale;
         end
         S(isnan(S)) = 1000^2;   % replace NaN as safficient large value
         rho = min(S);

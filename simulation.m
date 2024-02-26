@@ -74,11 +74,9 @@ param_base = system.addParam(param_base,"lb",lb(:,1),"Deterministic",0);
 param_base = system.addParam(param_base,"ub",ub(:,1),"Deterministic",0);
 % Optimize Weight Matrix
 %Q = diag([1,1,1,1]);    % cost matrix for state (x, d)
-Q = diag([0,0,0,0]);
-R = diag([1, 1, 1, 1])./(param_base.m.average^2);      % cost matrix for input (u_theta, u_r, U_l, U_X)
-%P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
-%P = diag([0,0,0,0,0,0]);
-P = zeros(length(xd));
+param_base = system.addParam(param_base,"Q",zeros(length(xd)),"Deterministic");   % cost matrix for state (x, d)
+param_base = system.addParam(param_base,"R",diag([1, 1, 1, 1])./(param_base.m.average^2),"Deterministic");   % cost matrix for input (u_theta, u_r, U_l, U_X)  
+param_base = system.addParam(param_base,"P",zeros(length(xd)),"Deterministic");
 % Set Low side controller
 %param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
 param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
@@ -119,7 +117,7 @@ seed_list = [1];
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");
 
-[u,fval,~] = planning(u0,xd,Q,R,P,param_base,seed_list,lb,ub,options);
+[u,fval,~] = planning(u0,xd,param_base,seed_list,lb,ub,options);
 u0 = u;
 
 toc
@@ -127,7 +125,7 @@ param_base = system.addParam(param_base,"force_deterministic",false,"Determinist
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
 seed_list = 1:1;
 %seed_list = 1;
-[u,fval,t_end] = planning(u0,xd,Q,R,P,param_base,seed_list,lb,ub,options);
+[u,fval,t_end] = planning(u0,xd,param_base,seed_list,lb,ub,options);
 toc
 disp(fval)
 
@@ -178,7 +176,7 @@ for seed = seed_list
     
    % [constraint_results(i,:),Ceq] = uncertaintyConstraint(u_val(:,:,i),xd,Q,R,P,param_base,seed);
 end
-max_energy_consumption = energyEvaluation(u_val(:,:,:),f(:,:,:),param.q0,xd,Q,R,P,param);
+max_energy_consumption = energyEvaluation(u_val(:,:,:),f(:,:,:),param.q0,xd,param);
 
 %% save
 folder_name = "data/"+string(datetime('now','Format','yyyyMMdd/HH_mm_ss/'));

@@ -75,13 +75,9 @@ ub = [400; 400; 6000; 6000];
 param_base = system.addParam(param_base,"lb",lb(:,1),"Deterministic",0);
 param_base = system.addParam(param_base,"ub",ub(:,1),"Deterministic",0);
 % Optimize Weight Matrix
-%Q = diag([1,1,1,1]);    % cost matrix for state (x, d)
-%Q = diag([100,100,100,100,100,100]);
-Q = diag([100,100,100,100]);
-R = diag([1, 1, 1, 1])./(param_base.m.average^2);      % cost matrix for input (u_theta, u_r, U_l, U_X)
-P = diag([10000,10000,10000,10000]); % termination cost matrix for state (x, d)
-%P = diag([10000,10000,10000,10000,10000,10000]);
-%P = diag([0,0,0,0]);
+param_base = system.addParam(param_base,"Q",diag([100,100,100,100]),"Deterministic");   % cost matrix for state (x, d)
+param_base = system.addParam(param_base,"R",diag([1, 1, 1, 1])./(param_base.m.average^2),"Deterministic");   % cost matrix for input (u_theta, u_r, U_l, U_X)  
+param_base = system.addParam(param_base,"P",diag([10000,10000,10000,10000]),"Deterministic");
 
 % constant inputs
 %u = zeros(3,param.Nt);    % u,U_l,U_X
@@ -112,11 +108,11 @@ i = 0;
 for seed = seed_list
     i = i+1;
     disp(string(i)+"/"+string(length(seed_list)))
-    %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
-    [q(:,:,i),f(:,:,i),u(:,:,i),param_valid,~] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed,lb,ub);
+    %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,param_base,seed_sample_list,seed_list,lb,ub);
+    [q(:,:,i),f(:,:,i),u(:,:,i),param_valid,~] = planningAndSimulateMPPI(u0,xd,param_base,seed_sample_list,seed,lb,ub);
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid,xd);
 end
-max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,Q,R,P,param_valid);
+max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,param_valid);
 u_val = u;
 toc
 
