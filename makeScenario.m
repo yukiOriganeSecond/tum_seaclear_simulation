@@ -5,12 +5,14 @@ function param_ = makeScenario(make_scenario_list,scenario_setting)
     param_ = struct;
 
     for s = make_scenario_list
-        param_(s).seed_base_1 = randi(set_.seed_length,set_.seed_length,1);
-        param_(s).seed_base_2 = randi(set_.seed_length,set_.seed_length,1);
+        param_(s).seed_base_1 = randi(set_.seed_length,1,set_.seed_length);
+        param_(s).seed_base_2 = randi(set_.seed_length,1,set_.seed_length);
         cnt_ = 0;
         while 1     % sample initial and target point
             y0_ = set_.y0_limitation(:,1) + rand(length(set_.y0_limitation),1).*(set_.y0_limitation(:,2)-set_.y0_limitation(:,1));
             yd_ = set_.yd_limitation(:,1) + rand(length(set_.yd_limitation),1).*(set_.yd_limitation(:,2)-set_.yd_limitation(:,1));
+            yd_(5,1) = yd_(1,1);
+            y0_(5,1) = yd_(5,1);    % DEBUG CODE HERE: vessel is not required to move
             if (vecnorm(y0_([1,3],1)-yd_([1,3],1))>set_.y0_yd_min_distance)
                 break   % repeat sampling until y0 and yd satisfies min_length condition
             end
@@ -23,7 +25,8 @@ function param_ = makeScenario(make_scenario_list,scenario_setting)
         param_(s).y0 = y0_;
         param_(s).yd = yd_;
         param_(s).termination_time = max([ceil(abs(yd_(3,1)-y0_(3,1))/set_.tether_speed*set_.termination_time_coefficient), ceil(abs(yd_(1,1)-y0_(1,1))/set_.robot_horizontal_speed*set_.termination_time_coefficient)]);
-        
+        param_(s).termination_time = param_(s).termination_time + (mod(param_(s).termination_time,2)==1);   % termination time should be odd number
+
         for obs_cnt = 1:set_.number_of_obstacles
             cnt_ = 0;
             while 1     % sample obstacle setting
