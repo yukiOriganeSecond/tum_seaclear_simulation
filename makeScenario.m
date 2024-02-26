@@ -5,6 +5,8 @@ function param_ = makeScenario(make_scenario_list,scenario_setting)
     param_ = struct;
 
     for s = make_scenario_list
+        param_(s).seed_base_1 = randi(set_.seed_length,set_.seed_length,1);
+        param_(s).seed_base_2 = randi(set_.seed_length,set_.seed_length,1);
         cnt_ = 0;
         while 1     % sample initial and target point
             y0_ = set_.y0_limitation(:,1) + rand(length(set_.y0_limitation),1).*(set_.y0_limitation(:,2)-set_.y0_limitation(:,1));

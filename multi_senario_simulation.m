@@ -11,6 +11,7 @@ folder_name = "data/multi_scenario/"+folder_name_detail;
 scenario_setting_param = struct;
 Nsc = 2;    % number of scenario
 scenario_setting_param.number_of_scenario = Nsc;
+scenario_setting_param.seed_length = 100;
 scenario_setting_param.tether_speed = 0.3;
 scenario_setting_param.robot_horizontal_speed = 0.5;
 scenario_setting_param.termination_time_coefficient = 1.0;
@@ -32,7 +33,12 @@ layout = [1,2];
 %layout = [];
 visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
 
+
 %% run simulation
 load(folder_name+"/scenario_param.mat")
+run make_standard_parameters.m
 
-
+Nsc = length(scenario);
+for s = Nsc % loop for scenario
+    
+end
