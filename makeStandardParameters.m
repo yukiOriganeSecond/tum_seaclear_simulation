@@ -86,7 +86,9 @@ function param_base = makeStandardParameters(method)
     
     %% define method depended parameters
     if method == "RA-SAA"
+        param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
     elseif method == "RA-SAA-PID"
+        param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
     elseif method == "MPPI"
     elseif method == "PID-CBF"
     end
