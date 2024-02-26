@@ -1,4 +1,4 @@
-function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,param_base,seed_list_sample,seed_valid,lb,ub)
+function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,param_base,seed_list_sample,seed_valid)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 

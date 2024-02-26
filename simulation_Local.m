@@ -116,7 +116,7 @@ param_base = system.addParam(param_base,"visual_capture",false,"Deterministic");
 seed_list = 1;
 param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-[q_nominal(:,:),f_nominal(:,:),u_nominal(:,:),param_valid] = planningAndSimulateLocal(u0,xd,param_base,seed_list,lb,ub);
+[q_nominal(:,:),f_nominal(:,:),u_nominal(:,:),param_valid] = planningAndSimulateLocal(u0,xd,param_base,seed_list);
 x_nominal(:,:) = system.changeCoordinate(q_nominal(:,:),param_valid);
 
 % with uncertainty

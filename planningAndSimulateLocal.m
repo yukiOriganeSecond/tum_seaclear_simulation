@@ -1,4 +1,4 @@
-function [q,f,u,param_nominal] = planningAndSimulateLocal(u0,xd,param_base,seed_list,lb,ub)
+function [q,f,u,param_nominal] = planningAndSimulateLocal(u0,xd,param_base,seed_list)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
     

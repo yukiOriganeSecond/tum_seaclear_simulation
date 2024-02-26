@@ -109,7 +109,7 @@ for seed = seed_list
     i = i+1;
     disp(string(i)+"/"+string(length(seed_list)))
     %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,param_base,seed_sample_list,seed_list,lb,ub);
-    [q(:,:,i),f(:,:,i),u(:,:,i),param_valid,~] = planningAndSimulateMPPI(u0,xd,param_base,seed_sample_list,seed,lb,ub);
+    [q(:,:,i),f(:,:,i),u(:,:,i),param_valid,~] = planningAndSimulateMPPI(u0,xd,param_base,seed_sample_list,seed);
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid,xd);
 end
 max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,param_valid);

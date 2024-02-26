@@ -1,4 +1,4 @@
-function [u,fval,t_end] = planning(u0,xd,param_base,seed_list,lb,ub,options)
+function [u,fval,t_end] = planning(u0,xd,param_base,seed_list,options)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
     
@@ -25,7 +25,7 @@ function [u,fval,t_end] = planning(u0,xd,param_base,seed_list,lb,ub,options)
         [param_sets(i),W_sets(i,:)] = system.makeUncertainty(seed, param_base, false);
     end
 
-    [ust,fval,~,output] = fmincon(fun,[u0(:,1:param_base.input_prescale.average:Nt),[-0.2;0;0;0]],[],[],[],[],[repmat(lb,1,Nu),[-inf;0;0;0]],[repmat(ub,1,Nu),[+inf;0;0;0]],cfun,options);
+    [ust,fval,~,output] = fmincon(fun,[u0(:,1:param_base.input_prescale.average:Nt),[-0.2;0;0;0]],[],[],[],[],[repmat(param_base.lb.average,1,Nu),[-inf;0;0;0]],[repmat(param_base.ub.average,1,Nu),[+inf;0;0;0]],cfun,options);
     if (output.constrviolation > 1e-6) && (~isempty(output.bestfeasible))
         ust = output.bestfeasible.x;
         fval = output.bestfeasible.fval;

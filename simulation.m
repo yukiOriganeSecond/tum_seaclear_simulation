@@ -117,7 +117,7 @@ seed_list = [1];
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");
 
-[u,fval,~] = planning(u0,xd,param_base,seed_list,lb,ub,options);
+[u,fval,~] = planning(u0,xd,param_base,seed_list,options);
 u0 = u;
 
 toc
@@ -125,7 +125,7 @@ param_base = system.addParam(param_base,"force_deterministic",false,"Determinist
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
 seed_list = 1:1;
 %seed_list = 1;
-[u,fval,t_end] = planning(u0,xd,param_base,seed_list,lb,ub,options);
+[u,fval,t_end] = planning(u0,xd,param_base,seed_list,options);
 toc
 disp(fval)
 
