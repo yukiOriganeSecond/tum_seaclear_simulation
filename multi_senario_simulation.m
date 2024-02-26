@@ -3,7 +3,7 @@ clear
 clc
 
 %%
-folder_name_detail = "multi_test_2";
+folder_name_detail = "multi_test_3";
 folder_name = "data/multi_scenario/"+folder_name_detail;
 mkdir(folder_name+"/variables")
 mkdir(folder_name+"/paths")
@@ -12,7 +12,7 @@ mkdir(folder_name+"/inputs")
 
 %% make scenario
 scenario_setting_param = struct;
-Nsc = 1;    % number of scenario
+Nsc = 2;    % number of scenario
 scenario_setting_param.number_of_scenario = Nsc;
 scenario_setting_param.seed_length = 100;
 scenario_setting_param.tether_speed = 0.3;
@@ -41,14 +41,24 @@ visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
 %% run simulation
 load(folder_name+"/scenario_param.mat")
 method_list = ["RA-SAA","RA-SAA-PID"];
+Nsc = length(scenario);     % number of scenario
+Nm = length(method_list);   % number of method
+Nplan = 10;                 % number of sample for planning
+Nsim = 10;                  % number of sample for simulation
 
-Nsc = length(scenario);
+energy_consumption = zeros(Nsim, Nm, Nsc); % input energy
+face_infeasible_solution = zeros(Nsim, Nm, Nsc);
+minimum_collision_torelance = zeros(Nsim, Nm, Nsc);
+final_target_error_pos = zeros(Nsim, Nm, Nsc);
+final_target_error_vel = zeros(Nsim, Nm, Nsc);
+
 for s = 1:Nsc % loop for scenario
     clear x
-    seed_plan = scenario(s).seed_base_1(1:10);
-    seed_simulate = scenario(s).seed_base_2(1:10);
-
+    seed_plan = scenario(s).seed_base_1(1:Nplan);
+    seed_simulate = scenario(s).seed_base_2(1:Nsim);
+    cnt_method = 0;
     for method = method_list
+        cnt_method = cnt_method+1;
         % common setting
         param_base = makeStandardParameters(method);
         theta_0 = atan2(scenario(s).y0(5)-scenario(s).y0(1), scenario(s).y0(3));
@@ -62,18 +72,41 @@ for s = 1:Nsc % loop for scenario
 
         % method depended setting & perform simulation
         if ismember(method, ["RA-SAA","RA-SAA-PID"])
-            [q,f,u,param_nominal] = planningAndSimulateSAA(param_base,seed_plan,seed_simulate); % SAA method
+            [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateSAA(param_base,seed_plan,seed_simulate); % SAA method
+            face_infeasible_solution(:,cnt_method,s) = ~find_feasible_solution;
         end
         % evaluation
         for i = 1:length(seed_simulate)
+            dist_ = NaN;
             x(:,:,i) = system.changeCoordinate(q(:,:,i),param_nominal);
+            for j = 1:size(scenario(s).obs_pos,2)
+                dist_ = min([dist_, vecnorm(x([1,3],:,i)-param_sim(s).obs_pos(:,j),2,1)-param_sim(s).obs_size(:,j)]);
+            end
+            minimum_collision_torelance(i,cnt_method,s) = dist_;
         end
-        max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_nominal);
+        if size(x,1)==4          
+            final_target_error_pos(:,cnt_method,s) = permute(vecnorm(x([1,3],end,:)-scenario(s).yd([1,3],1),2,1),[3,1,2]);
+            final_target_error_vel(:,cnt_method,s) = permute(vecnorm(x([2,4],end,:)-scenario(s).yd([2,4],1),2,1),[3,1,2]);
+        else
+            final_target_error_pos(:,cnt_method,s) = permute(vecnorm(x([1,3,5],end,:)-scenario(s).yd([1,3,5],1),2,1),[3,1,2]);
+            final_target_error_vel(:,cnt_method,s) = permute(vecnorm(x([2,4,6],end,:)-scenario(s).yd([2,4,6],1),2,1),[3,1,2]);
+        end
+        [~,energy_consumption(:,cnt_method,s)] = energyEvaluation(u(:,:,:),f(:,:,:),param_nominal);
         
-        % save results
+        % save each results
         save(folder_name+"/variables/scenario_"+sprintf("%03d",s)+"_"+method+".mat");
         t_vec = param_nominal.dt:param_nominal.dt:param_nominal.dt*param_nominal.Nt;
         visual.plotInputs(u,f,param_nominal,t_vec,[1,2;3,4],folder_name+"/inputs/scenario_"+sprintf("%03d",s)+"_"+method+"_",1:length(seed_simulate))
         visual.makeSnapsWithPoints(q,x,param_nominal,scenario(s),t_vec,folder_name+"/paths/scenario_"+sprintf("%03d",s)+"_"+method+"_",[1],1:length(seed_simulate));
     end
 end
+save(folder_name+"/results.mat");
+
+%% analysis
+color_base = ["#0072BD","#D95319","#EDB120","#7E2F8E","#77AC30"];
+visual.plotMultiAverageMax(energy_consumption,color_base,method_list,"energy consumption",folder_name)
+visual.plotMultiAverageMax(final_target_error_pos,color_base,method_list,"termination position error",folder_name,"max",0.3,"slack variable")
+visual.plotMultiAverageMax(minimum_collision_torelance,color_base,method_list,"collision torelance",folder_name,"min",0,"collision")
+visual.plotMultiAverageMax(mean(minimum_collision_torelance<0,1),color_base,method_list,"collision rate",folder_name)
+
+visual.plotMultiBarGraph(method_list,mean(mean(face_infeasible_solution,1),3),"infeasible ratio",folder_name)

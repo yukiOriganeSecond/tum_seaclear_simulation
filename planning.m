@@ -1,4 +1,4 @@
-function [u,fval,t_end] = planning(u0,xd,param_base,seed_list,options)
+function [u,fval,find_feasible_solution] = planning(u0,xd,param_base,seed_list,options)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
     
@@ -31,6 +31,7 @@ function [u,fval,t_end] = planning(u0,xd,param_base,seed_list,options)
         fval = output.bestfeasible.fval;
         disp("WARN: use best feasible point")
     end
+    find_feasible_solution = ~isempty(output.bestfeasible);
     u = repelem(ust(:,1:end-1),1,param_base.input_prescale.average); % insert missing section
     t_end = ust(1,end);
 
@@ -53,7 +54,7 @@ function [u,fval,t_end] = planning(u0,xd,param_base,seed_list,options)
             us_last = us;
         end
         
-        c = zeros(1,5);
+        c = zeros(1,6);
         if param_base.consider_collision.average == true
             %c(1) = param_nominal.t+1/param_nominal.alpha/length(seed_list)*sum(max(max(-dist,[],2)-param_nominal.t,0),1);
             %c(2) = param_nominal.t+1/param_nominal.alpha/length(seed_list)*sum(max(max(-dist_gnd,[],2)-param_nominal.t,0),1);
@@ -71,6 +72,7 @@ function [u,fval,t_end] = planning(u0,xd,param_base,seed_list,options)
             c(4) = mean(vecnorm(x([1,3,5],end,:)-xd([1,3,5],1),2,1),3)-param_nominal.equality_slack(1);
             c(5) = mean(vecnorm(x([2,4,6],end,:)-xd([2,4,6],1),2,1),3)-param_nominal.equality_slack(2);
         end
+        c(6) = -(min(x(3,end,:))-0.01);
         ceq = 0;
     end
     

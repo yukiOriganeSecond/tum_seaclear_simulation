@@ -1,7 +1,7 @@
-function [q,f,u,param_nominal] = planningAndSimulateSAA(param_base,seed_plan,seed_simulate,~)
+function [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateSAA(param_base,seed_plan,seed_simulate,~)
     
     options = optimoptions(@fmincon, ...
-        'MaxFunctionEvaluations',10000, ...
+        'MaxFunctionEvaluations',1000, ...
         'PlotFcn','optimplotfvalconstr', ...
         'Display','iter', ...
         'SpecifyObjectiveGradient',true, ...
@@ -26,7 +26,7 @@ function [q,f,u,param_nominal] = planningAndSimulateSAA(param_base,seed_plan,see
     % main planning
     param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
     param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
-    [u_openloop,~,~] = planning(u0,xd,param_base,seed_plan,options);
+    [u_openloop,~,find_feasible_solution] = planning(u0,xd,param_base,seed_plan,options);
     [q_nominal(:,:),~,~] = system.steps(param_nominal.q0,u_openloop,param_nominal,W); % calc target trajectory
 
     % simulation
@@ -35,16 +35,17 @@ function [q,f,u,param_nominal] = planningAndSimulateSAA(param_base,seed_plan,see
     u = zeros(length(param_nominal.u0),param_nominal.Nt,length(seed_simulate));
     
     i = 0;
+    %param_sim(length(seed_simulate)) = struct;
     for seed = seed_simulate
         i = i+1;
-        [param,W] = system.makeUncertainty(seed,param_base);
+        [param_sim(i),W] = system.makeUncertainty(seed,param_base);
 
-        if param.low_side_controller == "none"
-            [q(:,:,i),f(:,:,i),~] = system.steps(param.q0,u_openloop,param,W);   % nonFB case
+        if param_sim(i).low_side_controller == "none"
+            [q(:,:,i),f(:,:,i),~] = system.steps(param_sim(i).q0,u_openloop,param_sim(i),W);   % nonFB case
             u(:,:,i) = u_openloop(:,:);
-        elseif param.low_side_controller == "PID"
-            [param_unc,W] = system.makeUncertainty(seed, param_base, false); % calc uncertained parameters
-            [q(:,:,i),f(:,:,i),u(:,:,i)] = system.stepsFB(param_unc.q0,q_nominal,u_openloop,param_unc,W); %
+        elseif param_sim(i).low_side_controller == "PID"
+            %[param_unc,W] = system.makeUncertainty(seed, param_base, false); % calc uncertained parameters
+            [q(:,:,i),f(:,:,i),u(:,:,i)] = system.stepsFB(param_sim(i).q0,q_nominal,u_openloop,param_sim(i),W); %
         end
     end
 end
