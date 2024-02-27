@@ -86,8 +86,10 @@ function param_base = makeStandardParameters(method)
     if ismember(method,["RA-SAA","RA-SAA-PID"])
         input_prescale = 8; % change input prescale
         param_base = system.addParam(param_base,"input_prescale",input_prescale,"Deterministic");
-        param_base = system.addParam(param_base,"opt_MaxFunctionEvaluations",5000,"Deterministic");
+        param_base = system.addParam(param_base,"opt_MaxFunctionEvaluations",1000,"Deterministic");
         param_base = system.addParam(param_base,"opt_OptimalityTolerance",1e-3,"Deterministic");
+        param_base = system.addParam(param_base,"opt_Display",'iter',"Deterministic");
+        param_base = system.addParam(param_base,"opt_PlotFcn",'optimplotfvalconstr',"Deterministic");
         if method == "RA-SAA"
             param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
         else    % RA-SAA-PID 

@@ -3,11 +3,13 @@ clear
 clc
 
 %%
-folder_name_detail = "diverge_debug";
+folder_name_detail = "multi_test_4";
 folder_name = "data/multi_scenario/"+folder_name_detail;
 mkdir(folder_name+"/variables")
 mkdir(folder_name+"/paths")
 mkdir(folder_name+"/inputs")
+
+kill_all_visualize = true;            % if true, all visualizing are killed
 %mkdir(folder_name);    % please make folder manualy
 
 %% make scenario
@@ -28,6 +30,7 @@ scenario_setting_param.obs_y_min_distance = 0.3;                                
 scenario_setting_param.max_sample_trial = 100;
 scenario_setting_param.visualize_initial_condition = true;
 
+
 make_scenario_list = 1:Nsc;  % if you want remake, please modify this list
 
 scenario = makeScenario(make_scenario_list,scenario_setting_param);
@@ -35,8 +38,9 @@ save(folder_name+"/scenario_param.mat","scenario_setting_param","scenario")
 
 layout = [1,Nsc];
 %layout = [];
-visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
-
+if ~kill_all_visualize
+    visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
+end
 
 %% run simulation
 load(folder_name+"/scenario_param.mat")
@@ -78,6 +82,10 @@ for s = 1:Nsc % loop for scenario
 
         % method depended setting & perform simulation
         if ismember(method, ["RA-SAA","RA-SAA-PID"])
+            if kill_all_visualize == true
+                %param_base = system.addParam(param_base,"opt_Display",'none',"Deterministic");
+                param_base = system.addParam(param_base,"opt_PlotFcn",[],"Deterministic");
+            end
             [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateSAA(param_base,seed_plan,seed_simulate); % SAA method
             face_infeasible_solution(:,cnt_method,s) = ~find_feasible_solution;
         end
@@ -88,6 +96,9 @@ for s = 1:Nsc % loop for scenario
         if ismember(method, ["MPPI"])
             if param_base.predict_steps.average > Nt
                 param_base.predict_steps.average = Nt;
+            end
+            if kill_all_visualize == true
+                param_base = system.addParam(param_base,"visual_capture",false,"Deterministic");
             end
             param_base = system.addParam(param_base,"predict_steps",200,"Deterministic");
             [q,f,u,param_nominal,param_sim,find_feasible_solution,~] = planningAndSimulateMPPI(param_base,seed_plan,seed_simulate); % MPPI method
@@ -114,9 +125,10 @@ for s = 1:Nsc % loop for scenario
         % save each results
         save(folder_name+"/variables/scenario_"+sprintf("%03d",s)+"_"+method+".mat");
         t_vec = param_nominal.dt:param_nominal.dt:param_nominal.dt*param_nominal.Nt;
-        visual.plotInputs(u,f,param_nominal,t_vec,[1,2;3,4],folder_name+"/inputs/scenario_"+sprintf("%03d",s)+"_"+method+"_",1:length(seed_simulate))
-        visual.makeSnapsWithPoints(q,x,param_nominal,scenario(s),t_vec,folder_name+"/paths/scenario_"+sprintf("%03d",s)+"_"+method+"_",[1],1:length(seed_simulate));
-        
+        if ~kill_all_visualize
+            visual.plotInputs(u,f,param_nominal,t_vec,[1,2;3,4],folder_name+"/inputs/scenario_"+sprintf("%03d",s)+"_"+method+"_",1:length(seed_simulate))
+            visual.makeSnapsWithPoints(q,x,param_nominal,scenario(s),t_vec,folder_name+"/paths/scenario_"+sprintf("%03d",s)+"_"+method+"_",[1],1:length(seed_simulate));
+        end
         close all   % once close all figure
     end
 end
@@ -124,10 +136,12 @@ toc
 save(folder_name+"/results.mat");
 
 %% analysis
-color_base = ["#0072BD","#D95319","#EDB120","#7E2F8E","#77AC30"];
-visual.plotMultiAverageMax(energy_consumption,color_base,method_list,"energy consumption",folder_name)
-visual.plotMultiAverageMax(final_target_error_pos,color_base,method_list,"termination position error",folder_name,"max",0.3,"slack variable")
-visual.plotMultiAverageMax(minimum_collision_torelance,color_base,method_list,"collision torelance",folder_name,"min",0,"collision")
-visual.plotMultiAverageMax(mean(minimum_collision_torelance<0,1),color_base,method_list,"collision rate",folder_name)
-
-visual.plotMultiBarGraph(method_list,mean(mean(face_infeasible_solution,1),3),"infeasible ratio",folder_name)
+if ~kill_all_visualize
+    color_base = ["#0072BD","#D95319","#EDB120","#7E2F8E","#77AC30"];
+    visual.plotMultiAverageMax(energy_consumption,color_base,method_list,"energy consumption",folder_name)
+    visual.plotMultiAverageMax(final_target_error_pos,color_base,method_list,"termination position error",folder_name,"max",0.3,"slack variable")
+    visual.plotMultiAverageMax(minimum_collision_torelance,color_base,method_list,"collision torelance",folder_name,"min",0,"collision")
+    visual.plotMultiAverageMax(mean(minimum_collision_torelance<0,1),color_base,method_list,"collision rate",folder_name)
+    
+    visual.plotMultiBarGraph(method_list,mean(mean(face_infeasible_solution,1),3),"infeasible ratio",folder_name)
+end

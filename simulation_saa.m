@@ -94,6 +94,7 @@ param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*pa
 
 param_base = system.addParam(param_base,"opt_MaxFunctionEvaluations",1000,"Deterministic");
 param_base = system.addParam(param_base,"opt_OptimalityTolerance",1e-3,"Deterministic");
+param_base = system.addParam(param_base,"opt_Display",'itr',"Deterministic");
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
 %u0 = u_b;
 

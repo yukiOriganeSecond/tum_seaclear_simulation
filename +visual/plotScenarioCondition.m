@@ -5,6 +5,7 @@ function plotScenarioCondition(make_list, scenario, folder_name, layout)
         folder_name = []
         layout = []
     end
+
     if ~isempty(layout)
         figure
     end
