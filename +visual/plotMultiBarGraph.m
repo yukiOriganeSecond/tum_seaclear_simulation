@@ -6,5 +6,5 @@ function plotMultiBarGraph(method_list, var, bar_name, folder_name)
     bar(list_,var)
     title(bar_name)
     saveas(gcf,folder_name+"/"+bar_name+".fig")
-    saveas(gcf,folder_name+"/"+bar_name+".fig")
+    saveas(gcf,folder_name+"/"+bar_name+".png")
 end

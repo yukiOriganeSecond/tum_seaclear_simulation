@@ -15,10 +15,11 @@ function [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSim
     i = 0;
     for seed = seed_list
         i = i+1;
+        disp("(Local) processing sample "+string(i))
         [param_sim(i), W] = system.makeUncertainty(seed, param_base, false);
         q(:,1,i) = param_sim(i).q0;
         f(:,1,i) = param_sim(i).f0;
-        [q(:,:,i), f(:,:,i), u(:,:,i), face_infeasible(i)] = system.stepsFBwithCBF(param_sim(i).q0,param_sim(i),param_nominal,W,cbf);
+        [q(:,:,i), f(:,:,i), u(:,:,i), face_infeasible(i,1)] = system.stepsFBwithCBF(param_sim(i).q0,param_sim(i),param_nominal,W,cbf);
     end
     find_feasible_solution = mean(~face_infeasible);
     %rng(seed_valid);
