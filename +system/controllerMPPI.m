@@ -14,6 +14,7 @@ function [us_, F, face_infeasible] = controllerMPPI(qt, ft, u0s, param_nominal, 
     face_infeasible = true;
     for model_cnt = 1:N_model
         W = W_plan_list(model_cnt,:);
+        W = repmat(W,1,ceil(param_nominal.predict_steps/param_nominal.Nt));
         for sample_cnt = 1:N_input_sample
             k = k+1;
             if (qt(7,1)>qt(3,1))

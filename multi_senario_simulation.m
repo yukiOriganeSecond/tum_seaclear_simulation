@@ -3,7 +3,7 @@ clear
 clc
 
 %%
-folder_name_detail = "PID_CBF_test";
+folder_name_detail = "MPPI_test";
 folder_name = "data/multi_scenario/"+folder_name_detail;
 mkdir(folder_name+"/variables")
 mkdir(folder_name+"/paths")
@@ -41,7 +41,8 @@ visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
 %% run simulation
 load(folder_name+"/scenario_param.mat")
 %method_list = ["RA-SAA","RA-SAA-PID"];
-method_list = ["PID-CBF","RA-SAA","RA-SAA-PID"];
+%method_list = ["PID-CBF","RA-SAA","RA-SAA-PID"];
+%method_list = ["MPPI"];
 Nsc = length(scenario);     % number of scenario
 Nm = length(method_list);   % number of method
 Nplan = 10;                 % number of sample for planning
@@ -81,7 +82,15 @@ for s = 1:Nsc % loop for scenario
             face_infeasible_solution(:,cnt_method,s) = ~find_feasible_solution;
         end
         if ismember(method, ["PID-CBF"])
-            [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateLocal(param_base,seed_simulate); % SAA method
+            [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateLocal(param_base,seed_simulate); % Local method
+            face_infeasible_solution(:,cnt_method,s) = ~find_feasible_solution;
+        end
+        if ismember(method, ["MPPI"])
+            if param_base.predict_steps.average > Nt
+                param_base.predict_steps.average = Nt;
+            end
+            param_base = system.addParam(param_base,"predict_steps",200,"Deterministic");
+            [q,f,u,param_nominal,param_sim,find_feasible_solution,~] = planningAndSimulateMPPI(param_base,seed_plan,seed_simulate); % MPPI method
             face_infeasible_solution(:,cnt_method,s) = ~find_feasible_solution;
         end
         % evaluation
