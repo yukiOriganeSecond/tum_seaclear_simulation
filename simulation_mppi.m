@@ -21,7 +21,7 @@ param_base = system.addParam(param_base,"q0",[pi/6;0;6;0;0;0;6;0],"White",[0;0;0
 % targets
 xd = [0; 0; 1; 0];  % target value of (x; x_dot; d; d_dot);
 %xd = [0; 0; 1; 0; 0; 0];
-
+param_base = system.addParam(param_base,"xd",xd,"Deterministic");
 % set input rate
 input_prescale = 1;
 Nu = Nt/input_prescale;
@@ -31,6 +31,8 @@ param_base = system.addParam(param_base,"input_prescale",input_prescale,"Determi
 param_base = system.addParam(param_base,"predict_steps",200,"Deterministic");
 param_base = system.addParam(param_base,"lambda",1000,"Deterministic");
 param_base = system.addParam(param_base,"alpha_MPPI",0,"Deterministic");
+param_base = system.addParam(param_base,"number_of_input_sample",10,"Deterministic");
+param_base = system.addParam(param_base,"seed_for_input_sampling",100,"White",1.0); % from 0 to 200
 
 % set time delay of input. if set as dt, it is same as non delay
 param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
@@ -98,21 +100,24 @@ param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Determin
 
 %% simulation and planning
 tic
-seed_sample_list = 1:20;
-seed_list = 1:1;
+seed_plan_list = 1:1;       % this seed list is planning (not implemented for MPPI)
+seed_list = 1:1;            % this seed list is for simulation
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
 param_base = system.addParam(param_base,"visual_capture",true,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(ub),Nt,length(seed_list));
 u = f;
-i = 0;
-for seed = seed_list
-    i = i+1;
-    disp(string(i)+"/"+string(length(seed_list)))
+%i = 0;
+%for seed = seed_list
+%    i = i+1;
+%    disp(string(i)+"/"+string(length(seed_list)))
     %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,param_base,seed_sample_list,seed_list,lb,ub);
-    [q(:,:,i),f(:,:,i),u(:,:,i),param_valid,~] = planningAndSimulateMPPI(xd,param_base,seed_sample_list,seed);
-    x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid,xd);
+    [q,f,u,param_valid,find_feasible_solution,~] = planningAndSimulateMPPI(param_base,seed_plan_list,seed_list);
+    %x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid,xd);
+%end
+for i = 1:length(seed_simulate)
+    x(:,:,i) = system.changeCoordinate(q(:,:,i),param_nominal);
 end
 max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid);
 u_val = u;
