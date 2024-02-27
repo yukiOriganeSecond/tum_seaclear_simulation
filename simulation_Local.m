@@ -98,10 +98,13 @@ param_base = system.addParam(param_base,"P",diag([10000,10000,10000,10000]),"Det
 %U_X = 1000;      % input for vessel position      (m/s^2)
 %u0 = zeros(4,param_base.predict_steps.average);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
-u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,Nt]);
+%u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,Nt]);
 %u0 = repmat([param_base.bar_m.average*param_base.g.average*sin(pi/6);0;-param_base.bar_m.average*param_base.g.average*cos(pi/6);0],[1,param_base.predict_steps.average]);
-param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
+%param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
 %param_base = system.addParam(param_base,"f0",[0; 0; 0; 0],"Deterministic");
+gravity_force = param_base.bar_m.average*param_base.g.average;
+param_base = system.addParam(param_base,"u0",[0; 0;-gravity_force/2;0],"Deterministic");  % TODO: repmat
+param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic");    % initial value of force input theta,r,l,X
 
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
 %u0 = u_b;
@@ -116,11 +119,11 @@ param_base = system.addParam(param_base,"visual_capture",false,"Deterministic");
 seed_list = 1;
 param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
-[q_nominal(:,:),f_nominal(:,:),u_nominal(:,:),param_valid] = planningAndSimulateLocal(u0,xd,param_base,seed_list);
+[q_nominal(:,:),f_nominal(:,:),u_nominal(:,:),param_valid] = planningAndSimulateLocal(param_base,seed_list);
 x_nominal(:,:) = system.changeCoordinate(q_nominal(:,:),param_valid);
 
 % with uncertainty
-seed_list = 1:1;
+seed_list = 1:10;
 %seed_list = 1;
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(ub),Nt,length(seed_list));
@@ -128,11 +131,11 @@ u = f;
 %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,Q,R,P,param_base,seed_sample_list,seed_list,lb,ub);
 param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
 param_base = system.addParam(param_base,"enable_CBF",false,"Deterministic");
-[q(:,:,:),f(:,:,:),u(:,:,:),param_valid] = planningAndSimulateLocal(u0,xd,param_base,seed_list,lb,ub);
+[q(:,:,:),f(:,:,:),u(:,:,:),param_valid] = planningAndSimulateLocal(param_base,seed_list);
 for i = 1:length(seed_list)
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid);
 end
-max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,param_valid);
+max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid);
 u_val = u;
 toc
 

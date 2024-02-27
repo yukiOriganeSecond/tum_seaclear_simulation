@@ -1,4 +1,4 @@
-function [q,f,u] = stepsFBwithCBF(q0,param,param_nominal,W,cbf,q_nominal,u_nominal)
+function [q,f,u,face_infeasible] = stepsFBwithCBF(q0,param,param_nominal,W,cbf,q_nominal,u_nominal)
     arguments
         q0      % initial state
         param   % parameters set
@@ -28,6 +28,7 @@ function [q,f,u] = stepsFBwithCBF(q0,param,param_nominal,W,cbf,q_nominal,u_nomin
     end
     u = u_nominal;  % initialuze u_use by u
     q_ddot = zeros(4,1);
+    face_infeasible = false;
 
     for t = 1:param.Nt-1
         if param.use_gravity_compensate
@@ -47,6 +48,8 @@ function [q,f,u] = stepsFBwithCBF(q0,param,param_nominal,W,cbf,q_nominal,u_nomin
             du = quadprog(eye(4,4),[],A,b-A*u(:,t),[],[],param.lb-u(:,t),param.ub-u(:,t),[],opt);
             if size(du,1)~=size(u(:,t))
                 %u(:,t,i) = 0;   % if no solution, u should be 0
+                % if no solution, do not apply CBF
+                face_infeasible = true;
                 disp("WARN: cbf no solution")
             else
                 u(:,t) = u(:,t) + du;
