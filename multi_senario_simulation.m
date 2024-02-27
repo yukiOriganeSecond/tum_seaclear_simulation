@@ -3,7 +3,7 @@ clear
 clc
 
 %%
-folder_name_detail = "MPPI_test";
+folder_name_detail = "multi_method_test";
 folder_name = "data/multi_scenario/"+folder_name_detail;
 mkdir(folder_name+"/variables")
 mkdir(folder_name+"/paths")
@@ -41,7 +41,7 @@ visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
 %% run simulation
 load(folder_name+"/scenario_param.mat")
 %method_list = ["RA-SAA","RA-SAA-PID"];
-%method_list = ["PID-CBF","RA-SAA","RA-SAA-PID"];
+method_list = ["RA-SAA","RA-SAA-PID","PID-CBF","MPPI"];
 %method_list = ["MPPI"];
 Nsc = length(scenario);     % number of scenario
 Nm = length(method_list);   % number of method
@@ -116,8 +116,9 @@ for s = 1:Nsc % loop for scenario
         t_vec = param_nominal.dt:param_nominal.dt:param_nominal.dt*param_nominal.Nt;
         visual.plotInputs(u,f,param_nominal,t_vec,[1,2;3,4],folder_name+"/inputs/scenario_"+sprintf("%03d",s)+"_"+method+"_",1:length(seed_simulate))
         visual.makeSnapsWithPoints(q,x,param_nominal,scenario(s),t_vec,folder_name+"/paths/scenario_"+sprintf("%03d",s)+"_"+method+"_",[1],1:length(seed_simulate));
+        
+        close all   % once close all figure
     end
-    close all   % once close all figure
 end
 toc
 save(folder_name+"/results.mat");

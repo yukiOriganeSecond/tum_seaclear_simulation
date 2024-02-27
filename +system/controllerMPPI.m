@@ -46,7 +46,7 @@ function [us_, F, face_infeasible] = controllerMPPI(qt, ft, u0s, param_nominal, 
     eta = sum(exp(-1/param_nominal.lambda*(S-rho)));
     w = exp(-1/param_nominal.lambda*(S-rho))/eta;
     us_ = sgolayfilt(permute(tensorprod(w,v,2,3),[2,3,1]),3,71,[],2);
-    [q_,~,~] = system.steps(qt,repelem(us_(:,1:end-1),1,param_nominal.input_prescale),param_nominal,W_plan_list(1,:),param_nominal.predict_steps);
+    [q_,~,~] = system.steps(qt,repelem(us_(:,1:end-1),1,param_nominal.input_prescale),param_nominal,W,param_nominal.predict_steps);
     x(:,:,Nk+1) = system.changeCoordinate(q_,param_nominal,param_nominal.xd);
     F = [];
         
