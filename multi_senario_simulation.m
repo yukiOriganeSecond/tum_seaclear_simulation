@@ -52,6 +52,7 @@ minimum_collision_torelance = zeros(Nsim, Nm, Nsc);
 final_target_error_pos = zeros(Nsim, Nm, Nsc);
 final_target_error_vel = zeros(Nsim, Nm, Nsc);
 
+tic
 for s = 1:Nsc % loop for scenario
     clear x
     seed_plan = scenario(s).seed_base_1(1:Nplan);
@@ -99,7 +100,9 @@ for s = 1:Nsc % loop for scenario
         visual.plotInputs(u,f,param_nominal,t_vec,[1,2;3,4],folder_name+"/inputs/scenario_"+sprintf("%03d",s)+"_"+method+"_",1:length(seed_simulate))
         visual.makeSnapsWithPoints(q,x,param_nominal,scenario(s),t_vec,folder_name+"/paths/scenario_"+sprintf("%03d",s)+"_"+method+"_",[1],1:length(seed_simulate));
     end
+    close all   % once close all figure
 end
+tio
 save(folder_name+"/results.mat");
 
 %% analysis
