@@ -1,11 +1,16 @@
-function result = evaluateStates(q,xd,param)
-
+function [result,violate_constraint] = evaluateStates(q,xd,param)
+    violate_constraint = false;
     x = system.changeCoordinate(q,param,xd);
     result = 0;
     result = result + param.dt*sum(dot(param.Q*(x(:,:)-xd(:,1)),(x(:,:)-xd(:,1))));
     if param.consider_collision
+        dist_ = zeros(size(param.obs_pos,2),1);
         for j = 1:size(param.obs_pos,2)
-            result = result + param.constraint_penalty.* (min(vecnorm(x([1,3],:)-param.obs_pos(:,j),2,1)-param.obs_size(:,j))<0 );
+            dist_(j) = min(vecnorm(x([1,3],:)-param.obs_pos(:,j),2,1)-param.obs_size(:,j));
+        end
+        if min(dist_)<0
+            result = result + param.constraint_penalty;
+            violate_constraint = true;
         end
         %result = result + param.constraint_penalty.* exp(-(min(vecnorm(x([1,3],:)-param.obs_pos,2,1)-param.obs_size))^2);
     end

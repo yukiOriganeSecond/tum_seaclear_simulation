@@ -59,7 +59,7 @@ param_base = system.addParam(param_base,"g",9.8,"Deterministic");            % g
 
 % set constraints
 param_base = system.addParam(param_base,"constraint_penalty",1000^2,"Deterministic");
-param_base = system.addParam(param_base,"obs_pos",[[0;4.5],[0;6]],"Deterministic",[0.10;0.10]);
+param_base = system.addParam(param_base,"obs_pos",[[0;5.5]],"Deterministic",[0.10;0.10]);
 param_base = system.addParam(param_base,"obs_size",[1 1 1],"Deterministic",0.1);
 param_base = system.addParam(param_base,"ground_depth",20,"Deterministic");
 param_base = system.addParam(param_base,"right_side",0,"Deterministic");
@@ -105,7 +105,7 @@ seed_plan_list = 1:1;       % this seed list is planning (not implemented for MP
 seed_list = 1:1;            % this seed list is for simulation
 param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
-param_base = system.addParam(param_base,"visual_capture",true,"Deterministic");
+param_base = system.addParam(param_base,"visual_capture",false,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
 f = zeros(length(ub),Nt,length(seed_list));
 u = f;
@@ -114,7 +114,7 @@ u = f;
 %    i = i+1;
 %    disp(string(i)+"/"+string(length(seed_list)))
     %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,param_base,seed_sample_list,seed_list,lb,ub);
-    [q,f,u,param_valid,find_feasible_solution,~] = planningAndSimulateMPPI(param_base,seed_plan_list,seed_list);
+    [q,f,u,param_valid,param_sim_list,find_feasible_solution,F] = planningAndSimulateMPPI(param_base,seed_plan_list,seed_list);
     %x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid,xd);
 %end
 for i = 1:length(seed_list)

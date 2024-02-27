@@ -1,5 +1,5 @@
 
-function [us_, F] = controllerMPPI(qt, ft, u0s, param_nominal, param_plan_list, W_plan_list)
+function [us_, F, face_infeasible] = controllerMPPI(qt, ft, u0s, param_nominal, param_plan_list, W_plan_list, fig)
     param_plan_list = param_nominal;    % ORIGINAL MPPI, USE NOMINAL MODEL TO PREDICT 
 
     N_input_sample = param_nominal.number_of_input_sample;
@@ -11,6 +11,7 @@ function [us_, F] = controllerMPPI(qt, ft, u0s, param_nominal, param_plan_list, 
     S = zeros(1,Nk);
     x = zeros(length(param_nominal.xd),param_nominal.predict_steps,Nk+1);
     k=0;
+    face_infeasible = true;
     for model_cnt = 1:N_model
         W = W_plan_list(model_cnt,:);
         for sample_cnt = 1:N_input_sample
@@ -34,8 +35,9 @@ function [us_, F] = controllerMPPI(qt, ft, u0s, param_nominal, param_plan_list, 
                 [q_(:,t_sample+1), f_(:,t_sample+1), mode] = system.step(q_(:,t_sample), f_(:,t_sample), v(:,t_sample,k), param_plan_list(model_cnt), mode, W(t_sample+1)-W(t_sample));
             end
             x(:,:,k) = system.changeCoordinate(q_,param_plan_list(model_cnt),param_nominal.xd);
-            S(1,k) = evaluateStates(q_,param_plan_list(model_cnt).xd,param_plan_list(model_cnt));
-            S(1,k) = S(1,k) + sum(dot(param_plan_list(model_cnt).R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_nominal.dt*param_nominal.input_prescale;
+            [S(k),violate_constraint] = evaluateStates(q_,param_plan_list(model_cnt).xd,param_plan_list(model_cnt));
+            face_infeasible = face_infeasible & violate_constraint; % if a path does not violate, its feasible.
+            S(k) = S(k) + sum(dot(param_plan_list(model_cnt).R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_nominal.dt*param_nominal.input_prescale;
         end
     end
     S(isnan(S)) = 1000^2;   % replace NaN as safficient large value
@@ -48,6 +50,7 @@ function [us_, F] = controllerMPPI(qt, ft, u0s, param_nominal, param_plan_list, 
     F = [];
         
     if param_nominal.visual_capture
+        figure(fig)
         for k = 1:Nk
             plot(x(1,:,k), x(3,:,k), 'b');
             hold on
