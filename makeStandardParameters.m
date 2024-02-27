@@ -31,7 +31,6 @@ function param_base = makeStandardParameters(method)
     param_base = system.addParam(param_base,"T",[0.1; 0.1; 0.5; 1.0],"Deterministic");  % T_theta; T_r; T_l; T_X 
     
     % set limitations
-    use_constraint = "thruster";
     lb = [-400; -400; -6000; -6000];
     ub = [400; 400; 6000; 6000];
     param_base = system.addParam(param_base,"lb",lb(:,1),"Deterministic",0);
@@ -61,8 +60,7 @@ function param_base = makeStandardParameters(method)
     param_base = system.addParam(param_base,"equality_slack",[0.3; 0.3],"Deterministic");   % slack variables for termination constraint [x; xdot]
     
     % set input rate
-    input_prescale = 8;
-    Nu = Nt/input_prescale;
+    input_prescale = 1; % standard common prescale is 1
     param_base = system.addParam(param_base,"input_prescale",input_prescale,"Deterministic");
     
     % set constraints
@@ -85,12 +83,37 @@ function param_base = makeStandardParameters(method)
     param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic");    % initial value of force input theta,r,l,X
     
     %% define method depended parameters
-    if method == "RA-SAA"
-        param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
-    elseif method == "RA-SAA-PID"
-        param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
+    if ismember(method,["RA-SAA","RA-SAA-PID"])
+        input_prescale = 8; % change input prescale
+        param_base = system.addParam(param_base,"input_prescale",input_prescale,"Deterministic");
+        if method == "RA-SAA"
+            param_base = system.addParam(param_base,"low_side_controller","none","Deterministic");
+        else    % RA-SAA-PID 
+            param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
+        end
     elseif method == "MPPI"
     elseif method == "PID-CBF"
+        % controller
+        param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
+        param_base = system.addParam(param_base,"use_gravity_compensate",true,"Deterministic");
+        % target
+        param_base = system.addParam(param_base,"use_heuristic_trajectory",true,"Deterministic");
+        %param_base = system.addParam(param_base,"qd",[0;0;1;0;0;0;1;0],"Deterministic");    % target state
+        % noise
+        param_base = system.addParam(param_base,"acc_noise",0.2*[1; 1; 1; 1],"Deterministic");
+        param_base = system.addParam(param_base,"force_noise_coeff",0.2*[1; 1; 1; 1],"Deterministic");
+        param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+        % CBF
+        param_base = system.addParam(param_base,"enable_CBF",true,"Deterministic"); % if false, no cbf
+        %param_base = system.addParam(param_base,"gamma",[2 3 0.1],"Deterministic");
+        param_base = system.addParam(param_base,"gamma",[10 10 1],"Deterministic");
+        % Optimize Weight Matrix
+        param_base = system.addParam(param_base,"Q",diag([100,100,100,100]),"Deterministic");   % cost matrix for state (x, d)
+        param_base = system.addParam(param_base,"R",diag([1, 1, 1, 1])./(param_base.m.average^2),"Deterministic");   % cost matrix for input (u_theta, u_r, U_l, U_X)  
+        param_base = system.addParam(param_base,"P",diag([10000,10000,10000,10000]),"Deterministic");
+        % initial solution
+        gravity_force = param_base.bar_m.average*param_base.g.average;
+        param_base = system.addParam(param_base,"u0",[0; 0;-gravity_force/2;0],"Deterministic");
+        param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic");    % initial value of force input theta,r,l,X
     end
-
 end

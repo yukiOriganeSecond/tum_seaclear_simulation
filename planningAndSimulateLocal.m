@@ -11,7 +11,7 @@ function [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSim
     u0 = repmat(param_nominal.u0,1,param_nominal.Nt);
     face_infeasible = zeros(Ns,1);
     cbf = system.CBF;
-
+    
     i = 0;
     for seed = seed_list
         i = i+1;

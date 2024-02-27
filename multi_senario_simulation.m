@@ -3,7 +3,7 @@ clear
 clc
 
 %%
-folder_name_detail = "multi_test_3";
+folder_name_detail = "PID_CBF_test";
 folder_name = "data/multi_scenario/"+folder_name_detail;
 mkdir(folder_name+"/variables")
 mkdir(folder_name+"/paths")
@@ -12,7 +12,7 @@ mkdir(folder_name+"/inputs")
 
 %% make scenario
 scenario_setting_param = struct;
-Nsc = 2;    % number of scenario
+Nsc = 1;    % number of scenario
 scenario_setting_param.number_of_scenario = Nsc;
 scenario_setting_param.seed_length = 100;
 scenario_setting_param.tether_speed = 0.3;
@@ -40,7 +40,8 @@ visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
 
 %% run simulation
 load(folder_name+"/scenario_param.mat")
-method_list = ["RA-SAA","RA-SAA-PID"];
+%method_list = ["RA-SAA","RA-SAA-PID"];
+method_list = ["PID-CBF"];
 Nsc = length(scenario);     % number of scenario
 Nm = length(method_list);   % number of method
 Nplan = 10;                 % number of sample for planning
@@ -65,6 +66,9 @@ for s = 1:Nsc % loop for scenario
         theta_0 = atan2(scenario(s).y0(5)-scenario(s).y0(1), scenario(s).y0(3));
         r_0 = vecnorm([scenario(s).y0(5)-scenario(s).y0(1), scenario(s).y0(3)]);
         param_base = system.addParam(param_base,"q0",[theta_0;0;r_0;0;scenario(s).y0(5);0;r_0;0]);
+        theta_d = atan2(scenario(s).yd(5)-scenario(s).yd(1), scenario(s).yd(3));
+        r_d = vecnorm([scenario(s).yd(5)-scenario(s).yd(1), scenario(s).yd(3)]);
+        param_base = system.addParam(param_base,"qd",[theta_d;0;r_d;0;scenario(s).yd(5);0;r_d;0]);
         param_base = system.addParam(param_base,"xd",scenario(s).yd);
         param_base = system.addParam(param_base,"obs_pos",scenario(s).obs_pos,"Deterministic",[0.10 0.10 0.10]);
         param_base = system.addParam(param_base,"obs_size",scenario(s).obs_size,"Deterministic",0.1);
@@ -74,6 +78,10 @@ for s = 1:Nsc % loop for scenario
         % method depended setting & perform simulation
         if ismember(method, ["RA-SAA","RA-SAA-PID"])
             [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateSAA(param_base,seed_plan,seed_simulate); % SAA method
+            face_infeasible_solution(:,cnt_method,s) = ~find_feasible_solution;
+        end
+        if ismember(method, ["PID-CBF"])
+            [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateLocal(param_base,seed_simulate); % SAA method
             face_infeasible_solution(:,cnt_method,s) = ~find_feasible_solution;
         end
         % evaluation
@@ -102,7 +110,7 @@ for s = 1:Nsc % loop for scenario
     end
     close all   % once close all figure
 end
-tio
+toc
 save(folder_name+"/results.mat");
 
 %% analysis
