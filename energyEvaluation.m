@@ -1,4 +1,4 @@
-function [eval_max] = energyEvaluation(u,f,q0,xd,Q,R,W,param)
+function [eval_max,eval_each] = energyEvaluation(u,f,param)
 %EVALUATEINPUT この関数の概要をここに記述
 %   詳細説明をここに記述
     persistent u_cnt
@@ -15,6 +15,7 @@ function [eval_max] = energyEvaluation(u,f,q0,xd,Q,R,W,param)
         %L(1,t) = sqrt(f(:,t).'*f(:,t));
         L(1,i) = sum(vecnorm(f(:,:,i),2,1));
     end
+    eval_each = L(1,:).'*param.dt;
     eval_max = max(L(1,:))*param.dt;
     %U_r_list(u_cnt,:) = u(2,:);
 end

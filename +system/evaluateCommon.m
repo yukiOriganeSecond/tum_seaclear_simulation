@@ -1,6 +1,6 @@
-function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,Q,R,P,param_base,param_nominal,param_sets,W_nominal,W_sets)
+function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,param_base,param_nominal,param_sets,W_nominal,W_sets)
     u = repelem(us,1,param_base.input_prescale.average); % insert missing section
-
+    
     Ns = length(param_sets);
     q = zeros(length(param_base.q0.average),param_base.Nt.average,Ns);
     x = zeros(length(xd),param_base.Nt.average,Ns);
@@ -34,11 +34,11 @@ function [q,x,eval_result,grad,dist,dist_gnd,dist_right] = evaluateCommon(us,xd,
         dist_gnd(i,:) = param.ground_depth-x_(3,:);
         dist_right(i,:) = param.right_side-x_(1,:)+(x_(3,:)<4)*10;  % if upper than 4m, it is OK
         x(:,:,i) = x_;
-        L(1,i) = sum(param_sets(i).dt*dot(R*u_use(:,:),u_use(:,:)));% + param_sets(i).dt*dot(Q*(x(:,:,i)-xd(:,1)),(x(:,:,i)-xd(:,1))));
+        L(1,i) = sum(param_sets(i).dt*dot(param_nominal.R*u_use(:,:),u_use(:,:)));% + param_sets(i).dt*dot(Q*(x(:,:,i)-xd(:,1)),(x(:,:,i)-xd(:,1))));
     end
 
-    eval_result = sum(L(:,:))+sum(dot(pagemtimes(P,(x(:,end,:)-xd(:,1))), x(:,end,:)-xd(:,1)));
-    grad = [param_nominal.dt*(R*us(:,:)), [0;0;0;0]];  % if Q and P = 0 only case
+    eval_result = sum(L(:,:))+sum(dot(pagemtimes(param_nominal.P,(x(:,end,:)-xd(:,1))), x(:,end,:)-xd(:,1)));
+    grad = [param_nominal.dt*(param_nominal.R*us(:,:)), [0;0;0;0]];  % if Q and P = 0 only case
 end
 
 
