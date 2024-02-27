@@ -88,8 +88,10 @@ param_base = system.addParam(param_base,"P",diag([10000,10000,10000,10000]),"Det
 %u0 = zeros(4,param_base.predict_steps.average);
 %u0 = repmat([0;-param.bar_m*param.g;0;0],[1,param.Nt]);
 %u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,param_base.predict_steps.average]);
-u0 = repmat([param_base.bar_m.average*param_base.g.average*sin(pi/6);0;-param_base.bar_m.average*param_base.g.average*cos(pi/6);0],[1,param_base.predict_steps.average]);
-param_base = system.addParam(param_base,"f0",[0; 0; -param_base.bar_m.average*param_base.g.average; 0],"Deterministic");    % initial value of force input theta,r,l,X
+%u0 = repmat([gravity_force*sin(pi/6);0;-gravity_force*cos(pi/6);0],[1,param_base.predict_steps.average]);
+gravity_force = param_base.bar_m.average*param_base.g.average;
+param_base = system.addParam(param_base,"u0",[gravity_force*sin(pi/6);0;-gravity_force*cos(pi/6);0],"Deterministic");  % TODO: repmat
+param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic");    % initial value of force input theta,r,l,X
 
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
 %u0 = u_b;
@@ -109,10 +111,10 @@ for seed = seed_list
     i = i+1;
     disp(string(i)+"/"+string(length(seed_list)))
     %[q(:,:,i),f(:,:,i),u(:,:,i),param_valid,F] = planningAndSimulateMPPI(u0,xd,param_base,seed_sample_list,seed_list,lb,ub);
-    [q(:,:,i),f(:,:,i),u(:,:,i),param_valid,~] = planningAndSimulateMPPI(u0,xd,param_base,seed_sample_list,seed);
+    [q(:,:,i),f(:,:,i),u(:,:,i),param_valid,~] = planningAndSimulateMPPI(xd,param_base,seed_sample_list,seed);
     x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid,xd);
 end
-max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid.q0,xd,param_valid);
+max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid);
 u_val = u;
 toc
 

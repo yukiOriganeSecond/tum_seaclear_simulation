@@ -1,4 +1,4 @@
-function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,param_base,seed_list_sample,seed_valid)
+function [q,f,u,param_valid,F] = planningAndSimulateMPPI(xd,param_base,seed_list_sample,seed_valid)
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
 
@@ -11,10 +11,11 @@ function [q,f,u,param_valid,F] = planningAndSimulateMPPI(u0,xd,param_base,seed_l
     rng(seed_valid);
     Nt = param_valid.Nt;
     q = zeros(length(param_valid.q0),Nt); % state variables
-    f = zeros(length(u0(:,1)),Nt);  % force input
-    u = zeros(length(u0(:,1)),Nt);
+    f = zeros(length(param_valid.u0(:,1)),Nt);  % force input
+    u = zeros(length(param_valid.u0(:,1)),Nt);
     q(:,1) = param_valid.q0;
     f(:,1) = param_valid.f0;
+    u0 = repmat(param_valid.u0,1,param_valid.Nt);
     us_pred = repmat(u0(:,1),1,param_valid.predict_steps/param_valid.input_prescale+1);
     
     j = 0;
