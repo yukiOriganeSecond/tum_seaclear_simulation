@@ -3,7 +3,7 @@ clear
 clc
 
 %%
-folder_name_detail = "multi_method_test";
+folder_name_detail = "diverge_debug";
 folder_name = "data/multi_scenario/"+folder_name_detail;
 mkdir(folder_name+"/variables")
 mkdir(folder_name+"/paths")
@@ -41,8 +41,8 @@ visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
 %% run simulation
 load(folder_name+"/scenario_param.mat")
 %method_list = ["RA-SAA","RA-SAA-PID"];
-method_list = ["RA-SAA","RA-SAA-PID","PID-CBF","MPPI"];
-%method_list = ["MPPI"];
+%method_list = ["RA-SAA","RA-SAA-PID","PID-CBF","MPPI"];
+method_list = ["RA-SAA"];
 Nsc = length(scenario);     % number of scenario
 Nm = length(method_list);   % number of method
 Nplan = 10;                 % number of sample for planning
