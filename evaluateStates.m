@@ -12,7 +12,7 @@ function result = evaluateStates(q,xd,param)
     if param.right_side_constraints == true
         result = result + 2*param.constraint_penalty.* any((x(1,:)>0).*(x(3,:)>4));
     end
-    result = result + param.constraint_penalty*any((x(3,:)>5.5));
+    %result = result + param.constraint_penalty*any((x(3,:)>5.5));
     %result = result + 1000*(min(x(3,:)-0.5)<0);
     result = result + dot(param.P*(x(:,end)-xd(:,1)),(x(:,end)-xd(:,1))); %termination cost
 end

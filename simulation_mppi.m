@@ -31,7 +31,7 @@ param_base = system.addParam(param_base,"input_prescale",input_prescale,"Determi
 param_base = system.addParam(param_base,"predict_steps",200,"Deterministic");
 param_base = system.addParam(param_base,"lambda",1000,"Deterministic");
 param_base = system.addParam(param_base,"alpha_MPPI",0,"Deterministic");
-param_base = system.addParam(param_base,"number_of_input_sample",10,"Deterministic");
+param_base = system.addParam(param_base,"number_of_input_sample",20,"Deterministic");
 param_base = system.addParam(param_base,"seed_for_input_sampling",100,"White",1.0); % from 0 to 200
 
 % set time delay of input. if set as dt, it is same as non delay
@@ -92,7 +92,8 @@ param_base = system.addParam(param_base,"P",diag([10000,10000,10000,10000]),"Det
 %u0 = repmat([0;0;-param_base.bar_m.average*param_base.g.average;0],[1,param_base.predict_steps.average]);
 %u0 = repmat([gravity_force*sin(pi/6);0;-gravity_force*cos(pi/6);0],[1,param_base.predict_steps.average]);
 gravity_force = param_base.bar_m.average*param_base.g.average;
-param_base = system.addParam(param_base,"u0",[gravity_force*sin(pi/6);0;-gravity_force*cos(pi/6);0],"Deterministic");  % TODO: repmat
+%param_base = system.addParam(param_base,"u0",[gravity_force*sin(pi/6);0;-gravity_force*cos(pi/6);0],"Deterministic");
+param_base = system.addParam(param_base,"u0",[0;0;-gravity_force;0],"Deterministic");
 param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic");    % initial value of force input theta,r,l,X
 
 %u0 = repmat([0;0;0;0],[1,param.Nu]);
@@ -102,7 +103,7 @@ param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Determin
 tic
 seed_plan_list = 1:1;       % this seed list is planning (not implemented for MPPI)
 seed_list = 1:1;            % this seed list is for simulation
-param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
+param_base = system.addParam(param_base,"force_deterministic",true,"Deterministic");
 param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");
 param_base = system.addParam(param_base,"visual_capture",true,"Deterministic");
 q = zeros(length(param_base.q0.average),Nt,length(seed_list));
@@ -116,8 +117,8 @@ u = f;
     [q,f,u,param_valid,find_feasible_solution,~] = planningAndSimulateMPPI(param_base,seed_plan_list,seed_list);
     %x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid,xd);
 %end
-for i = 1:length(seed_simulate)
-    x(:,:,i) = system.changeCoordinate(q(:,:,i),param_nominal);
+for i = 1:length(seed_list)
+    x(:,:,i) = system.changeCoordinate(q(:,:,i),param_valid);
 end
 max_energy_consumption = energyEvaluation(u(:,:,:),f(:,:,:),param_valid);
 u_val = u;

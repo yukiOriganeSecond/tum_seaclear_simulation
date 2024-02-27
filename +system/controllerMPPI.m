@@ -35,7 +35,7 @@ function [us_, F] = controllerMPPI(qt, ft, u0s, param_nominal, param_plan_list, 
             end
             x(:,:,k) = system.changeCoordinate(q_,param_plan_list(model_cnt),param_nominal.xd);
             S(1,k) = evaluateStates(q_,param_plan_list(model_cnt).xd,param_plan_list(model_cnt));
-            S(1,k) = S(1,model_cnt) + sum(dot(param_plan_list(model_cnt).R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_nominal.dt*param_nominal.input_prescale;
+            S(1,k) = S(1,k) + sum(dot(param_plan_list(model_cnt).R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_nominal.dt*param_nominal.input_prescale;
         end
     end
     S(isnan(S)) = 1000^2;   % replace NaN as safficient large value
