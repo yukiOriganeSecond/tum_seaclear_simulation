@@ -46,8 +46,8 @@ end
 
 %% run simulation
 load(folder_name+"/scenario_param.mat")
-method_list = ["RA-SAA","RA-SAA-PID"];
-%method_list = ["RA-SAA","RA-SAA-PID","PID-CBF","MPPI"];
+%method_list = ["RA-SAA","RA-SAA-PID"];
+method_list = ["RA-SAA","RA-SAA-PID","PID-CBF","MPPI"];
 %method_list = ["RA-SAA"];
 Nsc = length(scenario);     % number of scenario
 Nm = length(method_list);   % number of method
