@@ -109,7 +109,7 @@ for s = 1:Nsc % loop for scenario
             dist_ = NaN;
             x(:,:,i) = system.changeCoordinate(q(:,:,i),param_nominal);
             for j = 1:size(scenario(s).obs_pos,2)
-                dist_ = min([dist_, vecnorm(x([1,3],:,i)-param_sim(s).obs_pos(:,j),2,1)-param_sim(s).obs_size(:,j)]);
+                dist_ = min([dist_, vecnorm(x([1,3],:,i)-param_simi(i).obs_pos(:,j),2,1)-param_sim(i).obs_size(:,j)]);
             end
             minimum_collision_torelance(i,cnt_method,s) = dist_;
         end
