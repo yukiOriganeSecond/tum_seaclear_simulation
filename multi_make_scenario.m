@@ -3,15 +3,15 @@ clear
 clc
 
 %%
-scenario_name_detail = "test_001_path";
+scenario_name_detail = "path_20";
 folder_name = "scenarios/"+scenario_name_detail;
-
+mkdir(folder_name)
 kill_all_visualize = false;            % if true, all visualizing are killed
 %mkdir(folder_name);    % please make folder manualy
 
 %% make scenario
 scenario_setting_param = struct;
-Nsc = 1;    % number of scenario
+Nsc = 20;    % number of scenario
 scenario_setting_param.number_of_scenario = Nsc;
 scenario_setting_param.seed_length = 100;
 scenario_setting_param.tether_speed = 0.3;
@@ -34,7 +34,7 @@ make_scenario_list = 1:Nsc;  % if you want remake, please modify this list
 scenario = makeScenario(make_scenario_list,scenario_setting_param);
 save(folder_name+"/scenario_param.mat","scenario_setting_param","scenario")
 
-layout = [1,Nsc];
+layout = [4,5];
 %layout = [];
 if ~kill_all_visualize
     visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
