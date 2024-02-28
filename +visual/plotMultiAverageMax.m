@@ -44,6 +44,7 @@ legend(leg)
 xlabel("scenario")
 ylabel(val_name)
 title(val_name)
+grid on
 saveas(gcf,folder_name+"/"+val_name+".fig")
 saveas(gcf,folder_name+"/"+val_name+".png")
 end

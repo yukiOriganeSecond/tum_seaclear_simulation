@@ -5,6 +5,7 @@ function plotMultiBarGraph(method_list, var, bar_name, folder_name)
     list_ = reordercats(list_,method_list);
     bar(list_,var)
     title(bar_name)
+    grid on
     saveas(gcf,folder_name+"/"+bar_name+".fig")
     saveas(gcf,folder_name+"/"+bar_name+".png")
 end
