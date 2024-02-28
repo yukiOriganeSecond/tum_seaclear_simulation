@@ -11,8 +11,12 @@ function param_ = makeScenario(make_scenario_list,scenario_setting)
         while 1     % sample initial and target point
             y0_ = set_.y0_limitation(:,1) + rand(length(set_.y0_limitation),1).*(set_.y0_limitation(:,2)-set_.y0_limitation(:,1));
             yd_ = set_.yd_limitation(:,1) + rand(length(set_.yd_limitation),1).*(set_.yd_limitation(:,2)-set_.yd_limitation(:,1));
-            yd_(5,1) = yd_(1,1);
-            y0_(5,1) = yd_(5,1);    % DEBUG CODE HERE: vessel is not required to move
+            if set_.vessel_target_position_to_robot == true
+                yd_(5,1) = yd_(1,1);
+            end
+            if set_.vessel_initial_position_to_target == true
+                y0_(5,1) = yd_(5,1);
+            end
             if (vecnorm(y0_([1,3],1)-yd_([1,3],1))>set_.y0_yd_min_distance)
                 break   % repeat sampling until y0 and yd satisfies min_length condition
             end

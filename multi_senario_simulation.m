@@ -9,7 +9,7 @@ mkdir(folder_name+"/variables")
 mkdir(folder_name+"/paths")
 mkdir(folder_name+"/inputs")
 
-kill_all_visualize = true;            % if true, all visualizing are killed
+kill_all_visualize = false;            % if true, all visualizing are killed
 %mkdir(folder_name);    % please make folder manualy
 
 %% make scenario
@@ -23,6 +23,8 @@ scenario_setting_param.termination_time_coefficient = 1.0;
 scenario_setting_param.y0_limitation = [[-3 3]; [0 0]; [1 6]; [0 0]; [-3 3]; [0 0]];           % [x(0); dx(0); d(0); dd(0); X(0); dX(0)];
 scenario_setting_param.yd_limitation = [[-3 3]; [0 0]; [1 6]; [0 0]; [-3 3]; [0 0]];            % [xd; dxd; dd; ddd; Xd; dXd];
 scenario_setting_param.obstacle_limitation = [[-3 3]; [2 6]; [0.5 2]];                         % [xo, do, obs_size];
+scenario_setting_param.vessel_initial_position_to_target = false;    % false
+scenario_setting_param.vessel_target_position_to_robot = false;      % false
 %scenario_setting_param.obstacle_limitation = [[-4 -4]; [3 3]; [1 1]]; 
 scenario_setting_param.number_of_obstacles = 1;
 scenario_setting_param.y0_yd_min_distance = 1.0;                                               % keep this distance between y(0) and yd
@@ -44,9 +46,9 @@ end
 
 %% run simulation
 load(folder_name+"/scenario_param.mat")
-%method_list = ["RA-SAA","RA-SAA-PID"];
+method_list = ["RA-SAA","RA-SAA-PID"];
 %method_list = ["RA-SAA","RA-SAA-PID","PID-CBF","MPPI"];
-method_list = ["RA-SAA"];
+%method_list = ["RA-SAA"];
 Nsc = length(scenario);     % number of scenario
 Nm = length(method_list);   % number of method
 Nplan = 10;                 % number of sample for planning
@@ -109,7 +111,7 @@ for s = 1:Nsc % loop for scenario
             dist_ = NaN;
             x(:,:,i) = system.changeCoordinate(q(:,:,i),param_nominal);
             for j = 1:size(scenario(s).obs_pos,2)
-                dist_ = min([dist_, vecnorm(x([1,3],:,i)-param_simi(i).obs_pos(:,j),2,1)-param_sim(i).obs_size(:,j)]);
+                dist_ = min([dist_, vecnorm(x([1,3],:,i)-param_sim(i).obs_pos(:,j),2,1)-param_sim(i).obs_size(:,j)]);
             end
             minimum_collision_torelance(i,cnt_method,s) = dist_;
         end
