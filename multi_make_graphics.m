@@ -4,9 +4,9 @@ clear
 visual.visualInit("thin");
 
 %%
-simulation_folder_name = "container_test_2";
+simulation_folder_name = "multiple_0228";
 visialize_graphics = false;     % if false, make figures in silent way
-color_base = ["#0072BD","#D95319","#EDB120","#7E2F8E","#77AC30"];
+color_base = ["#0072BD","#D95319","#EDB120","#7E2F8E","#77AC30","#4DBEEE","#A2142F","#0000FF","#00FF00","#FF0000","#FF00FF","#00FFFF"];
 
 %%
 each_simulation_folder_list = dir("data/multi_scenario/"+simulation_folder_name);
