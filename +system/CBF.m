@@ -18,7 +18,7 @@ classdef CBF
             syms gamma_0 gamma_1 gamma_2
             syms m I_l m_bar g M
             syms T_r T_theta T_l T_X
-            syms mu [1 4]
+            syms mu_ [1 4]
             to_dt_old = [diff(r, t), diff(theta, t), diff(l,t), diff(X, t)];
             to_dt_new = [dr, dtheta, dl, dX];
             to_ddt_old = [diff(dr, t), diff(dtheta, t), diff(dl, t), diff(dX, t)];
@@ -44,10 +44,10 @@ classdef CBF
             v_r = dr-dX*sin(theta);
             v_theta = r*dtheta-dX*cos(theta);
             
-            eta_r = mu(1)*(2/(1+exp(-sigmoid_a*v_r))-1)*v_r^2;
-            eta_theta = mu(2)*(2/(1+exp(-sigmoid_a*v_theta))-1)*v_theta^2;
-            eta_l = mu(3)*dl;
-            eta_X = mu(4)*dX;
+            eta_r = mu_(1)*(2/(1+exp(-sigmoid_a*v_r))-1)*v_r^2;
+            eta_theta = mu_(2)*(2/(1+exp(-sigmoid_a*v_theta))-1)*v_theta^2;
+            eta_l = mu_(3)*dl;
+            eta_X = mu_(4)*dX;
             
             % Inertia Matrix for third derivative
             sys_M_mat = [
@@ -98,12 +98,12 @@ classdef CBF
             syms gamma_0 gamma_1 gamma_2
             syms m I_l m_bar g M xo do a
             syms T_r T_theta T_l T_X
-            syms mu [1 4]
+            syms mu_ [1 4]
             param_names_1 = [gamma_0, gamma_1, gamma_2];
             param_vals_1 = param.gamma;
             param_names_2 = [m, I_l, m_bar, M, g];
             param_vals_2 = [param.m, param.I_l, param.bar_m, param.M, param.g];
-            param_names_3 = [T_theta, T_r, T_l, T_X, mu];
+            param_names_3 = [T_theta, T_r, T_l, T_X, mu_];
             param_val_3 = [param.T.', param.mu_r(1), param.mu_theta(1), param.Mu_l(2), param.Mu_X(2)];
             param_names_4 = [xo, do, a];
             obj.Lfh_with_param = sym('Lfh', [size(param.obs_pos,2), 1]);
