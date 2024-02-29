@@ -34,9 +34,14 @@ classdef MethodContainer
                 disp("(MethodContainer) WARN: options size should be odd number")
                 options = options(:,end-1);
             end
-            for i = 1:length(options)/2
-                obj.change_params_name.(method_name) = options(2*i-1);
-                obj.change_params_val.(method_name) = options(2*i);
+            if ~isempty(options)
+                for i = 1:length(options)/2
+                    obj.change_params_name.(method_name) = options(2*i-1);
+                    obj.change_params_val.(method_name) = options(2*i);
+                end
+            else
+                obj.change_params_name.(method_name) = [];
+                obj.change_params_val.(method_name) = [];
             end
         end
     
@@ -73,5 +78,31 @@ classdef MethodContainer
                 end
             end
         end
+
+        function name_for_legend_list_ = getNameForLegend(obj)
+            name_for_legend_list_(obj.getNumberOfMethods) = "";
+            for method_index = 1:obj.getNumberOfMethods
+                name_for_legend_ = obj.getBaseMethod(method_index);
+                method_name_ = obj.getMethodName(method_index);
+                method_param_name_ = obj.change_params_name.(method_name_);
+                method_param_vals_ = obj.change_params_val.(method_name_);
+                if ~isempty(method_param_name_)
+                    name_for_legend_ = name_for_legend_+"(";
+                    for var_cnt_ = length(obj.change_params_name)
+                        if ismember(method_param_name_(var_cnt_),"alpha")
+                            name_for_legend_ = name_for_legend_+"\";
+                        end
+                        name_for_legend_ = name_for_legend_+method_param_name_(var_cnt_);
+                        name_for_legend_ = name_for_legend_+"="+method_param_vals_(var_cnt_);
+                        if ~var_cnt_ == length(obj.change_params_name)
+                            name_for_legend_ = name_for_legend_ + ",";
+                        end
+                    end
+                    name_for_legend_ = name_for_legend_+")";
+                end
+                name_for_legend_list_(method_index) = name_for_legend_;
+            end
+        end
+
     end
 end
