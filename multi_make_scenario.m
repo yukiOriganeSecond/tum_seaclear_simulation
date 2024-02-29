@@ -3,7 +3,7 @@ clear
 clc
 
 %%
-scenario_name_detail = "path_10";
+scenario_name_detail = "path_2";
 folder_name = "scenarios/"+scenario_name_detail;
 mkdir(folder_name)
 kill_all_visualize = false;            % if true, all visualizing are killed
@@ -11,7 +11,7 @@ kill_all_visualize = false;            % if true, all visualizing are killed
 
 %% make scenario
 scenario_setting_param = struct;
-Nsc = 10;    % number of scenario
+Nsc = 2;    % number of scenario
 scenario_setting_param.number_of_scenario = Nsc;
 scenario_setting_param.seed_length = 100;
 scenario_setting_param.tether_speed = 0.3;

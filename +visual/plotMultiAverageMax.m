@@ -20,7 +20,7 @@ hold on
 for j = 1:Nm
     if (size(val,1) == 1)
         plot(1:Nsc, permute(val(:,j,:),[2,3,1]),"-o",'Color',color_list(j),'MarkerEdgeColor',color_list(j),'MarkerFaceColor',color_list(j));
-    elseif (size(val,1) > 2)
+    elseif (size(val,1) >= 2)
         plot(1:Nsc, permute(mean(val(:,j,:),1),[2,3,1]),"-o",'Color',color_list(j),'MarkerEdgeColor',color_list(j),'MarkerFaceColor',color_list(j));
         if max_or_min == "min"
             plot(1:Nsc, permute(min(val(:,j,:),[],1),[2,3,1]),"-+",'Color',color_list(j),'MarkerEdgeColor',color_list(j),'MarkerFaceColor',color_list(j));
@@ -31,7 +31,7 @@ for j = 1:Nm
 end
 if (size(val,1) == 1)
     leg = method_list.';
-elseif (size(val,1) > 2)
+elseif (size(val,1) >= 2)
     leg = repelem(method_list.',2,1)+string(repmat([": average";": "+max_or_min],Nm,1));
 end
 

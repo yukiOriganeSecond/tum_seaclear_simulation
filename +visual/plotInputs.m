@@ -29,7 +29,7 @@ function plotInputs(u,f,param,t_vec,dimset,folder_name,snum_set,visualize_)
                 plot(t_vec(1:end-1), u(dimset(m,n),1:end-1),'-','Color',"#0072BD",'LineWidth',0.8);
                 hold on
                 plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,1));
-                legend([legset(dimset(m,n)),legset2(dimset(m,n)),legset3(dimset(m,n))],'Interpreter','latex')
+                legend([legset(dimset(m,n)),legset2(dimset(m,n))],'Interpreter','latex')
             else
                 for s = snum_set
                    plot(t_vec(1:end-1), f(dimset(m,n),1:end-1,s),'-','Color',"#0072BD",'LineWidth',0.8);

@@ -1,5 +1,5 @@
 
-function runMultiScenarioSimulation(method_container, scenario_name, simulation_name, Nsim, Nplan, param_error, kill_all_visualize)
+function runMultiScenarioSimulation(method_container, scenario_name, simulation_name, Nsim, Nplan, param_error, robot_mass, kill_all_visualize)
     arguments
         method_container
         scenario_name
@@ -7,6 +7,7 @@ function runMultiScenarioSimulation(method_container, scenario_name, simulation_
         Nsim
         Nplan
         param_error
+        robot_mass = 90
         kill_all_visualize = true
     end
 
@@ -49,10 +50,14 @@ function runMultiScenarioSimulation(method_container, scenario_name, simulation_
             param_base = system.addParam(param_base,"obs_size",scenario(s).obs_size,"Deterministic",0.1);
             Nt = scenario(s).termination_time/param_base.dt.average;
             param_base = system.addParam(param_base,"Nt",Nt,"Deterministic");
+            % parameter change by simulation requirement
             param_base.m.error = param_error;
             param_base.bar_m.error = param_error;
             param_base.mu_theta.error = param_error;
             param_base.mu_r.error = param_error;
+            param_base.m.average = robot_mass;
+            param_base.bar_m.average = robot_mass-30;
+            gravity_force = param_base.bar_m.average*param_base.g.average;
             param_base = method_container.subsMethodParameters(method_index,param_base);
             % method depended setting & perform simulation
             if ismember(base_method, ["RA-SAA","RA-SAA-PID"])
@@ -60,15 +65,22 @@ function runMultiScenarioSimulation(method_container, scenario_name, simulation_
                     %param_base = system.addParam(param_base,"opt_Display",'none',"Deterministic");
                     param_base = system.addParam(param_base,"opt_PlotFcn",[],"Deterministic");
                 end
+                param_base = system.addParam(param_base,"u0",[0; 0;-gravity_force;0],"Deterministic");
+                param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic"); 
                 param_base = method_container.subsMethodParameters(method_index,param_base);
                 [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateSAA(param_base,seed_plan,seed_simulate); % SAA method
                 face_infeasible_solution(:,method_index,s) = ~find_feasible_solution;
             end
             if ismember(base_method, ["PID-CBF"])
+                param_base = system.addParam(param_base,"u0",[0; 0;-gravity_force;0],"Deterministic");
+                param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic");    % initial value of force input theta,r,l,X
                 [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateLocal(param_base,seed_simulate); % Local method
                 face_infeasible_solution(:,method_index,s) = ~find_feasible_solution;
             end
             if ismember(base_method, ["MPPI"])
+                % initial solution
+                param_base = system.addParam(param_base,"u0",[0;0;-gravity_force;0],"Deterministic");
+                param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic");    % initial value of force input theta,r,l,X
                 if param_base.predict_steps.average > Nt
                     param_base.predict_steps.average = Nt;
                 end
