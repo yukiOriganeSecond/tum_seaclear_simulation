@@ -24,7 +24,7 @@ function [q_next, f_next, mode, q_ddot] = step(qt, ft, ut, param, mode, dW)
     
     q_ddot = zeros(4,1);    % theta, l, X, r
 
-    if (r<0.01) || abs(theta)>pi
+    if (r<0.3) || abs(theta)>pi
         q_next = qt;
         return;
     end
