@@ -21,11 +21,12 @@ function [q,f,u,param_nominal,param_sim_list,find_feasible_solution,F_] = planni
     u = zeros(length(param_nominal.u0),Nt,Nss);  % control input
     face_infeasible = zeros(Nss,1);
     fig = figure;
-
-    %parfor i = 1:length(seed_simulate_list)
-    for i = 1:length(seed_simulate_list)
+    F_ = [];
+    parfor i = 1:length(seed_simulate_list)
+    %for i = 1:length(seed_simulate_list)
         disp("(MPPI) processing sample "+string(i))
-        [q(:,:,i), f(:,:,i), u(:,:,i), face_infeasible(i,1),F_] = system.stepsMPPI(param_sim_list(i),param_nominal,param_plan_list,W_sim_list(i,:),W_plan_list,fig);
+        %[q(:,:,i), f(:,:,i), u(:,:,i), face_infeasible(i,1),F_] = system.stepsMPPI(param_sim_list(i),param_nominal,param_plan_list,W_sim_list(i,:),W_plan_list,fig);
+        [q(:,:,i), f(:,:,i), u(:,:,i), face_infeasible(i,1),~] = system.stepsMPPI(param_sim_list(i),param_nominal,param_plan_list,W_sim_list(i,:),W_plan_list,fig);
     end
     find_feasible_solution = mean(~face_infeasible);
 end

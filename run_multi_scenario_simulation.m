@@ -2,7 +2,7 @@
 clear
 clc
 
-simulation_folder_name = "multiple_0301";
+simulation_folder_name = "multiple_0301_b";
 scenario_name_detail = "path_50";
 
 % for PC 1
@@ -21,9 +21,9 @@ scenario_name_detail = "path_50";
 % parameter_error_list = [0.20];
 % robot_mass_list = [180];
 % for PC 4
-% simulation_name_list = ["mass_250"];
-% parameter_error_list = [0.20];
-% robot_mass_list = [250];
+simulation_name_list = ["mass_250"];
+parameter_error_list = [0.20];
+robot_mass_list = [250];
 
 Nplan = 10;                                   % number of sample for planning
 Nsim = 20;                                    % number of sample for simulation
@@ -45,8 +45,8 @@ method_container = MethodContainer;
 %method_container = method_container.addMethod("RA_SAA_PID_alpha_020","RA-SAA-PID",["alpha",0.20]);
 %method_container = method_container.addMethod("RA_SAA_PID_alpha_050","RA-SAA-PID",["alpha",0.50]);
 
-method_container = method_container.addMethod("RA_SAA","RA-SAA");
-method_container = method_container.addMethod("RA_SAA_PID","RA-SAA-PID");
+%method_container = method_container.addMethod("RA_SAA","RA-SAA");
+%method_container = method_container.addMethod("RA_SAA_PID","RA-SAA-PID");
 method_container = method_container.addMethod("PID_CBF","PID-CBF");
 method_container = method_container.addMethod("MPPI","MPPI");
 

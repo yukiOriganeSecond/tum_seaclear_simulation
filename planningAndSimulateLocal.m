@@ -2,7 +2,7 @@ function [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSim
 %UNTITLED この関数の概要をここに記述
 %   詳細説明をここに記述
     
-    [param_nominal,W_nominal] = system.makeUncertainty(1, param_base, true);
+    [param_nominal,~] = system.makeUncertainty(1, param_base, true);
     Nt = param_nominal.Nt;
     Ns = length(seed_list);
     q = zeros(length(param_nominal.q0),Nt,Ns); % state variables
@@ -13,12 +13,18 @@ function [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSim
     cbf = system.CBF;
     
     i = 0;
+    %param_sim(length(seed_list)) = struct;
     for seed = seed_list
         i = i+1;
-        disp("(Local) processing sample "+string(i))
         [param_sim(i), W] = system.makeUncertainty(seed, param_base, false);
         q(:,1,i) = param_sim(i).q0;
         f(:,1,i) = param_sim(i).f0;
+    end
+
+    parfor i = 1:length(seed_list)
+    %for seed = seed_list
+        %i = i+1;
+        disp("(Local) processing sample "+string(i))
         [q(:,:,i), f(:,:,i), u(:,:,i), face_infeasible(i,1)] = system.stepsFBwithCBF(param_sim(i).q0,param_sim(i),param_nominal,W,cbf);
     end
     find_feasible_solution = mean(~face_infeasible);
