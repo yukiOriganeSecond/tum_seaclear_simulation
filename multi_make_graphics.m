@@ -4,7 +4,7 @@ clear
 gca
 
 %%
-simulation_folder_name = "multiple_compare_mass_0229";
+simulation_folder_name = "multiple_0301";
 visialize_graphics = false;     % if false, make figures in silent way
 color_base = ["#0072BD","#D95319","#EDB120","#7E2F8E","#77AC30","#4DBEEE","#A2142F","#0000FF","#00FF00","#FF0000","#FF00FF","#00FFFF"];
 

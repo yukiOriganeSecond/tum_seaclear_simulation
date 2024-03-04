@@ -2,28 +2,28 @@
 clear
 clc
 
-simulation_folder_name = "multiple_0301_b";
-scenario_name_detail = "path_50";
+simulation_folder_name = "multiple_0302";
+scenario_name_detail = "path_100";
 
 % for PC 1
-% simulation_folder_name = "multiple_warm_0301";
-% scenario_name_detail = "path_20_warm_stop";
-% simulation_name_list = ["mass_070", "mass_120", "mass_180", "mass_250", "error_001", "error_002", "error_005", "error_010", "error_050"];
-% parameter_error_list = [0.20, 0.20, 0.20, 0.20, 0.01, 0.02, 0.05, 0.10, 0.50];
-% robot_mass_list = [70, 120, 180, 250, 120, 120, 120, 120, 120];
+% simulation_name_list = ["error_001", "error_002"];
+% parameter_error_list = [0.01, 0.02];
+% robot_mass_list = [120, 120];
 
 % for PC 2
-% simulation_name_list = ["mass_70", "mass_120"];
-% parameter_error_list = [0.20, 0.20];
-% robot_mass_list = [70, 120];
+simulation_name_list = ["error_005", "error_010"];
+parameter_error_list = [0.05, 0.10];
+robot_mass_list = [120, 120];
+
 % for PC 3
-% simulation_name_list = ["mass_180"];
+% simulation_name_list = ["error_020"];
 % parameter_error_list = [0.20];
-% robot_mass_list = [180];
+% robot_mass_list = [120];
+
 % for PC 4
-simulation_name_list = ["mass_250"];
-parameter_error_list = [0.20];
-robot_mass_list = [250];
+% simulation_name_list = ["error_050"];
+% parameter_error_list = [0.50];
+% robot_mass_list = [120];
 
 Nplan = 10;                                   % number of sample for planning
 Nsim = 20;                                    % number of sample for simulation
@@ -45,8 +45,8 @@ method_container = MethodContainer;
 %method_container = method_container.addMethod("RA_SAA_PID_alpha_020","RA-SAA-PID",["alpha",0.20]);
 %method_container = method_container.addMethod("RA_SAA_PID_alpha_050","RA-SAA-PID",["alpha",0.50]);
 
-%method_container = method_container.addMethod("RA_SAA","RA-SAA");
-%method_container = method_container.addMethod("RA_SAA_PID","RA-SAA-PID");
+method_container = method_container.addMethod("RA_SAA","RA-SAA");
+method_container = method_container.addMethod("RA_SAA_PID","RA-SAA-PID");
 method_container = method_container.addMethod("PID_CBF","PID-CBF");
 method_container = method_container.addMethod("MPPI","MPPI");
 
