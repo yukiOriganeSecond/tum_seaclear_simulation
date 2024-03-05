@@ -2,28 +2,26 @@
 clear
 clc
 
-simulation_folder_name = "multiple_0304";
+simulation_folder_name = "multiple_0305";
 scenario_name_detail = "path_100";
 
 % for PC 1
-% simulation_name_list = ["error_001", "error_002"];
-% parameter_error_list = [0.01, 0.02];
-% robot_mass_list = [120, 120];
+simulation_name_list = ["mass_250"];
+parameter_error_list = [0.20];
+robot_mass_list = [250];
 
 % for PC 2
-simulation_name_list = ["error_005", "error_010"];
-parameter_error_list = [0.05, 0.10];
-robot_mass_list = [120, 120];
+% simulation_name_list = ["mass_120", "mass_180"];
+% parameter_error_list = [0.20, 0.20];
+% robot_mass_list = [120, 180];
 
 % for PC 3
-% simulation_name_list = ["error_020"];
-% parameter_error_list = [0.20];
-% robot_mass_list = [120];
+
 
 % for PC 4
-% simulation_name_list = ["error_050"];
-% parameter_error_list = [0.50];
-% robot_mass_list = [120];
+% simulation_name_list = ["mass_070"];
+% parameter_error_list = [0.20];
+% robot_mass_list = [70];
 
 Nplan = 10;                                   % number of sample for planning
 Nsim = 20;                                    % number of sample for simulation

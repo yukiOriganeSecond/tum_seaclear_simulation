@@ -26,12 +26,12 @@ figure
 
 for j = 1:Nm
     if ~isempty(val_avg)
-        plot(x_list, val_avg(j,:),"-o",'Color',color_list(j),'MarkerEdgeColor',color_list(j),'MarkerFaceColor',color_list(j));
+        semilogx(x_list, val_avg(j,:),"-o",'Color',color_list(j),'MarkerEdgeColor',color_list(j),'MarkerFaceColor',color_list(j));
         hold on
     end
     
     if ~isempty(val_max)
-        plot(x_list, val_max(j,:),"-+",'Color',color_list(j),'MarkerEdgeColor',color_list(j),'MarkerFaceColor',color_list(j));
+        semilogx(x_list, val_max(j,:),"-+",'Color',color_list(j),'MarkerEdgeColor',color_list(j),'MarkerFaceColor',color_list(j));
         hold on
     end
 end
