@@ -72,7 +72,7 @@ function param_base = makeStandardParameters(method)
     param_base = system.addParam(param_base,"t",-0.2,"Deterministic");
     %param_base = system.addParam(param_base,"consider_collision",false,"Deterministic");    % if false, obstacles is ignored
     param_base = system.addParam(param_base,"consider_collision",true,"Deterministic");    % if false, obstacles is ignored
-    param_base = system.addParam(param_base,"right_side_constraints",true,"Deterministic");
+    param_base = system.addParam(param_base,"right_side_constraints",false,"Deterministic");
     
     % Optimize Weight Matrix
     param_base = system.addParam(param_base,"Q",zeros(length(xd)),"Deterministic");   % cost matrix for state (x, d)

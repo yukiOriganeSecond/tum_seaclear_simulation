@@ -34,8 +34,9 @@ make_scenario_list = 1:Nsc;  % if you want remake, please modify this list
 scenario = makeScenario(make_scenario_list,scenario_setting_param);
 save(folder_name+"/scenario_param.mat","scenario_setting_param","scenario")
 
-layout = [10,10];
+layout = [1,2];
 %layout = [];
+make_scenario_list = 1:2;
 if ~kill_all_visualize
     visual.plotScenarioCondition(make_scenario_list,scenario,folder_name,layout);
 end
