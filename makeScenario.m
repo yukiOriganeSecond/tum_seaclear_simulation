@@ -28,7 +28,7 @@ function param_ = makeScenario(make_scenario_list,scenario_setting)
         end
         param_(s).y0 = y0_;
         param_(s).yd = yd_;
-        param_(s).termination_time = max([ceil(abs(yd_(3,1)-y0_(3,1))/set_.tether_speed*set_.termination_time_coefficient), ceil(abs(yd_(1,1)-y0_(1,1))/set_.robot_horizontal_speed*set_.termination_time_coefficient)]);
+        param_(s).termination_time = max([ceil(abs(yd_(3,1)-y0_(3,1))/set_.tether_speed*set_.termination_time_coefficient), ceil(abs(yd_(1,1)-y0_(1,1))/set_.robot_horizontal_speed*set_.termination_time_coefficient), ceil(abs(yd_(5,1)-y0_(5,1))/set_.vessel_horizontal_speed*set_.termination_time_coefficient)]);
         param_(s).termination_time = param_(s).termination_time + (mod(param_(s).termination_time,2)==1);   % termination time should be odd number
 
         for obs_cnt = 1:set_.number_of_obstacles

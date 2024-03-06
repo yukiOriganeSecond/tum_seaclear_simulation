@@ -3,7 +3,7 @@ clear
 clc
 
 %%
-scenario_name_detail = "path_100";
+scenario_name_detail = "path_100_modify";
 folder_name = "scenarios/"+scenario_name_detail;
 mkdir(folder_name)
 kill_all_visualize = true;            % if true, all visualizing are killed
@@ -16,6 +16,7 @@ scenario_setting_param.number_of_scenario = Nsc;
 scenario_setting_param.seed_length = 100;
 scenario_setting_param.tether_speed = 0.3;
 scenario_setting_param.robot_horizontal_speed = 0.5;
+scenario_setting_param.vessel_horizontal_speed = 0.5;
 scenario_setting_param.termination_time_coefficient = 1.0;
 scenario_setting_param.y0_limitation = [[-3 3]; [0 0]; [1 6]; [0 0]; [-3 3]; [0 0]];           % [x(0); dx(0); d(0); dd(0); X(0); dX(0)];
 scenario_setting_param.yd_limitation = [[-3 3]; [0 0]; [1 6]; [0 0]; [-3 3]; [0 0]];            % [xd; dxd; dd; ddd; Xd; dXd];

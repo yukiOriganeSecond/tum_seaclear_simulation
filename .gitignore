@@ -54,3 +54,5 @@ dkms.conf
 # MATLAB
 *.asv
 data/
+*.fig
+*.png
