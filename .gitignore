@@ -56,3 +56,5 @@ dkms.conf
 data/
 *.fig
 *.png
+*.mp4
+fig/
