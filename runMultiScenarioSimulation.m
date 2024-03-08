@@ -65,22 +65,22 @@ function runMultiScenarioSimulation(method_container, scenario_name, simulation_
                     %param_base = system.addParam(param_base,"opt_Display",'none',"Deterministic");
                     param_base = system.addParam(param_base,"opt_PlotFcn",[],"Deterministic");
                 end
-                param_base = system.addParam(param_base,"u0",[0; 0;-gravity_force;0],"Deterministic");
-                param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic"); 
+                param_base = system.addParam(param_base,"u0",[gravity_force*sin(theta_0); 0;-gravity_force*cos(theta_0);0],"Deterministic");
+                param_base = system.addParam(param_base,"f0",[gravity_force*sin(theta_0); 0;-gravity_force*cos(theta_0);0],"Deterministic"); 
                 param_base = method_container.subsMethodParameters(method_index,param_base);
                 [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateSAA(param_base,seed_plan,seed_simulate); % SAA method
                 face_infeasible_solution(:,method_index,s) = ~find_feasible_solution;
             end
             if ismember(base_method, ["PID-CBF"])
-                param_base = system.addParam(param_base,"u0",[0; 0;-gravity_force;0],"Deterministic");
-                param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic");    % initial value of force input theta,r,l,X
+                param_base = system.addParam(param_base,"u0",[gravity_force*sin(theta_0); 0;-gravity_force*cos(theta_0);0],"Deterministic");
+                param_base = system.addParam(param_base,"f0",[gravity_force*sin(theta_0); 0;-gravity_force*cos(theta_0);0],"Deterministic");    % initial value of force input theta,r,l,X
                 [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSimulateLocal(param_base,seed_simulate); % Local method
                 face_infeasible_solution(:,method_index,s) = ~find_feasible_solution;
             end
             if ismember(base_method, ["MPPI"])
                 % initial solution
-                param_base = system.addParam(param_base,"u0",[0;0;-gravity_force;0],"Deterministic");
-                param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic");    % initial value of force input theta,r,l,X
+                param_base = system.addParam(param_base,"u0",[gravity_force*sin(theta_0); 0;-gravity_force*cos(theta_0);0],"Deterministic");
+                param_base = system.addParam(param_base,"f0",[gravity_force*sin(theta_0); 0;-gravity_force*cos(theta_0);0],"Deterministic");    % initial value of force input theta,r,l,X
                 if param_base.predict_steps.average > Nt
                     param_base.predict_steps.average = Nt;
                 end
