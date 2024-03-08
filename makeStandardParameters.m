@@ -106,9 +106,9 @@ function param_base = makeStandardParameters(method)
         % noise
         param_base = system.addParam(param_base,"force_deterministic",false,"Deterministic");
         % Optimize Weight Matrix
-        param_base = system.addParam(param_base,"Q",diag([100,100,100,100]),"Deterministic");   % cost matrix for state (x, d)
+        param_base = system.addParam(param_base,"Q",diag([100,100,100,100,0,0]),"Deterministic");   % cost matrix for state (x, d)
         param_base = system.addParam(param_base,"R",diag([1, 1, 1, 1])./(param_base.m.average^2),"Deterministic");   % cost matrix for input (u_theta, u_r, U_l, U_X)  
-        param_base = system.addParam(param_base,"P",diag([10000,10000,10000,10000]),"Deterministic");
+        param_base = system.addParam(param_base,"P",diag([10000,10000,10000,10000,0,0]),"Deterministic");
         % initial solution
         param_base = system.addParam(param_base,"u0",[0;0;-gravity_force;0],"Deterministic");
         param_base = system.addParam(param_base,"f0",[0; 0; -gravity_force; 0],"Deterministic");    % initial value of force input theta,r,l,X
