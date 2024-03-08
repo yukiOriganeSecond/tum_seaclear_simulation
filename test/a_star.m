@@ -25,6 +25,10 @@ status(10) = "open";    % start node
 status(16) = "goal";
 color_base = ["#0072BD","#D95319","#EDB120","#7E2F8E","#77AC30","#4DBEEE","#A2142F","#0000FF","#00FF00","#FF0000","#FF00FF","#00FFFF"];
 
+real_cost = zeros(Nnode,1);
+estimate_cost = zeros(Nnode,1);
+parent_node = zeros(Nnode,1);
+
 while 1
     
 end
