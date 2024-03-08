@@ -4,7 +4,7 @@ clear
 visual.visualInit("thin");
 
 %%
-simulation_folder_name = "multiple_0306";
+simulation_folder_name = "multiple_0307";
 visialize_graphics = false;     % if false, make figures in silent way
 color_base = ["#EDB120","#D95319","#0072BD","#7E2F8E","#77AC30","#4DBEEE","#A2142F","#0000FF","#00FF00","#FF0000","#FF00FF","#00FFFF"];
 
@@ -50,6 +50,7 @@ mkdir(savefig_folder_name)
 visual.plotMultiBarError(x_list, collision_rate_list, color_base, legend_list, xlabel_name, "collision rate", savefig_folder_name);
 visual.plotMultiBarError(x_list, infeasible_ratio_list, color_base, legend_list, xlabel_name, "infeasible rate", savefig_folder_name);
 visual.plotMultiBarError(x_list, energy_consumption_list, color_base, legend_list, xlabel_name, "energy consumption", savefig_folder_name);
+ylim([0 14000])
 visual.plotMultiBarError(x_list, termination_position_error, color_base, legend_list, xlabel_name, "termination error", savefig_folder_name);
 
 savefig_folder_name = "data/multi_scenario/"+simulation_folder_name+"/fig/ploterror/";
@@ -79,3 +80,14 @@ mkdir(savefig_folder_name)
 %visual.plotMultiCombine(x_list, index_list, avg_collision_rate_list, [], color_base, legend_list, xlabel_name, "collision rate", savefig_folder_name);
 
 % legend("\alpha="+string([0.01, 0.02, 0.05, 0.10, 0.20, 0.50]))
+
+%% ttest
+clear tb_result
+savefig_folder_name = "data/multi_scenario/"+simulation_folder_name+"/fig/";
+mkdir(savefig_folder_name)
+x_list = [0.01 0.02 0.05 0.10 0.20 0.50];
+tb_collision = func.calcTtest2(collision_rate_list,x_list);
+tb_termination = func.calcTtest2(termination_position_error,x_list);
+tb_infeasible = func.calcTtest2(infeasible_ratio_list,x_list);
+tb_energy = func.calcTtest2(energy_consumption_list,x_list);
+save(savefig_folder_name+"ttest.mat","tb_energy","tb_infeasible","tb_termination","tb_collision");

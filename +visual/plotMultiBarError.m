@@ -30,7 +30,7 @@ for i = method_order
     %b(i).Visible = 'off';
 end
 
-legend(legend_list(method_order))
+legend(legend_list(method_order),'Location','northwest')
 xlabel(xlabel_name)
 ylabel(val_name)
 title(val_name)
@@ -38,5 +38,6 @@ title(val_name)
 %grid on
 saveas(gcf,folder_name+"/"+val_name+".fig")
 saveas(gcf,folder_name+"/"+val_name+".png")
+saveas(gcf,folder_name+"/"+val_name+".eps")
 end
 
