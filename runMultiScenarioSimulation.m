@@ -94,7 +94,7 @@ function runMultiScenarioSimulation(method_container, scenario_name, simulation_
             % evaluation
             for i = 1:length(seed_simulate)
                 dist_ = NaN;
-                x(:,:,i) = system.changeCoordinate(q(:,:,i),param_nominal,param_nominal.xd);
+                x(:,:,i) = system.changeCoordinate(q(:,:,i),param_nominal);
                 for j = 1:size(scenario(s).obs_pos,2)
                     dist_ = min([dist_, vecnorm(x([1,3],:,i)-param_sim(i).obs_pos(:,j),2,1)-param_sim(i).obs_size(:,j)]);
                 end

@@ -2,12 +2,12 @@
 clear
 clc
 
-simulation_folder_name = "multiple_0307";
+simulation_folder_name = "multiple_0308_without_Xd";
 scenario_name_detail = "path_100_modify";
 
 % for PC 1
-simulation_name_list = ["error_0.01", "error_0.50"];
-parameter_error_list = [0.01, 0.50];
+simulation_name_list = ["error_0.01", "error_0.02", "error_0.05", "error_0.10", "error_0.20", "error_0.50"];
+parameter_error_list = [0.01, 0.02, 0.05, 0.10, 0.20, 0.50];
 robot_mass_list = [120, 120];
 
 % for PC 2

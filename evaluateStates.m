@@ -1,6 +1,6 @@
 function [result,violate_constraint] = evaluateStates(q,xd,param)
     violate_constraint = false;
-    x = system.changeCoordinate(q,param,xd);
+    x = system.changeCoordinate(q,param);
     result = 0;
     result = result + param.dt*sum(dot(param.Q*(x(:,:)-xd(:,1)),(x(:,:)-xd(:,1))));
     if param.consider_collision
