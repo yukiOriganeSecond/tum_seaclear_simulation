@@ -22,7 +22,7 @@ function [q,f,u,param_nominal,param_sim,find_feasible_solution] = planningAndSim
     end
 
     parfor i = 1:length(seed_list)
-    %for seed = seed_list
+    %for i = 1:length(seed_list)
         %i = i+1;
         disp("(Local) processing sample "+string(i))
         [q(:,:,i), f(:,:,i), u(:,:,i), face_infeasible(i,1)] = system.stepsFBwithCBF(param_sim(i).q0,param_sim(i),param_nominal,W,cbf);

@@ -131,6 +131,8 @@ function param_base = makeStandardParameters(method)
         param_base = system.addParam(param_base,"enable_CBF",true,"Deterministic"); % if false, no cbf
         %param_base = system.addParam(param_base,"gamma",[2 3 0.1],"Deterministic");
         param_base = system.addParam(param_base,"gamma",[10 10 1],"Deterministic");
+        % PID
+        param_base = system.addParam(param_base,"ki",[100;100;100;100],"Deterministic");
         % Optimize Weight Matrix
         param_base = system.addParam(param_base,"Q",diag([100,100,100,100]),"Deterministic");   % cost matrix for state (x, d)
         param_base = system.addParam(param_base,"R",diag([1, 1, 1, 1])./(param_base.m.average^2),"Deterministic");   % cost matrix for input (u_theta, u_r, U_l, U_X)  

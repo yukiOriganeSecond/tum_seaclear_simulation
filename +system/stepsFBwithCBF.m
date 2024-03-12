@@ -42,7 +42,7 @@ function [q,f,u,face_infeasible] = stepsFBwithCBF(q0,param,param_nominal,W,cbf,q
             q_nominal(:,t) = (param.qd-param.q0)/param_nominal.Nt*t+param.q0;
         end
         if param.low_side_controller == "PID"
-            [u(:,t), ~] = system.ControllerPID(q(:,t), q_nominal(:,t), u_nominal(:,t), param, W(t+1)-W(t));
+            [u(:,t), ~] = system.ControllerPID(q(:,t), q_nominal(:,t), u_nominal(:,t), param, W(t+1)-W(t), t==1);
         end
         if param.enable_CBF
             [A,b,h] = cbf.calculateConstraint(q(:,t)+param.sensing_noise*(W(t+1)-W(t)),q_ddot+q_ddot.*param.acc_noise*(W(t+1)-W(t)),f(:,t)+f(:,t).*param.force_noise_coeff*(W(t+1)-W(t)));

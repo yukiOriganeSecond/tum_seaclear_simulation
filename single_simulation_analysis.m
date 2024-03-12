@@ -20,5 +20,6 @@ visual.plotRobotOutputsFB(x,param_nominal.xd,x_nominal,x_nominal,param_nominal,t
 visual.plotRobotStatesFB(q,q_nominal,q_nominal,param_nominal,t_vec,[1,5,7;2,6,8],folder_name,1:Nsim);
 visual.plotInputs(u,f,param_nominal,t_vec,[1,2;3,4],folder_name,1:Nsim);
 visual.plotInputsFB(u_nominal(:,:),u(:,:,:),u,param_nominal,t_vec,[1,2;3,4],folder_name,1:Nsim);
+visual.makeSnapsWithPoints(q_nominal,x_nominal,param_nominal,scenario(s),t_vec,folder_name,1,1);
 
 %visual.makePathMovie(q,x,param_nominal,t_vec,folder_name,1,1:Nsim);
