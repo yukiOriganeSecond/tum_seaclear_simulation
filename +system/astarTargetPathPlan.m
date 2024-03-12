@@ -32,8 +32,8 @@ function q_target = astarTargetPathPlan(param)
     path_theta = atan2(path_X.'-path_x(:,1), path_x(:,2));
     path_r = vecnorm([path_X.'-path_x(:,1), path_x(:,2)],2,2);
     q_target(1,:) = smooth(path_theta.',19,'sgolay');
-    q_target(3,:) = path_r.';
-    q_target(5,:) = path_X.';
-    q_target(7,:) = path_r.';
+    q_target(3,:) = smooth(path_r.',19,'sgolay');
+    q_target(5,:) = smooth(path_X.',19,'sgolay');
+    q_target(7,:) = q_target(3,:);
 end
 
