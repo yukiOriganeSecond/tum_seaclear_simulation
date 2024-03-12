@@ -38,8 +38,8 @@ function param_base = makeStandardParameters(method)
     
     % set noise
     param_base = system.addParam(param_base,"W_effect",[0; 0; 0; 0],"Deterministic");   % set wiener effect
-    %param_base = system.addParam(param_base,"sensing_noise",0.2*[1; 1; 1; 1; 1; 1; 1; 1],"Deterministic");
-    param_base = system.addParam(param_base,"sensing_noise",0*[1; 1; 1; 1; 1; 1; 1; 1],"Deterministic");
+    param_base = system.addParam(param_base,"sensing_noise",0.2*[1; 1; 1; 1; 1; 1; 1; 1],"Deterministic");
+    %param_base = system.addParam(param_base,"sensing_noise",0*[1; 1; 1; 1; 1; 1; 1; 1],"Deterministic");
     
 
     %% Controller parameter
