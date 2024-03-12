@@ -38,8 +38,10 @@ function param_base = makeStandardParameters(method)
     
     % set noise
     param_base = system.addParam(param_base,"W_effect",[0; 0; 0; 0],"Deterministic");   % set wiener effect
-    param_base = system.addParam(param_base,"sensing_noise",0.2*[1; 1; 1; 1; 1; 1; 1; 1],"Deterministic");
+    %param_base = system.addParam(param_base,"sensing_noise",0.2*[1; 1; 1; 1; 1; 1; 1; 1],"Deterministic");
+    param_base = system.addParam(param_base,"sensing_noise",0*[1; 1; 1; 1; 1; 1; 1; 1],"Deterministic");
     
+
     %% Controller parameter
     param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
     param_base = system.addParam(param_base,"kp",[800;800;800;800],"Deterministic");
@@ -118,7 +120,8 @@ function param_base = makeStandardParameters(method)
         param_base = system.addParam(param_base,"low_side_controller","PID","Deterministic");
         param_base = system.addParam(param_base,"use_gravity_compensate",true,"Deterministic");
         % target
-        param_base = system.addParam(param_base,"use_heuristic_trajectory",true,"Deterministic");
+        %param_base = system.addParam(param_base,"trajectory","heuristic","Deterministic");
+        param_base = system.addParam(param_base,"trajectory","astar","Deterministic");
         %param_base = system.addParam(param_base,"qd",[0;0;1;0;0;0;1;0],"Deterministic");    % target state
         % noise
         param_base = system.addParam(param_base,"acc_noise",0.2*[1; 1; 1; 1],"Deterministic");

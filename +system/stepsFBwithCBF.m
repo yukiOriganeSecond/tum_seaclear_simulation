@@ -29,12 +29,16 @@ function [q,f,u,face_infeasible] = stepsFBwithCBF(q0,param,param_nominal,W,cbf,q
     u = u_nominal;  % initialuze u_use by u
     q_ddot = zeros(4,1);
     face_infeasible = false;
+    
+    if param.trajectory == "astar"
+        q_nominal(:,:) = system.astarTargetPathPlan(param_nominal);
+    end
 
     for t = 1:param.Nt-1
         if param.use_gravity_compensate
             u_nominal(:,t) = param_nominal.bar_m*param_nominal.g*[sin(q(1,t));0;-cos(q(1,t));0];
         end
-        if param.use_heuristic_trajectory
+        if param.trajectory == "heuristic"
             q_nominal(:,t) = (param.qd-param.q0)/param_nominal.Nt*t+param.q0;
         end
         if param.low_side_controller == "PID"

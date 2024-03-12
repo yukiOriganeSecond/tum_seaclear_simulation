@@ -2,13 +2,13 @@
 clear
 clc
 
-simulation_folder_name = "multiple_0307";
-scenario_name_detail = "path_100_modify";
+simulation_folder_name = "multiple_0312_test";
+scenario_name_detail = "path_5_modify";
 
 % for PC 1
-simulation_name_list = ["error_0.01", "error_0.50"];
-parameter_error_list = [0.01, 0.50];
-robot_mass_list = [120, 120];
+% simulation_name_list = ["error_0.01", "error_0.50"];
+% parameter_error_list = [0.01, 0.50];
+% robot_mass_list = [120, 120];
 
 % for PC 2
 % simulation_name_list = ["error_0.05","error_0.10"];
@@ -16,9 +16,9 @@ robot_mass_list = [120, 120];
 % robot_mass_list = [120, 120];
 
 % for PC 3
-% simulation_name_list = ["error_0.20"];
-% parameter_error_list = [0.20];
-% robot_mass_list = [120];
+simulation_name_list = ["error_0.00"];
+parameter_error_list = [0.00];
+robot_mass_list = [120];
 
 % for PC 4
 % simulation_name_list = ["error_0.02"];
@@ -26,7 +26,7 @@ robot_mass_list = [120, 120];
 % robot_mass_list = [120];
 
 Nplan = 10;                                   % number of sample for planning
-Nsim = 20;                                    % number of sample for simulation
+Nsim = 10;                                    % number of sample for simulation
 
 kill_all_visualize = true;
 method_container = MethodContainer;
@@ -45,10 +45,10 @@ method_container = MethodContainer;
 %method_container = method_container.addMethod("RA_SAA_PID_alpha_020","RA-SAA-PID",["alpha",0.20]);
 %method_container = method_container.addMethod("RA_SAA_PID_alpha_050","RA-SAA-PID",["alpha",0.50]);
 
-method_container = method_container.addMethod("RA_SAA","RA-SAA");
-method_container = method_container.addMethod("RA_SAA_PID","RA-SAA-PID");
+%method_container = method_container.addMethod("RA_SAA","RA-SAA");
+%method_container = method_container.addMethod("RA_SAA_PID","RA-SAA-PID");
 method_container = method_container.addMethod("PID_CBF","PID-CBF");
-method_container = method_container.addMethod("MPPI","MPPI");
+%method_container = method_container.addMethod("MPPI","MPPI");
 
 %% run
 if isfolder("data/multi_scenario/"+simulation_folder_name)

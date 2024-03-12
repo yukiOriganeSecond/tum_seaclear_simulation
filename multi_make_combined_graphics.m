@@ -4,7 +4,7 @@ clear
 visual.visualInit("thin");
 
 %%
-simulation_folder_name = "multiple_0307";
+simulation_folder_name = "multiple_0307_from_desk";
 visialize_graphics = false;     % if false, make figures in silent way
 color_base = ["#EDB120","#D95319","#0072BD","#7E2F8E","#77AC30","#4DBEEE","#A2142F","#0000FF","#00FF00","#FF0000","#FF00FF","#00FFFF"];
 
@@ -40,7 +40,9 @@ end
 
 %% 
 
-x_list = [0.01 0.02 0.05 0.10 0.20 0.50];
+%x_list = [0.01 0.02 0.05 0.10 0.20 0.50];
+%xlabel_name = "error of model parameter";
+x_list = [0.00 0.01 0.02];
 xlabel_name = "error of model parameter";
 %x_list = [70, 120, 180, 250];
 %xlabel_name = "mass of robot";
@@ -85,7 +87,8 @@ mkdir(savefig_folder_name)
 clear tb_result
 savefig_folder_name = "data/multi_scenario/"+simulation_folder_name+"/fig/";
 mkdir(savefig_folder_name)
-x_list = [0.01 0.02 0.05 0.10 0.20 0.50];
+%x_list = [0.01 0.02 0.05 0.10 0.20 0.50];
+x_list = [0.01 0.02 0.05];
 tb_collision = func.calcTtest2(collision_rate_list,x_list);
 tb_termination = func.calcTtest2(termination_position_error,x_list);
 tb_infeasible = func.calcTtest2(infeasible_ratio_list,x_list);

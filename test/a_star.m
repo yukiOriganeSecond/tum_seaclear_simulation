@@ -1,51 +1,45 @@
+%%
+dx = 0.1;
 
-dx = 2;
-
-y_list = -1:dx:7;
 x_list = -4:dx:4;
-
-X = repmat(x_list,length(y_list),1);
-Y = repmat(y_list.',1,length(x_list));
-
-pos = [X(:).'; Y(:).'];
-Nnode = length(pos);
-status = repmat("ready",1,Nnode);
-
-DX = pos(1,:)-pos(1,:).';
-DY = pos(2,:)-pos(2,:).';
-Dist = sqrt(DX.^2+DY.^2);
-Adj = (Dist<(dx*1.5)) - eye(Nnode);
+y_list = -1:dx:7;
 
 obs_pos = [0;3];
 obs_size = 1.0;
-violate_index = prod(abs(pos(:,:)-obs_pos)<obs_size,1);
-status(violate_index==1) = "violate";
 
-status(10) = "open";    % start node
-status(16) = "goal";
-color_base = ["#0072BD","#D95319","#EDB120","#7E2F8E","#77AC30","#4DBEEE","#A2142F","#0000FF","#00FF00","#FF0000","#FF00FF","#00FFFF"];
+resolution = 1/dx;
+map = binaryOccupancyMap(length(x_list),length(y_list),resolution,"grid");
+map.GridLocationInWorld = [-4 -1];
 
-real_cost = zeros(Nnode,1);
-estimate_cost = zeros(Nnode,1);
-parent_node = zeros(Nnode,1);
+setOccupancy(map, obs_pos.', ones(size(obs_pos,2),1))
+inflate(map, obs_size)
 
-while 1
-    
-end
+start = [-2 6];
+goal = [2 1];
+planner = plannerAStarGrid(map);
+path = plan(planner,world2grid(map,start),world2grid(map,goal));
+path = grid2world(map,path);
+show(planner)
+axis xy
 
-for i = 1:Nnode
-    if (status(i)=="ready")
-        color = color_base(1);
-    elseif (status(i)=="violate")
-        color = color_base(2);
-    elseif (status(i)=="start")
-        color = color_base(3);
-    elseif (status(i)=="goal")
-        color = color_base(4);
-    else
-        color = color_base(5);
-    end
-    plot(pos(1,i),pos(2,i),'o','Color',color)
-    hold on
-end
+%% smoothing
+Nt = 200;
+path_time = 1:Nt/length(path):Nt;
+Fx = griddedInterpolant(path_time, path);
+path_x = Fx(1:Nt);
+visual.visualInit();
+figure
+plot(1:Nt, path_x(:,:))
+xlabel("timestep")
+ylabel("target point")
+
+%%
+figure
+show(map)
+hold on
+j = 1
+obspos_(j,:) = [(obs_pos(:,j)-obs_size(1,j)).', (2*obs_size(:,j))*[1 1]];
+rectangle('Position',obspos_(j,:),'Curvature',[1 1],'EdgeColor','r');
+plot(path(:,1),path(:,2))
+grid on
 axis ij
