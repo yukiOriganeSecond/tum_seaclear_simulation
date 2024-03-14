@@ -1,4 +1,4 @@
-function plotMultiBarError(x_list, val, color_base, legend_list, xlabel_name, val_name, folder_name)
+function plotMultiBarError(x_list, val, color_base, legend_list, xlabel_name, val_name, folder_name, tb)
 %PLOTMULTIAVERAGEMAX この関数の概要をここに記述
 %   詳細説明をここに記述
 arguments
@@ -9,6 +9,7 @@ arguments
     xlabel_name
     val_name
     folder_name
+    tb = []
 end
 
 Nenv = size(val, 1);
@@ -26,8 +27,9 @@ for i = method_order
     b(i).FaceColor = color_base(i);
     %plot(b(i).XEndPoints,b(i).YEndPoints,'Color',color_base(i),'Marker','o','MarkerFaceColor',color_base(i))
     %plot(b(i).XEndPoints,b(i).YEndPoints,'Color',color_base(i))
-    errorbar(b(i).XEndPoints,b(i).YEndPoints,zeros(1,Nsim),permute(std(val(:,i,:),1),[3,1,2]),'LineStyle','none','Color',color_base(i))
+    e = errorbar(b(i).XEndPoints,b(i).YEndPoints,zeros(1,Nsim),permute(std(val(:,i,:),1),[3,1,2]),'LineStyle','none','Color',color_base(i));
     %b(i).Visible = 'off';
+    plot(b(i).XEndPoints,b(i).YEndPoints+permute(std(val(:,i,:),1),[1,3,2]),'Color','k','LineStyle','none','Marker','*')
 end
 
 legend(legend_list(method_order),'Location','northwest')
