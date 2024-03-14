@@ -46,8 +46,8 @@ function runMultiScenarioSimulation(method_container, scenario_name, simulation_
             r_d = vecnorm([scenario(s).yd(5)-scenario(s).yd(1), scenario(s).yd(3)]);
             param_base = system.addParam(param_base,"qd",[theta_d;0;r_d;0;scenario(s).yd(5);0;r_d;0]);
             param_base = system.addParam(param_base,"xd",scenario(s).yd);
-            param_base = system.addParam(param_base,"obs_pos",scenario(s).obs_pos,"White_Const",0.30*size(scenario(s).obs_pos));
-            param_base = system.addParam(param_base,"obs_size",scenario(s).obs_size,"White",0.1*size(scenario(s).obs_size));
+            param_base = system.addParam(param_base,"obs_pos",scenario(s).obs_pos,"White_Const",0*size(scenario(s).obs_pos));
+            param_base = system.addParam(param_base,"obs_size",scenario(s).obs_size,"White",0*size(scenario(s).obs_size));
             Nt = scenario(s).termination_time/param_base.dt.average;
             param_base = system.addParam(param_base,"Nt",Nt,"Deterministic");
             % parameter change by simulation requirement
