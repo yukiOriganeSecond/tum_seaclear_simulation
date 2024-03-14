@@ -2,7 +2,7 @@
 clear
 clc
 
-simulation_folder_name = "multiple_0312_test";
+simulation_folder_name = "multiple_0314_test";
 scenario_name_detail = "test_001_path";
 
 % for PC 1
@@ -45,10 +45,10 @@ method_container = MethodContainer;
 %method_container = method_container.addMethod("RA_SAA_PID_alpha_020","RA-SAA-PID",["alpha",0.20]);
 %method_container = method_container.addMethod("RA_SAA_PID_alpha_050","RA-SAA-PID",["alpha",0.50]);
 
-%method_container = method_container.addMethod("RA_SAA","RA-SAA");
-%method_container = method_container.addMethod("RA_SAA_PID","RA-SAA-PID");
+method_container = method_container.addMethod("RA_SAA","RA-SAA");
+method_container = method_container.addMethod("RA_SAA_PID","RA-SAA-PID");
 method_container = method_container.addMethod("PID_CBF","PID-CBF");
-%method_container = method_container.addMethod("MPPI","MPPI");
+method_container = method_container.addMethod("MPPI","MPPI");
 
 %% run
 if isfolder("data/multi_scenario/"+simulation_folder_name)
