@@ -1,7 +1,7 @@
 function snapPath(t,q,x,param,snum_list)
 %SNAPPATH この関数の概要をここに記述
 %   詳細説明をここに記述
-sim_index = 6;
+sim_index = 2;
 for s = snum_list
     plot(x(1,:,s), x(3,:,s),'LineWidth',0.7,'Color','b');
     hold on

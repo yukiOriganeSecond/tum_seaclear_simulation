@@ -18,6 +18,8 @@ classdef ParamBaseElement
                 val = obj.error.*obj.average.*randn(size(obj.average))+obj.average;
             elseif obj.type == "White"&&~force_deterministic
                 val = obj.error.*obj.average.*(rand(size(obj.average))-0.5)*2+obj.average;
+            elseif obj.type == "White_Const"&&~force_deterministic
+                val = obj.error.*(rand(size(obj.average))-0.5)*2+obj.average;   % does not affected by average value
             else
                 val = obj.average;
             end

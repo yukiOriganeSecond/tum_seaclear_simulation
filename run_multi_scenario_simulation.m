@@ -2,13 +2,13 @@
 clear
 clc
 
-simulation_folder_name = "multiple_0314_test";
-scenario_name_detail = "test_001_path";
+simulation_folder_name = "multiple_0314";
+scenario_name_detail = "path_100_obs";
 
 % for PC 1
-% simulation_name_list = ["error_0.01", "error_0.02","error_0.05"];
-% parameter_error_list = [0.01, 0.02, 0.05];
-% robot_mass_list = [120, 120, 120];
+% simulation_name_list = ["error_0.01", "error_0.02","error_0.05","error_0.10", "error_0.20","error_0.50"];
+% parameter_error_list = [0.01, 0.02, 0.05, 0.10, 0.20, 0.50];
+% robot_mass_list = [120, 120, 120, 120, 120, 120];
 
 % for PC 2
 % simulation_name_list = ["error_0.10"];
@@ -21,12 +21,12 @@ scenario_name_detail = "test_001_path";
 % robot_mass_list = [120, 120];
 
 % for PC 4
-simulation_name_list = ["error_0.02"];
-parameter_error_list = [0.02];
-robot_mass_list = [120];
+% simulation_name_list = ["error_0.02"];
+% parameter_error_list = [0.02];
+% robot_mass_list = [120];
 
 Nplan = 10;                                   % number of sample for planning
-Nsim = 3;                                    % number of sample for simulation
+Nsim = 20;                                    % number of sample for simulation
 
 kill_all_visualize = true;
 method_container = MethodContainer;

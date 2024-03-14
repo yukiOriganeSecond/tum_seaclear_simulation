@@ -3,7 +3,7 @@ clear
 clc
 
 %%
-scenario_name_detail = "path_5_modify";
+scenario_name_detail = "path_100_obs";
 folder_name = "scenarios/"+scenario_name_detail;
 mkdir(folder_name)
 kill_all_visualize = true;            % if true, all visualizing are killed
@@ -11,7 +11,7 @@ kill_all_visualize = true;            % if true, all visualizing are killed
 
 %% make scenario
 scenario_setting_param = struct;
-Nsc = 5;    % number of scenario
+Nsc = 100;    % number of scenario
 scenario_setting_param.number_of_scenario = Nsc;
 scenario_setting_param.seed_length = 100;
 scenario_setting_param.tether_speed = 0.3;
@@ -26,7 +26,7 @@ scenario_setting_param.vessel_target_position_to_robot = true;      % false
 %scenario_setting_param.obstacle_limitation = [[-4 -4]; [3 3]; [1 1]]; 
 scenario_setting_param.number_of_obstacles = 1;
 scenario_setting_param.y0_yd_min_distance = 1.0;                                               % keep this distance between y(0) and yd
-scenario_setting_param.obs_y_min_distance = 0.3;                                               % keep this distance between y(0),yd and obstacles
+scenario_setting_param.obs_y_min_distance = 0.8;                                               % keep this distance between y(0),yd and obstacles
 scenario_setting_param.max_sample_trial = 100;
 scenario_setting_param.visualize_initial_condition = true;
 
