@@ -38,7 +38,7 @@ function [us_, F, face_infeasible] = controllerMPPI(qt, ft, u0s, param_nominal, 
             x(:,:,k) = system.changeCoordinate(q_,param_plan_list(model_cnt),param_nominal.xd);
             [S(k),violate_constraint] = evaluateStates(q_,param_plan_list(model_cnt).xd,param_plan_list(model_cnt));
             face_infeasible = face_infeasible & violate_constraint; % if a path does not violate, its feasible.
-            S(k) = S(k) + sum(dot(param_plan_list(model_cnt).R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_nominal.dt*param_nominal.input_prescale;
+            S(k) = S(k) + sum(dot(param_plan_list(model_cnt).R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_nominal.gamma_MPPI;
         end
     end
     S(isnan(S)) = 1000^2;   % replace NaN as safficient large value

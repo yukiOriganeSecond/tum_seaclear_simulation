@@ -101,6 +101,7 @@ function param_base = makeStandardParameters(method)
         % MPPI parameters
         param_base = system.addParam(param_base,"predict_steps",200,"Deterministic");
         param_base = system.addParam(param_base,"lambda",1000,"Deterministic");
+        param_base = system.addParam(param_base,"gamma_MPPI",0.1,"Deterministic");
         param_base = system.addParam(param_base,"alpha_MPPI",0,"Deterministic");
         param_base = system.addParam(param_base,"number_of_input_sample",20,"Deterministic");
         param_base = system.addParam(param_base,"constraint_penalty",1000^2,"Deterministic");
