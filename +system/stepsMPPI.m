@@ -23,9 +23,9 @@ function [q,f,u,face_infeasible,F_] = stepsMPPI(param_sim, param_nominal, param_
             if param_nominal.visual_capture
                 % controller does not real model param_sim, but
                 % param_nominal and param_plan
-                [us_pred, F_(j), is_infeasible_] = system.controllerMPPI(q(:,t_sys), f(:,t_sys), us_pred, param_nominal, param_plan_list, W_plan_list, fig);
+                [us_pred, F_(j), is_infeasible_] = system.controllerMPPI(q(:,t_sys), f(:,t_sys), us_pred, param_nominal, param_sim, W_plan_list, fig);
             else
-                [us_pred, ~, is_infeasible_] = system.controllerMPPI(q(:,t_sys), f(:,t_sys), us_pred, param_nominal, param_plan_list, W_plan_list, fig);
+                [us_pred, ~, is_infeasible_] = system.controllerMPPI(q(:,t_sys), f(:,t_sys), us_pred, param_nominal, param_sim, W_plan_list, fig);
             end
             face_infeasible = face_infeasible | is_infeasible_;   % if once face infeasible, its out.
             u(:,t_sys) = us_pred(:,1);

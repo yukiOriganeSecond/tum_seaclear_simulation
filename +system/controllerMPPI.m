@@ -1,5 +1,5 @@
 
-function [us_, F, face_infeasible] = controllerMPPI(qt, ft, u0s, param_nominal, param_plan_list, W_plan_list, fig)
+function [us_, F, face_infeasible] = controllerMPPI(qt, ft, u0s, param_nominal, param_sim, W_plan_list, fig)
     param_plan_list = param_nominal;    % ORIGINAL MPPI, USE NOMINAL MODEL TO PREDICT 
 
     N_input_sample = param_nominal.number_of_input_sample;
@@ -36,7 +36,9 @@ function [us_, F, face_infeasible] = controllerMPPI(qt, ft, u0s, param_nominal, 
                 [q_(:,t_sample+1), f_(:,t_sample+1), mode] = system.step(q_(:,t_sample), f_(:,t_sample), v(:,t_sample,k), param_plan_list(model_cnt), mode, W(t_sample+1)-W(t_sample));
             end
             x(:,:,k) = system.changeCoordinate(q_,param_plan_list(model_cnt),param_nominal.xd);
-            [S(k),violate_constraint] = evaluateStates(q_,param_plan_list(model_cnt).xd,param_plan_list(model_cnt));
+            %[S(k),violate_constraint] =
+            %evaluateStates(q_,param_plan_list(model_cnt).xd,param_plan_list(model_cnt)); % this means that controller know actual model
+            [S(k),violate_constraint] = evaluateStates(q_,param_plan_list(model_cnt).xd,param_nominal,param_sim);
             face_infeasible = face_infeasible & violate_constraint; % if a path does not violate, its feasible.
             S(k) = S(k) + sum(dot(param_plan_list(model_cnt).R*u0s(:,1:end-1),u0s(:,2:end)-vs_(:,2:end)))*param_nominal.gamma_MPPI;
         end

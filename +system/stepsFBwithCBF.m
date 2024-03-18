@@ -10,9 +10,14 @@ function [q,f,u,face_infeasible] = stepsFBwithCBF(q0,param,param_nominal,W,cbf,q
     end
     opt = optimoptions(@quadprog, ...
     'Display','off');
-    cbf = cbf.substituteParameters(param_nominal);  % CBF uses nominal model
-    %cbf = cbf.substituteParameters(param);  % CBF uses real model
 
+    if param_nominal.error_decreasing
+        % If true, estimation error about obstacle will gradually decreasing as distance between obstacle decreasing.
+        cbf = cbf.substituteParametersWithoutObstacle(param_nominal);
+    else
+        cbf = cbf.substituteParameters(param_nominal);  % CBF only know the information of nominal model
+    end
+    
     if ~isfield(param,"low_side_controller")  % If not defined
         param.low_side_controller = "none"; % treated as FF system
     end
@@ -42,10 +47,16 @@ function [q,f,u,face_infeasible] = stepsFBwithCBF(q0,param,param_nominal,W,cbf,q
             q_nominal(:,t) = (param.qd-param.q0)/param_nominal.Nt*t+param.q0;
         end
         if param.low_side_controller == "PID"
-            [u(:,t), ~] = system.ControllerPID(q(:,t), q_nominal(:,t), u_nominal(:,t), param, W(t+1)-W(t), t==1);
+            [u(:,t), ~] = system.ControllerPID(q(:,t), q_nominal(:,t), u_nominal(:,t), param_nominal, W(t+1)-W(t), t==1);
+        end
+        if param_nominal.error_decreasing
+            [obs_pos_est, obs_size_est] = system.estimateObstacleInformation(param_nominal, param, q(:,t));
+            cbf_ = cbf.substituteObstacle(param_nominal, obs_pos_est, obs_size_est);
+        else
+            cbf_ = cbf;
         end
         if param.enable_CBF
-            [A,b,h] = cbf.calculateConstraint(q(:,t)+param.sensing_noise*(W(t+1)-W(t)),q_ddot+q_ddot.*param.acc_noise*(W(t+1)-W(t)),f(:,t)+f(:,t).*param.force_noise_coeff*(W(t+1)-W(t)));
+            [A,b,h] = cbf_.calculateConstraint(q(:,t)+param.sensing_noise*(W(t+1)-W(t)),q_ddot+q_ddot.*param.acc_noise*(W(t+1)-W(t)),f(:,t)+f(:,t).*param.force_noise_coeff*(W(t+1)-W(t)));
             if h<0
                 disp("WARN: missing constraint h("+string(t)+")="+string(h))
             end
