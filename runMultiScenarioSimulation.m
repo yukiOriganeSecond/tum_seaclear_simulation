@@ -31,7 +31,8 @@ function runMultiScenarioSimulation(method_container, scenario_name, simulation_
     final_target_error_vel = zeros(Nsim, Nm, Nsc);
     
     tic
-    for s = 1:Nsc % loop for scenario
+    %for s = 1:Nsc % loop for scenario
+    for s = 81 % loop for scenario   % Debug code here!!
         clear x
         seed_plan = scenario(s).seed_base_1(1:Nplan);
         seed_simulate = scenario(s).seed_base_2(1:Nsim);
